@@ -107,32 +107,136 @@ const FormPage = () => {
     { label: '₹5,00,000 (50L Project)', margin: 500000, cost: 5000000, scheme: 'Term Loan (8%)' }
   ];
 
+  const [voiceFeedback, setVoiceFeedback] = useState(null);
+
   const handleVoiceTranscript = (text) => {
+    if (!text || !text.trim()) return;
     const lower = text.toLowerCase();
-    
-    // Check business category
-    if (lower.includes('dairy') || lower.includes('doodh') || lower.includes('गाय') || lower.includes('दूध')) {
-      setFormData(prev => ({ ...prev, business_type: 'Dairy Farm', business_title: text }));
-    } else if (lower.includes('dukaan') || lower.includes('kirana') || lower.includes('shop') || lower.includes('दुकान')) {
-      setFormData(prev => ({ ...prev, business_type: 'Grocery / Kirana Store', business_title: text }));
-    } else if (lower.includes('tailor') || lower.includes('silai') || lower.includes('सिलाई')) {
-      setFormData(prev => ({ ...prev, business_type: 'Tailoring & Boutique', business_title: text }));
-    } else if (lower.includes('rickshaw') || lower.includes('रिक्शा')) {
-      setFormData(prev => ({ ...prev, business_type: 'E-Rickshaw / Transport', business_title: text }));
-    } else {
-      setFormData(prev => ({ ...prev, business_title: text }));
+    const detected = [];
+
+    let updatedType = null;
+    if (lower.includes('dairy') || lower.includes('doodh') || lower.includes('दूध') || lower.includes('गाय') || lower.includes('भैंस') || lower.includes('पशु')) {
+      updatedType = 'Dairy Farm';
+      detected.push('डेयरी / Dairy Farm');
+    } else if (lower.includes('kirana') || lower.includes('grocery') || lower.includes('किराना') || lower.includes('दुकान') || lower.includes('store') || lower.includes('shop')) {
+      updatedType = 'Grocery / Kirana Store';
+      detected.push('किराना स्टोर / Grocery');
+    } else if (lower.includes('tailor') || lower.includes('silai') || lower.includes('सिलाई') || lower.includes('बुटीक') || lower.includes('boutique') || lower.includes('कपड़ा')) {
+      updatedType = 'Tailoring & Boutique';
+      detected.push('सिलाई / Tailoring');
+    } else if (lower.includes('rickshaw') || lower.includes('रिक्शा') || lower.includes('ऑटो') || lower.includes('auto') || lower.includes('transport') || lower.includes('गाड़ी')) {
+      updatedType = 'E-Rickshaw / Transport';
+      detected.push('ई-रिक्शा / Transport');
+    } else if (lower.includes('solar') || lower.includes('सोलर') || lower.includes('सौर') || lower.includes('energy')) {
+      updatedType = 'Solar & Renewable Energy';
+      detected.push('सोलर / Solar');
+    } else if (lower.includes('mill') || lower.includes('चक्की') || lower.includes('आटा') || lower.includes('तेल') || lower.includes('flour') || lower.includes('oil')) {
+      updatedType = 'Agri Processing / Mill';
+      detected.push('आटा/तेल मिल / Mill');
+    } else if (lower.includes('artisan') || lower.includes('हस्तशिल्प') || lower.includes('दस्तकारी') || lower.includes('craft')) {
+      updatedType = 'Handicrafts / Artisan';
+      detected.push('हस्तशिल्प / Handicrafts');
     }
 
-    // Check for margin or amount
-    const lakhMatch = text.match(/(\d+)\s*(लाख|lakh|lac)/i);
-    if (lakhMatch) {
-      const val = parseInt(lakhMatch[1], 10) * 100000;
-      handleProjectCostChange(val);
-    } else {
-      const numMatch = text.match(/(\d{4,7})/);
-      if (numMatch) {
-        handleProjectCostChange(parseInt(numMatch[1], 10));
+    // Gender detection
+    let updatedGender = null;
+    if (lower.includes('महिला') || lower.includes('स्त्री') || lower.includes('woman') || lower.includes('women') || lower.includes('female') || lower.includes('girl') || lower.includes('aurat')) {
+      updatedGender = 'Female';
+      detected.push('महिला उद्यमी (Special 4% Subsidized Rebate)');
+    }
+
+    // State detection
+    let updatedState = null;
+    const statesMap = {
+      'uttar pradesh': 'Uttar Pradesh', 'उत्तर प्रदेश': 'Uttar Pradesh', 'यूपी': 'Uttar Pradesh',
+      'rajasthan': 'Rajasthan', 'राजस्थान': 'Rajasthan',
+      'bihar': 'Bihar', 'बिहार': 'Bihar',
+      'madhya pradesh': 'Madhya Pradesh', 'मध्य प्रदेश': 'Madhya Pradesh', 'एमपी': 'Madhya Pradesh',
+      'maharashtra': 'Maharashtra', 'महाराष्ट्र': 'Maharashtra',
+      'gujarat': 'Gujarat', 'गुजरात': 'Gujarat',
+      'haryana': 'Haryana', 'हरियाणा': 'Haryana',
+      'punjab': 'Punjab', 'पंजाब': 'Punjab',
+      'delhi': 'Delhi', 'दिल्ली': 'Delhi',
+      'west bengal': 'West Bengal', 'बंगाल': 'West Bengal'
+    };
+    for (const [k, v] of Object.entries(statesMap)) {
+      if (lower.includes(k)) {
+        updatedState = v;
+        detected.push(`राज्य: ${v}`);
+        break;
       }
+    }
+
+    // Amount extraction
+    let updatedMargin = null;
+    let updatedCost = null;
+
+    // Check for Lakhs (e.g. 1.5 लाख, 2 lakh, एक लाख)
+    const lakhMatch = lower.match(/(\d+(?:\.\d+)?)\s*(लाख|lakh|lac)/);
+    let amount = null;
+    if (lakhMatch) {
+      amount = parseFloat(lakhMatch[1]) * 100000;
+    } else if (lower.includes('एक लाख') || lower.includes('one lakh')) {
+      amount = 100000;
+    } else if (lower.includes('दो लाख') || lower.includes('two lakh')) {
+      amount = 200000;
+    } else if (lower.includes('पांच लाख') || lower.includes('5 लाख') || lower.includes('five lakh')) {
+      amount = 500000;
+    } else if (lower.includes('दस लाख') || lower.includes('10 लाख') || lower.includes('ten lakh')) {
+      amount = 1000000;
+    } else {
+      // Thousands (हजार / thousand)
+      const thousandMatch = lower.match(/(\d+)\s*(हजार|thousand|k)/);
+      if (thousandMatch) {
+        amount = parseInt(thousandMatch[1], 10) * 1000;
+      } else {
+        const rawNum = lower.match(/\b(\d{4,8})\b/);
+        if (rawNum) {
+          amount = parseInt(rawNum[1], 10);
+        }
+      }
+    }
+
+    if (amount) {
+      // Decide if the user mentioned margin capital or total project cost
+      if (lower.includes('margin') || lower.includes('मार्जिन') || lower.includes('पूंजी') || lower.includes('बचत') || lower.includes('पास')) {
+        updatedMargin = amount;
+        updatedCost = amount * 10;
+        detected.push(`उपलब्ध मार्जिन: ₹${amount.toLocaleString('en-IN')} (प्रोजेक्ट: ₹${(amount * 10).toLocaleString('en-IN')})`);
+      } else {
+        updatedCost = amount;
+        updatedMargin = Math.round(amount * 0.10);
+        detected.push(`कुल प्रोजेक्ट लागत: ₹${amount.toLocaleString('en-IN')} (मार्जिन: ₹${Math.round(amount * 0.10).toLocaleString('en-IN')})`);
+      }
+    }
+
+    // Apply updates to form
+    setFormData(prev => ({
+      ...prev,
+      business_title: text,
+      ...(updatedType && { business_type: updatedType }),
+      ...(updatedGender && { gender: updatedGender }),
+      ...(updatedState && { state: updatedState }),
+      ...(updatedMargin && { margin_capital: updatedMargin, investment_amount: updatedCost })
+    }));
+
+    setVoiceFeedback({
+      transcript: text,
+      detected: detected.length > 0 ? detected : ['विवरण दर्ज कर लिया गया है (Details Recorded)']
+    });
+
+    // Speak confirmation back to user if supported
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        const utter = new SpeechSynthesisUtterance(
+          lang === 'hi' 
+            ? 'आपकी आवाज दर्ज कर ली गई है और फॉर्म भर दिया गया है।'
+            : 'Voice input captured and form details filled successfully.'
+        );
+        utter.lang = lang === 'hi' ? 'hi-IN' : 'en-US';
+        utter.rate = 1.0;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {}
     }
   };
 
@@ -266,6 +370,36 @@ const FormPage = () => {
         </div>
         <MicButton onTranscript={handleVoiceTranscript} />
       </div>
+
+      {voiceFeedback && (
+        <div className="bg-emerald-50/90 border border-emerald-300 p-4 rounded-xl text-emerald-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-fadeIn">
+          <div className="flex items-start space-x-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-xs uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  {lang === 'hi' ? 'वॉइस इनपुट प्राप्त हुआ' : 'Voice Input Captured'}
+                </span>
+                <span className="text-xs italic text-emerald-700 font-medium">"{voiceFeedback.transcript}"</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {voiceFeedback.detected.map((item, idx) => (
+                  <span key={idx} className="bg-white/80 border border-emerald-200 text-emerald-900 text-xs font-semibold px-2.5 py-1 rounded-md shadow-2xs">
+                    ✓ {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setVoiceFeedback(null)} 
+            className="text-xs font-bold text-emerald-700 hover:text-emerald-900 self-end sm:self-center px-2 py-1 rounded hover:bg-emerald-100/60"
+          >
+            {lang === 'hi' ? 'हटाएं' : 'Dismiss'}
+          </button>
+        </div>
+      )}
 
 
       {error && (

@@ -65,6 +65,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async () => {
+    if (isSupabaseConfigured && supabase) {
+      return await signInWithGoogle();
+    } else {
+      const demoUser = { email: 'user@google.com', id: 'google-beneficiary-101', role: 'Beneficiary' };
+      localStorage.setItem('demo_user_auth', JSON.stringify(demoUser));
+      setUser(demoUser);
+      return { data: { user: demoUser }, error: null };
+    }
+  };
+
   const logout = async () => {
     if (isSupabaseConfigured && supabase) {
       await signOut();
@@ -74,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isConfigured: isSupabaseConfigured, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, isConfigured: isSupabaseConfigured, login, register, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,6 +9,8 @@ import FormPage from './pages/FormPage';
 import SchemesPage from './pages/SchemesPage';
 import CalculatorPage from './pages/CalculatorPage';
 
+import AIChatbot from './components/AIChatbot';
+
 function App() {
   return (
     <LanguageProvider>
@@ -25,6 +27,7 @@ function App() {
               </Routes>
             </main>
             <Footer />
+            <AIChatbot />
           </div>
         </Router>
       </AuthProvider>

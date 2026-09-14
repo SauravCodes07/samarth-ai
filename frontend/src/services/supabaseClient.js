@@ -33,6 +33,16 @@ export const signOut = async () => {
   return await supabase.auth.signOut();
 };
 
+export const signInWithGoogle = async () => {
+  if (!supabase) return { data: null, error: { message: "Supabase not configured" } };
+  return await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
+};
+
 export const getCurrentUser = async () => {
   if (!supabase) return null;
   const { data: { user } } = await supabase.auth.getUser();
