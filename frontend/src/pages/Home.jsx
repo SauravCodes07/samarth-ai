@@ -87,14 +87,15 @@ const Home = () => {
       
       {/* Hero Section with Cinematic Background & Gradient Overlay */}
       <section className="relative overflow-hidden bg-slate-950 text-white min-h-[640px] flex items-center">
-        {/* Background Image Layer */}
+        {/* Background Image Layer - Crisp, Bold & High Vibrancy */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity scale-105 transition-transform duration-1000"
+          className="absolute inset-0 bg-cover bg-center opacity-75 contrast-115 saturate-120 scale-100 transition-all duration-700"
           style={{ backgroundImage: `url('/hero-bg.jpg')` }}
         />
-        {/* Rich Gradient Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-blue-950/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.15),transparent_60%)]" />
+        {/* Crisp Directional Gradient Overlay (Bold & High Contrast for pristine text legibility) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.25),transparent_60%)]" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">

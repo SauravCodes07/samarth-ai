@@ -513,7 +513,7 @@ const SchemesPage = () => {
       <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xs">
         <div className="max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold text-blue-700 border border-blue-200/80">
-            <Building2 className="w-3.5 h-3.5 text-blue-600" />
+            <img src="/logo.png" alt="Samarth AI" className="w-4 h-4 object-contain" />
             <span>{lang === 'mr' ? 'केंद्र व राज्य शासन सवलत कर्ज निर्देशिका' : lang === 'hi' ? 'केंद्रीय एवं राज्य रियायती ऋण डायरेक्टरी' : 'Central & State Concessional Lending Directory'}</span>
           </div>
 
