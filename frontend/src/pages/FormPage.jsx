@@ -315,44 +315,53 @@ const FormPage = () => {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-6">
       
-      {/* Step Indicator */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+      {/* Step Indicator (Ultra Responsive on Mobile & Desktop) */}
+      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
               step >= 1 ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'
             }`}>
               1
             </div>
-            <span className={`text-xs sm:text-sm font-semibold ${step === 1 ? 'text-blue-700' : 'text-slate-600'}`}>
-              {lang === 'hi' ? 'व्यवसाय का चयन' : 'Trade Category'}
-            </span>
+            <div className="leading-tight">
+              <span className={`text-xs sm:text-sm font-semibold block ${step === 1 ? 'text-blue-700' : 'text-slate-600'}`}>
+                {lang === 'mr' ? 'व्यवसाय' : lang === 'hi' ? 'व्यवसाय' : 'Trade'}
+                <span className="hidden sm:inline"> {lang === 'mr' ? 'निवड' : lang === 'hi' ? 'का चयन' : 'Category'}</span>
+              </span>
+            </div>
           </div>
 
-          <div className="h-0.5 w-8 sm:w-16 bg-slate-200"></div>
+          <div className="h-0.5 flex-grow mx-2 sm:mx-4 max-w-[48px] sm:max-w-[80px] bg-slate-200"></div>
 
-          <div className="flex items-center space-x-3">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
               step >= 2 ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'
             }`}>
               2
             </div>
-            <span className={`text-xs sm:text-sm font-semibold ${step === 2 ? 'text-blue-700' : 'text-slate-600'}`}>
-              {lang === 'hi' ? '10% मार्जिन पूंजी' : 'Margin Budget (10%)'}
-            </span>
+            <div className="leading-tight">
+              <span className={`text-xs sm:text-sm font-semibold block ${step === 2 ? 'text-blue-700' : 'text-slate-600'}`}>
+                {lang === 'mr' ? '१०% भांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}
+                <span className="hidden sm:inline"> {lang === 'mr' ? 'बजेट' : lang === 'hi' ? 'पूंजी' : 'Budget'}</span>
+              </span>
+            </div>
           </div>
 
-          <div className="h-0.5 w-8 sm:w-16 bg-slate-200"></div>
+          <div className="h-0.5 flex-grow mx-2 sm:mx-4 max-w-[48px] sm:max-w-[80px] bg-slate-200"></div>
 
-          <div className="flex items-center space-x-3">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
               step >= 3 ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'
             }`}>
               3
             </div>
-            <span className={`text-xs sm:text-sm font-semibold ${step === 3 ? 'text-blue-700' : 'text-slate-600'}`}>
-              {lang === 'hi' ? 'स्थान व प्रोफाइल' : 'Profile & Location'}
-            </span>
+            <div className="leading-tight">
+              <span className={`text-xs sm:text-sm font-semibold block ${step === 3 ? 'text-blue-700' : 'text-slate-600'}`}>
+                {lang === 'mr' ? 'स्थान' : lang === 'hi' ? 'स्थान' : 'Profile'}
+                <span className="hidden sm:inline"> & {lang === 'mr' ? 'माहिती' : lang === 'hi' ? 'प्रोफाइल' : 'Location'}</span>
+              </span>
+            </div>
           </div>
         </div>
       </div>

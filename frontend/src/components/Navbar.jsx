@@ -252,7 +252,7 @@ const Navbar = () => {
                   }`}
                 >
                   <Icon className="w-4 h-4 text-slate-500" />
-                  <span>{lang === 'hi' ? link.labelHi : link.labelEn}</span>
+                  <span>{getNavLabel(link)}</span>
                 </Link>
               );
             })}
@@ -261,7 +261,7 @@ const Navbar = () => {
                 <div className="flex items-center justify-between w-full">
                   <span className="text-xs text-slate-600 truncate">{user.email}</span>
                   <button onClick={logout} className="text-xs text-rose-600 font-medium">
-                    {lang === 'hi' ? 'लॉगआउट' : 'Log out'}
+                    {lang === 'mr' ? 'लॉगआउट' : lang === 'hi' ? 'लॉगआउट' : 'Log out'}
                   </button>
                 </div>
               ) : (
@@ -273,7 +273,7 @@ const Navbar = () => {
                   }}
                   className="w-full text-center bg-slate-900 text-white py-2 rounded-lg text-xs font-semibold"
                 >
-                  {lang === 'hi' ? 'खाता लॉगिन / रजिस्टर' : 'Sign In / Register'}
+                  {lang === 'mr' ? 'खाते लॉगिन / नोंदणी' : lang === 'hi' ? 'खाता लॉगिन / रजिस्टर' : 'Sign In / Register'}
                 </button>
               )}
             </div>
