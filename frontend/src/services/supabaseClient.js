@@ -23,9 +23,15 @@ export const supabase = isSupabaseConfigured
 /**
  * Authentication Helpers for Supabase Auth
  */
-export const signUpWithEmail = async (email, password) => {
+export const signUpWithEmail = async (email, password, metadata = {}) => {
   if (!supabase) return { data: null, error: { message: "Supabase not configured" } };
-  return await supabase.auth.signUp({ email, password });
+  return await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: metadata
+    }
+  });
 };
 
 export const signInWithEmail = async (email, password) => {

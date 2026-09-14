@@ -73,6 +73,16 @@ export const getLocaleForLang = (lang) => {
   return 'en-IN';
 };
 
+export const cleanVoiceTranscript = (text) => {
+  if (!text) return '';
+  let cleaned = text.trim();
+  // Strip trailing voice control words like "exit", "stop", "cancel", "रद्द", "थांबवा", "रोकें"
+  cleaned = cleaned.replace(/\s+(exit|stop|cancel|close|रोकें|रद्द|थांबवा|बंद करा)\.?$/i, '');
+  // Remove redundant trailing punctuation
+  cleaned = cleaned.replace(/[.,;!?]+$/, '').trim();
+  return cleaned;
+};
+
 /**
  * Trilingual Text-to-Speech (TTS) announcement
  * Strictly respects active language: Marathi -> mr-IN, Hindi -> hi-IN, English -> en-IN
@@ -112,7 +122,67 @@ export const speakConfirmation = (lang = 'en') => {
 };
 
 /**
- * Initialize Speech Recognition with high accuracy and locale compliance
+ * Speaks arbitrary text in the specified language (mr, hi, en) with audio cleanup
+ */
+export const speakTextWithVoice = (text, lang = 'en', onDone = null) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+    if (onDone) onDone();
+    return null;
+  }
+  try {
+    window.speechSynthesis.cancel();
+
+    // Clean text of markdown, emojis, asterisks, headers, bullets, and URLs
+    let clean = text
+      .replace(/[*#_`~]/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/https?:\/\/\S+/g, '')
+      .replace(/[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .replace(/^[0-9]+\.\s*/gm, '')
+      .replace(/^[•\-]\s*/gm, '')
+      .trim();
+
+    if (!clean) {
+      if (onDone) onDone();
+      return null;
+    }
+
+    const locale = lang === 'mr' ? 'mr-IN' : lang === 'hi' ? 'hi-IN' : 'en-IN';
+    const utter = new SpeechSynthesisUtterance(clean);
+    utter.lang = locale;
+    utter.rate = 0.95;
+    utter.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices() || [];
+    const matchedVoice = voices.find(v => v.lang === locale || v.lang.startsWith(locale.split('-')[0]));
+    if (matchedVoice) {
+      utter.voice = matchedVoice;
+    }
+
+    if (onDone) {
+      utter.onend = () => onDone();
+      utter.onerror = () => onDone();
+    }
+
+    window.speechSynthesis.speak(utter);
+    return utter;
+  } catch (err) {
+    console.debug('TTS error:', err);
+    if (onDone) onDone();
+    return null;
+  }
+};
+
+export const stopSpeaking = () => {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel();
+    } catch (e) {}
+  }
+};
+
+/**
+ * Initialize Speech Recognition with high accuracy, interim aggregation and locale compliance
  */
 export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-IN', onInterim = null) => {
   const SpeechRecognition = 
@@ -134,34 +204,48 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-I
     recognition.maxAlternatives = 3;
 
     let hasDeliveredFinal = false;
+    let accumulatedFinal = '';
+    let latestInterim = '';
 
     recognition.onstart = () => {
       hasDeliveredFinal = false;
+      accumulatedFinal = '';
+      latestInterim = '';
       playListeningChime();
     };
 
     recognition.onresult = (event) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
+      let currentEventFinal = '';
+      let currentEventInterim = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const item = event.results[i];
-        const transcriptText = item[0].transcript;
+        const transcriptText = item[0]?.transcript || '';
         if (item.isFinal) {
-          finalTranscript += transcriptText;
+          currentEventFinal += (currentEventFinal ? ' ' : '') + transcriptText.trim();
         } else {
-          interimTranscript += transcriptText;
+          currentEventInterim += (currentEventInterim ? ' ' : '') + transcriptText.trim();
         }
       }
 
-      if (interimTranscript && onInterim) {
-        onInterim(interimTranscript);
+      if (currentEventFinal) {
+        accumulatedFinal += (accumulatedFinal ? ' ' : '') + currentEventFinal;
+      }
+      latestInterim = currentEventInterim;
+
+      const liveDisplay = (accumulatedFinal + (latestInterim ? ' ' + latestInterim : '')).trim();
+      if (liveDisplay && onInterim) {
+        onInterim(liveDisplay);
       }
 
-      if (finalTranscript && !hasDeliveredFinal) {
-        hasDeliveredFinal = true;
-        playStopChime();
-        onResult && onResult(finalTranscript.trim());
+      // If we have definitive final text and no ongoing interim, deliver immediately
+      if (accumulatedFinal && !latestInterim && !hasDeliveredFinal) {
+        const candidate = cleanVoiceTranscript(accumulatedFinal);
+        if (candidate) {
+          hasDeliveredFinal = true;
+          playStopChime();
+          onResult && onResult(candidate);
+        }
       }
     };
 
@@ -189,6 +273,15 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-I
     };
 
     recognition.onend = () => {
+      // If recognition ended before a final event fired, deliver accumulated or interim text
+      if (!hasDeliveredFinal) {
+        const fallbackCandidate = cleanVoiceTranscript((accumulatedFinal + ' ' + latestInterim).trim());
+        if (fallbackCandidate) {
+          hasDeliveredFinal = true;
+          playStopChime();
+          onResult && onResult(fallbackCandidate);
+        }
+      }
       onEnd && onEnd();
     };
 

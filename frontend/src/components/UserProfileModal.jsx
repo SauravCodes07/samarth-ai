@@ -21,8 +21,9 @@ const UserProfileModal = ({ isOpen, onClose }) => {
 
   if (!isOpen || !user) return null;
 
-  const initial = user.email?.[0]?.toUpperCase() || 'U';
-  const username = user.email?.split('@')[0] || 'Beneficiary';
+  const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Beneficiary';
+  const initial = displayName[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U';
+  const username = displayName;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 animate-fadeIn">

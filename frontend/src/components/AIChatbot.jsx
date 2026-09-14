@@ -17,7 +17,7 @@ import {
   Mic,
   MicOff
 } from 'lucide-react';
-import { initSpeechRecognition, isSpeechRecognitionSupported } from '../utils/speechToText';
+import { initSpeechRecognition, isSpeechRecognitionSupported, speakTextWithVoice, stopSpeaking } from '../utils/speechToText';
 
 // Comprehensive Reasoning Engine for Concessional MSME Banking
 const REASONING_DATABASE = [
@@ -267,21 +267,52 @@ const AIChatbot = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [voiceSpeechEnabled, setVoiceSpeechEnabled] = useState(false);
+  const [speakingMessageId, setSpeakingMessageId] = useState(null);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
   const [liveVoiceText, setLiveVoiceText] = useState('');
   const recognitionRef = useRef(null);
   const messagesEndRef = useRef(null);
 
+  const toggleVoiceSpeech = () => {
+    if (!voiceSpeechEnabled) {
+      setVoiceSpeechEnabled(true);
+      const announcement = lang === 'mr'
+        ? 'आवाज सुरू केला आहे. मी उत्तरे वाचून दाखवेन.'
+        : lang === 'hi'
+        ? 'आवाज़ शुरू कर दी गई है। मैं उत्तर पढ़कर सुनाऊंगा।'
+        : 'Voice narration activated. I will read responses aloud.';
+      
+      const lastBotMsg = [...messages].reverse().find(m => m.sender === 'bot');
+      const textToSpeak = lastBotMsg ? `${announcement} ${lastBotMsg.text}` : announcement;
+      setSpeakingMessageId(lastBotMsg?.id || 'active');
+      speakTextWithVoice(textToSpeak, lang, () => setSpeakingMessageId(null));
+    } else {
+      setVoiceSpeechEnabled(false);
+      setSpeakingMessageId(null);
+      stopSpeaking();
+    }
+  };
+
   const startChatVoiceInput = () => {
     if (!isSpeechRecognitionSupported()) {
-      alert('Voice input is not supported in this browser. Please use Chrome.');
+      alert(lang === 'mr' ? 'या ब्राउझरमध्ये व्हॉइस इनपुट समर्थित नाही. कृपया गुगल क्रोम वापरा.' : lang === 'hi' ? 'इस ब्राउज़र में वॉइस इनपुट समर्थित नहीं है। कृपया गूगल क्रोम का उपयोग करें।' : 'Voice input is not supported in this browser. Please use Chrome or Edge.');
       return;
     }
 
-    if (isListeningVoice && recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {}
+    if (isListeningVoice) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {}
+      }
+      // If voice text was captured while listening, deliver it so it is not lost!
+      if (liveVoiceText && liveVoiceText.trim()) {
+        const captured = liveVoiceText.trim();
+        setIsListeningVoice(false);
+        setLiveVoiceText('');
+        handleSend(captured);
+        return;
+      }
       setIsListeningVoice(false);
       setLiveVoiceText('');
       return;
@@ -293,7 +324,6 @@ const AIChatbot = () => {
         setIsListeningVoice(false);
         setLiveVoiceText('');
         if (finalText && finalText.trim()) {
-          setInputValue(finalText.trim());
           handleSend(finalText.trim());
         }
       },
@@ -318,6 +348,7 @@ const AIChatbot = () => {
         rec.start();
         setIsListeningVoice(true);
       } catch (err) {
+        console.error('Mic start error:', err);
         setIsListeningVoice(false);
       }
     }
@@ -370,19 +401,14 @@ Tap any topic below or ask your specific business question!`;
     }
   }, [messages, isOpen]);
 
-  const speakText = (text) => {
-    if (!voiceSpeechEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const clean = text.replace(/[*#_`]/g, '').replace(/\[.*?\]\(.*?\)/g, '');
-      const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = lang === 'mr' ? 'mr-IN' : lang === 'hi' ? 'hi-IN' : 'en-US';
-      utter.rate = 1.0;
-      window.speechSynthesis.speak(utter);
-    } catch (e) {}
+  const speakText = (text, messageId = null) => {
+    setSpeakingMessageId(messageId || 'active');
+    speakTextWithVoice(text, lang, () => {
+      setSpeakingMessageId(null);
+    });
   };
 
-  // Logical Reasoning Engine
+  // Logical Reasoning Engine with Deep Intent Analysis
   const generateSmartReasoning = (rawQuery) => {
     const q = rawQuery.toLowerCase().trim();
 
@@ -390,8 +416,8 @@ Tap any topic below or ask your specific business question!`;
     if (q.length < 3 || /^[a-z0-9]$/i.test(q)) {
       if (lang === 'mr') {
         return {
-          text: `मला आपला प्रश्न समजला नाही. 🤔
-कृपया आपला प्रश्न स्पष्टपणे लिहा, जसे की:
+          text: `मला आपला प्रश्न स्पष्ट समजला नाही. 🤔
+कृपया व्यवसाय किंवा कर्जासंबंधी प्रश्न स्पष्टपणे विचारा, जसे की:
 - *"मोरेटोरियम म्हणजे काय?"*
 - *"१० गाईंच्या डेअरीमध्ये किती नफा होईल?"*
 - *"महिलांसाठी ४% व्याजाची योजना कोणती?"*
@@ -402,7 +428,7 @@ Tap any topic below or ask your specific business question!`;
       if (lang === 'hi') {
         return {
           text: `मुझे आपका प्रश्न स्पष्ट नहीं हुआ। 🤔
-कृपया अपना प्रश्न थोड़ा विस्तार से लिखें, जैसे:
+कृपया व्यापार या लोन से संबंधित प्रश्न स्पष्ट लिखें, जैसे:
 - *"मोरेटोरियम (किश्त छूट) क्या है?"*
 - *"10 गायों की डेयरी में कितना शुद्ध मुनाफा होगा?"*
 - *"महिला उद्यमियों के लिए 4% ब्याज वाली योजना कौन सी है?"*
@@ -412,7 +438,7 @@ Tap any topic below or ask your specific business question!`;
       }
       return {
         text: `I didn't quite catch that. 🤔
-Please ask a clear business or banking question, such as:
+Please ask a clear business, banking, or scheme question, such as:
 - *"What is a Moratorium period?"*
 - *"How much net profit in a 10-cow dairy farm?"*
 - *"Which schemes offer 4% interest for women?"*
@@ -421,27 +447,121 @@ Please ask a clear business or banking question, such as:
       };
     }
 
-    // 2. Handle Casual Greetings
-    if (/^(hi|hello|hey|namaste|namaskar|pranam|kem cho|kasa kay|kaise ho)/i.test(q)) {
+    // 2. Audio, Microphone, and Connectivity Check (Fixes "Are you listening to me / am I audible")
+    const isAudioTest =
+      /(are you|am i|can you|can u|hello|hi|test|check|mic|sound|आवाज|ऐकू|ऐकता|सुन रहे|आवाज आ रही)/i.test(q) &&
+      /(listening|audible|hear me|hear|mic|microphone|sound|test|work|working|आवाज|ऐकू|ऐकता|ऐकताय|सुन|सुनाई|ऑडिबल)/i.test(q);
+
+    if (
+      isAudioTest ||
+      /^(are you listening|am i audible|can you hear me|mic check|voice test|hello hello|आवाज येत आहे का|आवाज येतोय का|क्या आप सुन रहे हैं|मेरी आवाज आ रही है)/i.test(q)
+    ) {
       if (lang === 'mr') {
         return {
-          text: `नमस्कार! मी समर्थ एआय सहाय्यक आहे. मी आपल्याला शासकीय कर्ज योजना, मार्जिन मनी आणि व्यवसाय नफा-तोटा समजण्यास कशी मदत करू शकतो?`,
+          text: `होय, तुमचा आवाज स्पष्टपणे ऐकू येत आहे! 🎙️✅
+
+मी **समर्थ एआय (Samarth AI)** आर्थिक सल्लागार आहे. आपला मायक्रोफोन व्यवस्थित चालू आहे. 
+मी आपल्याला शासकीय कर्ज योजना, १०% स्वतःचे भांडवल (मार्जिन), किंवा व्यवसाय नफ्याबद्दल कशी मदत करू शकतो?`,
           cta: { label: 'योजनांची यादी पहा', path: '/schemes' }
         };
       }
       if (lang === 'hi') {
         return {
-          text: `नमस्ते! मैं समर्थ एआई वित्तीय सलाहकार हूँ। मैं आपके नए व्यवसाय, 10% मार्जिन पूंजी, और सरकारी सब्सिडी के संबंध में किस प्रकार सहायता करूँ?`,
+          text: `हाँ, आपकी आवाज़ बिल्कुल साफ और स्पष्ट सुनाई दे रही है! 🎙️✅
+
+मैं **समर्थ एआई (Samarth AI)** वित्तीय सलाहकार हूँ। आपका माइक बिल्कुल सही काम कर रहा है। 
+मैं आपके नए व्यापार, 10% मार्जिन पूंजी, या सरकारी लोन योजनाओं के संबंध में किस प्रकार सहायता करूँ?`,
           cta: { label: 'सरकारी योजनाएं देखें', path: '/schemes' }
         };
       }
       return {
-        text: `Hello! I am your Samarth AI Financial Advisor. How can I help structure your business credit, calculate margin money, or find concessional schemes today?`,
+        text: `Yes, I can hear you loud and clear! 🎙️✅
+
+I am your **Samarth AI Financial Advisor**. Your microphone is working properly! 
+How can I assist you with concessional business loans, 10% margin money, moratorium periods, or enterprise profitability today?`,
         cta: { label: 'Browse Verified Schemes', path: '/schemes' }
       };
     }
 
-    // 3. Match against Structured Knowledge & Reasoning Models
+    // 3. Casual Greetings
+    if (/^(hi|hello|hey|namaste|namaskar|pranam|kem cho|kasa kay|kaise ho|good morning|good afternoon|good evening)/i.test(q)) {
+      if (lang === 'mr') {
+        return {
+          text: `नमस्कार! 🙏 मी समर्थ एआय सहाय्यक आहे. मी आपल्याला शासकीय कर्ज योजना, मार्जिन मनी आणि व्यवसाय नफा-तोटा समजण्यास कशी मदत करू शकतो?`,
+          cta: { label: 'योजनांची यादी पहा', path: '/schemes' }
+        };
+      }
+      if (lang === 'hi') {
+        return {
+          text: `नमस्ते! 🙏 मैं समर्थ एआई वित्तीय सलाहकार हूँ। मैं आपके नए व्यवसाय, 10% मार्जिन पूंजी, और सरकारी सब्सिडी के संबंध में किस प्रकार सहायता करूँ?`,
+          cta: { label: 'सरकारी योजनाएं देखें', path: '/schemes' }
+        };
+      }
+      return {
+        text: `Hello! 🙏 I am your Samarth AI Financial Advisor. How can I help structure your business credit, calculate margin money, or find concessional schemes today?`,
+        cta: { label: 'Browse Verified Schemes', path: '/schemes' }
+      };
+    }
+
+    // 4. AI Identity & Capabilities Questions
+    if (/(who are you|what is your name|what can you do|who made you|help|तु कोण आहेस|तुम कौन हो|क्या करते हो|काम काय)/i.test(q)) {
+      if (lang === 'mr') {
+        return {
+          text: `मी **समर्थ एआय (Samarth AI)** आहे—सामाजिक न्याय व एमएसएमई क्षेत्रातील शासकीय कर्ज व आर्थिक योजनांसाठीचा अधिकृत डिजिटल सल्लागार. 🤖🇮🇳
+
+मी आपल्याला पुढील बाबींमध्ये मदत करू शकतो:
+- **१०% स्वतःचे भांडवल (Margin Money)** चे गणित
+- **मोरेटोरियम (हप्ता सवलत)** कालावधीचे नियम
+- **१० गाईंच्या डेअरी किंवा उद्योगाचे नफा-तोटा ताळेबंद**
+- **४% ते ८.५% सवलतीच्या शासकीय योजना** आणि पात्रता`,
+          cta: { label: 'व्यवसाय अहवाल तयार करा', path: '/advisory' }
+        };
+      }
+      if (lang === 'hi') {
+        return {
+          text: `मैं **समर्थ एआई (Samarth AI)** हूँ—सामाजिक न्याय मंत्रालय एवं एमएसएमई ऋण व सरकारी योजनाओं का विशेष वित्तीय सलाहकार। 🤖🇮🇳
+
+मैं आपकी इन विषयों में सहायता कर सकता हूँ:
+- **10% मार्जिन मनी** और 90% बैंक लोन संरचना
+- **मोरेटोरियम (किश्त छूट)** के आधिकारिक नियम
+- **10 गायों की डेयरी या दुकान का शुद्ध मुनाफा**
+- **4% से 8.5% रियायती ब्याज वाली योजनाएं**`,
+          cta: { label: 'बिजनेस DPR बनाएं', path: '/advisory' }
+        };
+      }
+      return {
+        text: `I am **Samarth AI**—your dedicated digital financial advisor for Indian MSMEs, MoSJE concessional credit, and government subsidies. 🤖🇮🇳
+
+I can help you analyze:
+- **10% Margin Money Calculations:** Founder contribution vs. 90% bank funding
+- **Moratorium Periods:** Principal repayment holidays (6 to 12 months)
+- **Enterprise Feasibility:** Revenue, expenses & net profit for dairy, retail, tailoring, etc.
+- **Concessional Schemes:** Filter 4% to 8.5% low-interest government schemes`,
+        cta: { label: 'Explore Feasibility Engine', path: '/advisory' }
+      };
+    }
+
+    // 5. Gratitude & Courtesy
+    if (/(thank|thanks|dhanyawad|shukriya|आभार|धन्यवाद|खूप छान|बहुत अच्छा)/i.test(q)) {
+      if (lang === 'mr') {
+        return {
+          text: `आपले मनःपूर्वक स्वागत आहे! 🙏 आपल्याला शासकीय योजना, व्यवसाय अहवाल किंवा कर्जासंबंधी आणखी काही जाणून घ्यायचे असल्यास नक्की विचारा.`,
+          cta: null
+        };
+      }
+      if (lang === 'hi') {
+        return {
+          text: `आपका स्वागत है! 🙏 यदि आपको सरकारी योजनाओं, DPR रिपोर्ट या रियायती लोन के बारे में कोई अन्य जानकारी चाहिए, तो बेझिझक पूछें।`,
+          cta: null
+        };
+      }
+      return {
+        text: `You are very welcome! 🙏 Feel free to ask any further questions about concessional schemes, DPRs, or credit structuring anytime.`,
+        cta: null
+      };
+    }
+
+    // 6. Match against Structured Knowledge & Reasoning Models
     for (const item of REASONING_DATABASE) {
       if (item.triggers.some(t => q.includes(t.toLowerCase()))) {
         const localized = lang === 'mr' ? item.mr : lang === 'hi' ? item.hi : item.en;
@@ -452,29 +572,87 @@ Please ask a clear business or banking question, such as:
       }
     }
 
-    // 4. Logical General Advisor Fallback (Explains based on MoSJE & Banking Logic)
+    // 7. Check if the query has ANY relevance to business, loans, banking, or government schemes
+    const businessKeywords = [
+      'loan', 'scheme', 'subsidy', 'margin', 'moratorium', 'emi', 'bank', 'interest', 'money', 'business',
+      'credit', 'dairy', 'cows', 'cow', 'buffalo', 'shop', 'mudra', 'pmmy', 'dpr', 'project', 'fund',
+      'finance', 'cost', 'profit', 'revenue', 'eligibility', 'documents', 'apply', 'tailoring', 'salon',
+      'flour', 'kirana', 'store', 'rate', 'concessional', 'guarantee', 'cgtmse', 'subsidy', 'nbcfdc', 'nsfdc',
+      'कर्ज', 'योजना', 'अनुदान', 'भांडवल', 'हप्ता', 'बँक', 'व्याज', 'पैसा', 'व्यवसाय', 'डेअरी', 'गाई',
+      'दुकान', 'मुद्रा', 'पात्रता', 'कागदपत्रे', 'अर्ज', 'नफा', 'सवलत', 'भांडवल',
+      'लोन', 'सब्सिडी', 'किश्त', 'ब्याज', 'व्यापार', 'मुनाफा', 'दस्तावेज', 'दुकान', 'आवेदन', 'बैंक'
+    ];
+
+    const hasBusinessContext = businessKeywords.some(kw => q.includes(kw));
+
+    // 8. Polite Off-Topic / Nonsense Question Fallback
+    // Never fake a scheme analysis for unrelated questions (weather, jokes, sports, politics, testing words)
+    if (!hasBusinessContext) {
+      if (lang === 'mr') {
+        return {
+          text: `मी **समर्थ एआय** आहे—विशेषतः **शासकीय कर्ज योजना, १०% भांडवल (मार्जिन) आणि एमएसएमई व्यवसाय मार्गदर्शन** यासाठी तयार केलेला आर्थिक सल्लागार. 🇮🇳
+
+मी इतर अवांतर विषयांवर उत्तरे देऊ शकत नाही. परंतु आपल्या व्यवसायासाठी मी खालील विषयांवर नक्की मदत करू शकतो:
+- 💡 **मोरेटोरियम (हप्ता सवलत):** व्यवसाय सुरू करताना ६-१२ महिन्यांची मुदत
+- 💰 **१०% स्वतःचे भांडवल:** ९०% सरकारी कर्जासह व्यवसायाची रचना
+- 🐄 **डेअरी व व्यवसाय नफा:** १० गाईंच्या डेअरी फार्मचे संपूर्ण ताळेबंद
+- 📋 **सरकारी योजना:** ४% ते ८.५% सवलतीच्या व्याजदराच्या योजना
+
+कृपया आपल्या व्यवसायाशी किंवा कर्जाशी संबंधित प्रश्न विचारा!`,
+          cta: { label: 'योजनांची यादी पहा', path: '/schemes' }
+        };
+      }
+      if (lang === 'hi') {
+        return {
+          text: `मैं **समर्थ एआई** हूँ—विशेष रूप से **सरकारी ऋण योजनाओं, 10% मार्जिन पूंजी और एमएसएमई व्यवसाय** के लिए प्रशिक्षित वित्तीय सलाहकार। 🇮🇳
+
+मैं असंबंधित विषयों का उत्तर नहीं दे सकता, परंतु आपके व्यवसाय हेतु इन प्रमुख विषयों पर तुरंत सहायता कर सकता हूँ:
+- 💡 **मोरेटोरियम (किश्त छूट):** काम शुरू करने पर 6 से 12 महीने की राहत
+- 💰 **10% मार्जिन पूंजी:** मात्र 10% लगाकर 90% सरकारी लोन प्राप्त करना
+- 🐄 **डेयरी व बिजनेस मुनाफा:** 10 दुधारू गायों का संपूर्ण आय-व्यय
+- 📋 **रियायती योजनाएं:** 4% से 8.5% न्यूनतम ब्याज वाली सरकारी योजनाएं
+
+कृपया अपने व्यापार या लोन से संबंधित प्रश्न पूछें!`,
+          cta: { label: 'सरकारी योजनाएं देखें', path: '/schemes' }
+        };
+      }
+      return {
+        text: `I am **Samarth AI**, a specialized advisor dedicated to **Government Schemes, 10% Margin Money, and MSME Concessional Credit**. 🇮🇳
+
+I am not programmed for off-topic questions, but I can directly help you structure your business financing:
+- 💡 **Moratorium Period:** 6 to 12 months repayment holidays
+- 💰 **10% Margin Money:** Investing 10% founder equity with 90% bank funding
+- 🐄 **Enterprise Profitability:** Real economic models for dairy, tailoring, grocery, etc.
+- 📋 **Verified Schemes:** Concessional 4% to 8.5% interest schemes under MoSJE & MSME
+
+Please ask a question related to loans, schemes, or enterprise feasibility!`,
+        cta: { label: 'Browse Verified Schemes', path: '/schemes' }
+      };
+    }
+
+    // 9. Legitimate Business Query Analysis (Explains based on MoSJE & Banking Logic)
     if (lang === 'mr') {
       return {
-        text: `आपल्या प्रश्नाचे (**"${rawQuery}"**) सविस्तर आर्थिक विश्लेषण:
+        text: `आपल्या व्यवसाय प्रकल्पाचे (**"${rawQuery}"**) सविस्तर आर्थिक विश्लेषण:
 
-1. **शासकीय निकष:** सामाजिक न्याय व एमएसएमई मंत्रालयाच्या नियमांनुसार, ग्रामीण व नवउद्योजकांना १०% मार्जिनवर ९०% पर्यंत सवलतीचे कर्ज उपलब्ध होते.
-2. **हप्ता सवलत:** नवीन उद्योगांना सुरुवातीला ६ ते १२ महिन्यांची मोरेटोरियम (हप्ता सवलत) दिली जाते जेणेकरून व्यवसायाची घडी बसेल.
+1. **शासकीय निकष:** सामाजिक न्याय व एमएसएमई मंत्रालयाच्या नियमांनुसार, पात्र नवउद्योजकांना १०% मार्जिनवर ९०% पर्यंत सवलतीचे कर्ज उपलब्ध होते.
+2. **हप्ता सवलत (Moratorium):** नवीन उद्योगांना सुरुवातीला ६ ते १२ महिन्यांची मोरेटोरियम दिली जाते जेणेकरून नफा सुरू होईपर्यंत कोणताही मुद्दल हप्ता भरावा लागत नाही.
 3. **पुढील कृती:** आपण समर्थ एआयच्या **"AI Feasibility Study"** वर जाऊन आपल्या प्रकल्पाची संपूर्ण ताळेबंद आणि बँक अहवाल (DPR) त्वरित तयार करू शकता!`,
         cta: { label: 'व्यवसाय अहवाल तयार करा', path: '/advisory' }
       };
     }
     if (lang === 'hi') {
       return {
-        text: `आपके प्रश्न (**"${rawQuery}"**) का तार्किक व वित्तीय विश्लेषण:
+        text: `आपके व्यवसाय प्रोजेक्ट (**"${rawQuery}"**) का तार्किक व वित्तीय विश्लेषण:
 
 1. **सरकारी नियम:** सामाजिक न्याय एवं एमएसएमई मंत्रालय के दिशानिर्देशों के तहत, उद्यमियों को मात्र 10% मार्जिन पूंजी पर 90% तक का रियायती बैंक ऋण मिलता है।
-2. **किश्त छूट:** व्यवसाय शुरू करने पर पहले 6 से 12 महीने का मोरेटोरियम दिया जाता है ताकि आप बिना किसी आर्थिक दबाव के काम जमा सकें।
+2. **किश्त छूट (Moratorium):** व्यवसाय शुरू करने पर पहले 6 से 12 महीने का मोरेटोरियम मिलता है ताकि आर्थिक दबाव के बिना काम जम सके।
 3. **आगे क्या करें:** आप समर्थ एआई के **"AI Feasibility Study"** पेज पर जाकर अपने व्यापार का संपूर्ण लाभ-हानि खाता और बैंक-योग्य DPR रिपोर्ट तैयार कर सकते हैं!`,
         cta: { label: 'व्यवहार्यता रिपोर्ट बनाएं', path: '/advisory' }
       };
     }
     return {
-      text: `Logical Financial Assessment for: **"${rawQuery}"**:
+      text: `Logical Financial Assessment for **"${rawQuery}"**:
 
 1. **Concessional Financing:** Under Ministry of Social Justice & MSME norms, eligible founders only need to contribute **5% to 10% Margin Money**, while 90% is funded via government credit.
 2. **Cashflow Protection:** You are eligible for a **6 to 12 months Moratorium Period** during which no principal loan repayments are due.
@@ -500,8 +678,9 @@ Please ask a clear business or banking question, such as:
 
     setTimeout(() => {
       const response = generateSmartReasoning(q);
+      const newBotMsgId = (Date.now() + 1).toString();
       const botMsg = {
-        id: (Date.now() + 1).toString(),
+        id: newBotMsgId,
         sender: 'bot',
         text: response.text,
         cta: response.cta,
@@ -509,7 +688,9 @@ Please ask a clear business or banking question, such as:
       };
       setMessages(prev => [...prev, botMsg]);
       setIsTyping(false);
-      speakText(response.text);
+      if (voiceSpeechEnabled) {
+        speakText(response.text, newBotMsgId);
+      }
     }, 450);
   };
 
@@ -548,7 +729,7 @@ Please ask a clear business or banking question, such as:
         <div className="fixed bottom-6 right-6 z-40">
           <button
             onClick={() => setIsOpen(true)}
-            className="group flex items-center space-x-2.5 bg-gradient-to-r from-slate-950 via-blue-900 to-indigo-950 text-white px-4 py-3 rounded-full shadow-2xl hover:scale-105 transition-all duration-300 border border-blue-400/40"
+            className="group flex items-center space-x-2.5 bg-gradient-to-r from-slate-950 via-blue-900 to-indigo-950 text-white px-4 py-3 rounded-full shadow-[0_0_30px_-5px_rgba(37,99,235,0.4)] hover:shadow-[0_0_35px_-2px_rgba(59,130,246,0.6)] hover:scale-105 transition-all duration-300 border border-blue-400/40 cursor-pointer"
           >
             <div className="relative">
               <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
@@ -571,7 +752,7 @@ Please ask a clear business or banking question, such as:
 
       {/* Modern Conversational Window */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 z-50 w-[95vw] sm:w-[440px] max-h-[85vh] h-[640px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-fadeIn">
+        <div className="fixed bottom-4 right-4 z-50 w-[95vw] sm:w-[440px] max-h-[85vh] h-[640px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-fadeIn transition-colors">
           
           {/* Header */}
           <div className="bg-slate-950 text-white px-4 py-3.5 flex items-center justify-between border-b border-slate-800">
@@ -596,24 +777,38 @@ Please ask a clear business or banking question, such as:
 
             <div className="flex items-center space-x-1 text-slate-300">
               <button
-                onClick={() => setVoiceSpeechEnabled(!voiceSpeechEnabled)}
-                className={`p-1.5 rounded-xl hover:bg-slate-800 transition-colors ${
-                  voiceSpeechEnabled ? 'text-amber-300 bg-slate-800' : 'text-slate-400'
+                type="button"
+                onClick={toggleVoiceSpeech}
+                className={`p-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                  voiceSpeechEnabled
+                    ? 'text-amber-300 bg-blue-900/80 ring-1 ring-amber-400/60 shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
-                title={voiceSpeechEnabled ? 'Mute AI voice' : 'Enable voice read-aloud'}
+                title={
+                  voiceSpeechEnabled 
+                    ? (lang === 'mr' ? 'आवाज बंद करा' : lang === 'hi' ? 'आवाज़ बंद करें' : 'Mute voice read-aloud') 
+                    : (lang === 'mr' ? 'आवाज चालू करा (उत्तरे ऐका)' : lang === 'hi' ? 'आवाज़ चालू करें (उत्तर सुनें)' : 'Enable voice read-aloud')
+                }
               >
-                {voiceSpeechEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                {voiceSpeechEnabled ? (
+                  <>
+                    <Volume2 className="w-4 h-4 text-amber-300 animate-pulse" />
+                    <span className="text-[10px] font-bold text-amber-300 pr-0.5">ON</span>
+                  </>
+                ) : (
+                  <VolumeX className="w-4 h-4" />
+                )}
               </button>
               <button
                 onClick={() => setMessages([{ id: 'welcome', sender: 'bot', text: getWelcomeMessage(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }])}
-                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Reset conversation"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Close chat"
               >
                 <X className="w-5 h-5" />
@@ -622,9 +817,9 @@ Please ask a clear business or banking question, such as:
           </div>
 
           {/* Quick Questions Pills */}
-          <div className="bg-slate-50 border-b border-slate-200 px-3 py-2 flex items-center space-x-2 overflow-x-auto no-scrollbar">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 shrink-0 flex items-center gap-1">
-              <Lightbulb className="w-3 h-3 text-amber-500" />
+          <div className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/80 px-3 py-2 flex items-center space-x-2 overflow-x-auto no-scrollbar">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 shrink-0 flex items-center gap-1">
+              <Lightbulb className="w-3 h-3 text-amber-500 dark:text-amber-400" />
               {lang === 'mr' ? 'महत्वाचे प्रश्न:' : lang === 'hi' ? 'महत्वपूर्ण प्रश्न:' : 'Quick Questions:'}
             </span>
             {quickPills.map((pill, i) => {
@@ -633,7 +828,7 @@ Please ask a clear business or banking question, such as:
                 <button
                   key={i}
                   onClick={() => handleSend(pillText)}
-                  className="text-[11px] font-semibold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full whitespace-nowrap transition-all shadow-2xs shrink-0"
+                  className="text-[11px] font-semibold text-blue-700 dark:text-blue-300 bg-white dark:bg-slate-700 hover:bg-blue-50 dark:hover:bg-slate-600 border border-blue-200 dark:border-slate-600 px-2.5 py-1 rounded-full whitespace-nowrap transition-all shadow-2xs shrink-0 cursor-pointer"
                 >
                   {pillText}
                 </button>
@@ -642,7 +837,7 @@ Please ask a clear business or banking question, such as:
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-[#F8FAFC]">
+          <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-[#F8FAFC] dark:bg-slate-950">
             {messages.map((msg) => {
               const isBot = msg.sender === 'bot';
               return (
@@ -651,7 +846,7 @@ Please ask a clear business or banking question, such as:
                   className={`flex items-start gap-2.5 ${isBot ? 'justify-start' : 'justify-end'}`}
                 >
                   {isBot && (
-                    <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-1">
+                    <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 flex items-center justify-center shrink-0 mt-1">
                       <Bot className="w-4 h-4" />
                     </div>
                   )}
@@ -660,8 +855,8 @@ Please ask a clear business or banking question, such as:
                     <div
                       className={`inline-block p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                         isBot
-                          ? 'bg-white border border-slate-200 text-slate-800 shadow-2xs rounded-tl-xs'
-                          : 'bg-blue-600 text-white shadow-xs rounded-tr-xs text-left'
+                          ? 'bg-white dark:bg-slate-800/95 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 shadow-2xs rounded-tl-xs'
+                          : 'bg-blue-600 dark:bg-blue-600 text-white shadow-xs rounded-tr-xs text-left'
                       }`}
                     >
                       <div className="space-y-2 whitespace-pre-line">
@@ -672,14 +867,14 @@ Please ask a clear business or banking question, such as:
                               {parts.map((part, partIdx) => {
                                 if (part.startsWith('**') && part.endsWith('**')) {
                                   return (
-                                    <strong key={partIdx} className={isBot ? 'text-slate-950 font-bold' : 'text-white font-bold'}>
+                                    <strong key={partIdx} className={isBot ? 'text-slate-950 dark:text-white font-bold' : 'text-white font-bold'}>
                                       {part.slice(2, -2)}
                                     </strong>
                                   );
                                 }
                                 if (part.startsWith('### ')) {
                                   return (
-                                    <span key={partIdx} className="block font-bold text-xs uppercase tracking-wider text-blue-600 mb-1">
+                                    <span key={partIdx} className="block font-bold text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">
                                       {part.replace('### ', '')}
                                     </span>
                                   );
@@ -692,13 +887,13 @@ Please ask a clear business or banking question, such as:
                       </div>
 
                       {msg.cta && (
-                        <div className="mt-3 pt-2.5 border-t border-slate-100">
+                        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-700">
                           <button
                             onClick={() => {
                               navigate(msg.cta.path);
                               setIsOpen(false);
                             }}
-                            className="inline-flex items-center space-x-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-colors"
+                            className="inline-flex items-center space-x-1.5 bg-blue-50 dark:bg-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/70 text-blue-700 dark:text-blue-300 font-bold px-3 py-1.5 rounded-xl text-xs transition-colors cursor-pointer"
                           >
                             <span>{msg.cta.label}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -707,13 +902,45 @@ Please ask a clear business or banking question, such as:
                       )}
                     </div>
 
-                    <div className="text-[10px] text-slate-400 mt-1 px-1">
-                      {msg.timestamp}
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-1 px-1">
+                      <span>{msg.timestamp}</span>
+                      {isBot && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (speakingMessageId === msg.id) {
+                              stopSpeaking();
+                              setSpeakingMessageId(null);
+                            } else {
+                              setSpeakingMessageId(msg.id);
+                              speakTextWithVoice(msg.text, lang, () => setSpeakingMessageId(null));
+                            }
+                          }}
+                          className={`flex items-center space-x-1 px-2 py-0.5 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
+                            speakingMessageId === msg.id
+                              ? 'text-amber-600 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 ring-1 ring-amber-400/50 animate-pulse'
+                              : 'text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          }`}
+                          title={speakingMessageId === msg.id ? (lang === 'mr' ? 'थांबवा' : lang === 'hi' ? 'रोकें' : 'Stop') : (lang === 'mr' ? 'हे उत्तर ऐका' : lang === 'hi' ? 'यह उत्तर सुनें' : 'Listen to this response')}
+                        >
+                          {speakingMessageId === msg.id ? (
+                            <>
+                              <VolumeX className="w-3.5 h-3.5 text-amber-600 dark:text-amber-300" />
+                              <span>{lang === 'mr' ? 'थांबवा' : lang === 'hi' ? 'रोकें' : 'Stop'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Volume2 className="w-3.5 h-3.5" />
+                              <span>{lang === 'mr' ? 'ऐका' : lang === 'hi' ? 'सुनें' : 'Listen'}</span>
+                            </>
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {!isBot && (
-                    <div className="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0 mt-1">
+                    <div className="w-7 h-7 rounded-lg bg-slate-900 dark:bg-slate-700 text-white flex items-center justify-center shrink-0 mt-1">
                       <User className="w-4 h-4" />
                     </div>
                   )}
@@ -722,14 +949,14 @@ Please ask a clear business or banking question, such as:
             })}
 
             {isTyping && (
-              <div className="flex items-center space-x-2 text-slate-400 text-xs py-1">
-                <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <div className="flex items-center space-x-2 text-slate-400 dark:text-slate-500 text-xs py-1">
+                <div className="w-6 h-6 rounded-lg bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                   <Sparkles className="w-3.5 h-3.5 animate-spin" />
                 </div>
                 <div className="flex space-x-1">
-                  <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" />
-                  <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  <span className="w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full animate-bounce" />
+                  <span className="w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <span className="w-2 h-2 bg-slate-300 dark:bg-slate-600 rounded-full animate-bounce [animation-delay:0.4s]" />
                 </div>
                 <span>
                   {lang === 'mr' ? 'तार्किक उत्तर तयार करत आहे...' : lang === 'hi' ? 'तार्किक उत्तर तैयार कर रहे हैं...' : 'Analyzing financial logic...'}
@@ -741,13 +968,13 @@ Please ask a clear business or banking question, such as:
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-white border-t border-slate-200">
+          <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors">
             {/* Live Voice Input Banner inside Chatbot */}
             {isListeningVoice && (
-              <div className="mb-2 p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between text-xs animate-fadeIn">
+              <div className="mb-2 p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl flex items-center justify-between text-xs animate-fadeIn">
                 <div className="flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
-                  <span className="font-bold text-rose-800">
+                  <span className="font-bold text-rose-800 dark:text-rose-200">
                     {liveVoiceText 
                       ? `"${liveVoiceText}"` 
                       : (lang === 'mr' ? 'ऐकत आहोत... बोला' : lang === 'hi' ? 'सुन रहे हैं... बोलिए' : 'Listening... speak now')}
@@ -756,7 +983,7 @@ Please ask a clear business or banking question, such as:
                 <button
                   type="button"
                   onClick={startChatVoiceInput}
-                  className="text-[11px] font-bold text-rose-700 bg-white px-2 py-0.5 rounded border border-rose-300"
+                  className="text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-rose-300 dark:border-rose-700 cursor-pointer"
                 >
                   {lang === 'mr' ? 'थांबवा' : lang === 'hi' ? 'रोकें' : 'Stop'}
                 </button>
@@ -781,7 +1008,7 @@ Please ask a clear business or banking question, such as:
                     ? 'मोरेटोरियम, मुनाफा, या 10% मार्जिन पूछें...'
                     : 'Ask about moratorium, profit, margin money...'
                 }
-                className="flex-grow px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all text-slate-900"
+                className="flex-grow px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
 
               {/* Voice Speaking Option for Chatbot */}
@@ -791,7 +1018,7 @@ Please ask a clear business or banking question, such as:
                 className={`p-2.5 rounded-xl transition-all shadow-xs cursor-pointer ${
                   isListeningVoice
                     ? 'bg-rose-600 text-white animate-pulse ring-2 ring-rose-300'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
                 title={lang === 'mr' ? 'माईकवर बोलून प्रश्न विचारा' : lang === 'hi' ? 'माइक पर बोलकर प्रश्न पूछें' : 'Speak your question'}
               >
@@ -807,9 +1034,9 @@ Please ask a clear business or banking question, such as:
               </button>
             </form>
 
-            <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2 px-1">
+            <div className="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-2 px-1">
               <span>{lang === 'mr' ? '१०% मार्जिन व मोरेटोरियम गणित' : lang === 'hi' ? '10% मार्जिन व मोरेटोरियम गणित' : 'MSME Concessional Credit Reasoning'}</span>
-              <span className="font-semibold text-emerald-600">● 100% Free Advisory</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">● 100% Free Advisory</span>
             </div>
           </div>
 

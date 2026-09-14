@@ -16,10 +16,10 @@ const Footer = () => {
   const { lang } = useLanguage();
 
   return (
-    <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 text-xs mt-auto">
+    <footer className="bg-slate-900 dark:bg-[#06080F] text-slate-400 border-t border-slate-800 dark:border-slate-800/80 text-xs mt-auto transition-colors duration-300">
       
       {/* Top Value Strip */}
-      <div className="border-b border-slate-800/80 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="border-b border-slate-800/80 dark:border-slate-800/60 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-300">
           
           <div className="flex items-start space-x-3">

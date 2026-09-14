@@ -54,11 +54,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (email, password) => {
+  const register = async (email, password, metadata = {}) => {
     if (isSupabaseConfigured && supabase) {
-      return await signUpWithEmail(email, password);
+      const res = await signUpWithEmail(email, password, metadata);
+      if (res.data?.user) {
+        setUser(res.data.user);
+      }
+      return res;
     } else {
-      const demoUser = { email, id: 'demo-beneficiary-101', role: 'Beneficiary' };
+      const demoUser = { 
+        email, 
+        id: 'beneficiary-' + Date.now(), 
+        role: 'Beneficiary',
+        user_metadata: metadata
+      };
       localStorage.setItem('demo_user_auth', JSON.stringify(demoUser));
       setUser(demoUser);
       return { data: { user: demoUser }, error: null };

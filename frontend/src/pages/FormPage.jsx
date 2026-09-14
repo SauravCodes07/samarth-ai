@@ -374,7 +374,7 @@ const FormPage = () => {
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-6">
       
       {/* Step Indicator (Ultra Responsive on Mobile & Desktop) */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="bg-white dark:bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs backdrop-blur-md transition-colors">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
@@ -425,16 +425,16 @@ const FormPage = () => {
       </div>
 
       {/* Voice Assistant Strip */}
-      <div className="bg-white border border-slate-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+      <div className="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs backdrop-blur-md transition-colors">
         <div className="flex items-center space-x-3 text-center sm:text-left">
-          <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-blue-600" />
+          <div className="p-2.5 bg-blue-50 dark:bg-blue-900/40 rounded-xl text-blue-600 dark:text-blue-400 flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h4 className="font-bold text-sm text-slate-900">
+            <h4 className="font-bold text-sm text-slate-900 dark:text-white">
               {lang === 'mr' ? 'आवाजाने किंवा १-क्लिक नमुन्याने फॉर्म भरा (Voice Assistant)' : lang === 'hi' ? 'आवाज से बोलकर फॉर्म भरें (Voice Assistant)' : 'Voice-Enabled Form Input (Web Speech API)'}
             </h4>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {lang === 'mr'
                 ? 'उदा: "माझ्याकडे १ लाख रुपये आहेत, मला डेअरी फार्म सुरू करायचा आहे"'
                 : lang === 'hi'
@@ -458,15 +458,15 @@ const FormPage = () => {
       </div>
 
       {voiceFeedback && (
-        <div className="bg-emerald-50/90 border border-emerald-300 p-4 rounded-xl text-emerald-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-fadeIn">
+        <div className="bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 p-4 rounded-xl text-emerald-950 dark:text-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs animate-fadeIn">
           <div className="flex items-start space-x-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-xs uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                <span className="font-bold text-xs uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/60 px-2 py-0.5 rounded-full">
                   {lang === 'mr' ? 'आवाज तपशील नोंदवला' : lang === 'hi' ? 'वॉइस इनपुट प्राप्त हुआ' : 'Voice Input Captured'}
                 </span>
-                <span className="text-xs italic text-emerald-700 font-medium">"{voiceFeedback.transcript}"</span>
+                <span className="text-xs italic text-emerald-700 dark:text-emerald-300 font-medium">"{voiceFeedback.transcript}"</span>
               </div>
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {voiceFeedback.detected.map((item, idx) => (
@@ -501,10 +501,10 @@ const FormPage = () => {
         {step === 1 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <h2 className="text-xl font-black text-[#0B3D91]">
+              <h2 className="text-xl font-black text-[#0B3D91] dark:text-blue-400">
                 {lang === 'mr' ? 'टप्पा १: आपण कोणता ग्रामीण किंवा सूक्ष्म व्यवसाय सुरू किंवा वाढवू इच्छिता?' : lang === 'hi' ? 'चरण 1: आप कौन सा ग्रामीण व्यवसाय शुरू या बढ़ाना चाहते हैं?' : 'Step 1: Which business do you plan to establish or expand?'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                 {lang === 'mr' ? 'प्रस्तावित व्यवसाय क्षेत्र निवडा (Proposed Business Category):' : lang === 'hi' ? 'प्रस्तावित व्यावसायिक क्षेत्र चुनें (Proposed Business Category):' : 'Select your proposed business category:'}
               </p>
             </div>
@@ -542,7 +542,7 @@ const FormPage = () => {
 
             {/* Business Title Details */}
             <div className="space-y-1.5 pt-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 {lang === 'mr' ? 'व्यवसायाचे विशिष्ट नाव किंवा संकल्पना (पर्यायी):' : lang === 'hi' ? 'व्यवसाय का नाम या संक्षिप्त विचार (वैकल्पिक):' : 'Specific Enterprise Name / Idea (Optional):'}
               </label>
               <input
@@ -550,7 +550,7 @@ const FormPage = () => {
                 value={formData.business_title}
                 onChange={(e) => setFormData({ ...formData, business_title: e.target.value })}
                 placeholder={lang === 'mr' ? 'उदा: ४ मुऱ्हा म्हशींची आधुनिक मिनी डेअरी, शिलाई केंद्र...' : lang === 'hi' ? 'उदा: 4 मुर्राह भैंसों की मिनी डेयरी, किराना सुपरस्टोर...' : 'e.g., 4 Buffaloes Mini Dairy, Ready-made stitching shop...'}
-                className="w-full p-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91]"
+                className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
               />
             </div>
 
@@ -571,10 +571,10 @@ const FormPage = () => {
         {step === 2 && (
           <div className="space-y-6 animate-fadeIn">
             <div>
-              <h2 className="text-xl font-black text-[#0B3D91]">
+              <h2 className="text-xl font-black text-[#0B3D91] dark:text-blue-400">
                 {lang === 'mr' ? 'टप्पा २: आपल्याकडे एकूण किती स्वतःचे भांडवल (१०% मार्जिन) उपलब्ध आहे?' : lang === 'hi' ? 'चरण 2: आपके पास कुल कितनी मार्जिन पूंजी (10%) उपलब्ध है?' : 'Step 2: How much Available Margin Capital (10%) do you possess?'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                 {lang === 'mr'
                   ? 'शासकीय नियमांनुसार आपल्याला एकूण प्रकल्प खर्चाच्या फक्त १०% स्वतःचे भांडवल द्यावे लागते; उर्वरित ९०% सवलतीचे कर्ज मिळते.'
                   : lang === 'hi'
@@ -612,7 +612,7 @@ const FormPage = () => {
             {/* Mode A: Enter Available Margin Capital */}
             {inputMode === 'margin' ? (
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {lang === 'mr' ? 'आपले उपलब्ध स्वतःचे भांडवल (Available Margin Capital in ₹):' : lang === 'hi' ? 'आपकी उपलब्ध मार्जिन पूंजी (Available Margin Capital in ₹):' : 'Available Margin Capital (in ₹):'}
                 </label>
                 <div className="relative">
@@ -635,7 +635,7 @@ const FormPage = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {lang === 'mr' ? 'एकूण अपेक्षित प्रकल्प खर्च (Total Project Cost in ₹):' : lang === 'hi' ? 'कुल प्रोजेक्ट लागत (Total Project Cost in ₹):' : 'Total Project Cost (in ₹):'}
                 </label>
                 <div className="relative">
@@ -741,7 +741,7 @@ const FormPage = () => {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl flex items-center space-x-1.5 text-sm transition-colors"
+                className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center space-x-1.5 text-sm transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>{lang === 'mr' ? 'मागे' : lang === 'hi' ? 'पीछे' : 'Back'}</span>
@@ -763,10 +763,10 @@ const FormPage = () => {
         {step === 3 && (
           <form onSubmit={handleSubmit} className="space-y-6 animate-fadeIn">
             <div>
-              <h2 className="text-xl font-black text-[#0B3D91]">
+              <h2 className="text-xl font-black text-[#0B3D91] dark:text-blue-400">
                 {lang === 'mr' ? 'टप्पा ३: आपली भौगोलिक स्थिती (गाव/तालुका) व वैयक्तिक माहिती' : lang === 'hi' ? 'चरण 3: अपनी भौगोलिक स्थिति (ग्राम/ब्लॉक) एवं प्रोफाइल बताएं' : 'Step 3: Geographic Location & Beneficiary Profile'}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                 {lang === 'mr'
                   ? 'स्थानिक बाजारपेठ (५-१० किमी), स्पर्धा विश्लेषण आणि ग्राहक मागणीसाठी आवश्यक:'
                   : lang === 'hi'
@@ -777,7 +777,7 @@ const FormPage = () => {
 
             {/* Gender / Category (For Women Concession) */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 {lang === 'mr' ? 'अर्जदार प्रवर्ग / श्रेणी (Beneficiary Category):' : lang === 'hi' ? 'आवेदक श्रेणी (Gender / Beneficiary Category):' : 'Beneficiary Category:'}
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -804,7 +804,7 @@ const FormPage = () => {
 
             {/* Experience in Trade */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 {lang === 'mr' ? 'या व्यवसायातील कामाचा अनुभव:' : lang === 'hi' ? 'इस कार्य में अनुभव स्तर:' : 'Experience in this trade:'}
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -830,7 +830,7 @@ const FormPage = () => {
             {/* Geographic Location: State & District/Block */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {lang === 'mr' ? 'राज्य (State):' : lang === 'hi' ? 'राज्य (State):' : 'State:'}
                 </label>
                 <input
@@ -839,12 +839,12 @@ const FormPage = () => {
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                   placeholder={lang === 'mr' ? 'महाराष्ट्र, गुजरात, उत्तर प्रदेश, मध्यप्रदेश...' : 'Maharashtra, Gujarat, Uttar Pradesh, MP...'}
-                  className="w-full p-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91]"
+                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   {lang === 'mr' ? 'गाव / तालुका / जिल्हा (Village / Taluka / District):' : lang === 'hi' ? 'जिला / ब्लॉक / ग्राम पंचायत (Village / Block):' : 'Village / Block / District:'}
                 </label>
                 <input
@@ -853,7 +853,7 @@ const FormPage = () => {
                   value={formData.district}
                   onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                   placeholder={lang === 'mr' ? 'उदा: पुणे (बारामती तालुका) किंवा कोल्हापूर' : lang === 'hi' ? 'उदा: वाराणसी (चिरईगांव ब्लॉक)' : 'e.g. Pune (Baramati Taluka) / Varanasi'}
-                  className="w-full p-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91]"
+                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
                 />
               </div>
             </div>
@@ -862,7 +862,7 @@ const FormPage = () => {
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl flex items-center space-x-1.5 text-sm transition-colors"
+                className="px-5 py-2.5 border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center space-x-1.5 text-sm transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>{lang === 'mr' ? 'मागे' : lang === 'hi' ? 'पीछे' : 'Back'}</span>

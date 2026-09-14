@@ -116,16 +116,16 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Top Action Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-md card-hover-lift">
-        <div className="flex items-center space-x-2.5 text-[#0B3D91]">
-          <div className="p-2 rounded-xl bg-emerald-50 text-[#138808] border border-emerald-200 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md card-hover-lift transition-colors">
+        <div className="flex items-center space-x-2.5 text-[#0B3D91] dark:text-blue-400">
+          <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-[#138808] dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shadow-xs">
             <Award className="w-6 h-6" />
           </div>
           <div>
-            <span className="font-extrabold text-base sm:text-lg block text-slate-900 leading-tight">
+            <span className="font-extrabold text-base sm:text-lg block text-slate-900 dark:text-white leading-tight">
               {lang === 'mr' ? 'हायपर-लोकल व्यवसाय व्यवहार्यता व वित्तीय अहवाल' : lang === 'hi' ? 'हाइपर-लोकल व्यवसाय व्यवहार्यता एवं वित्तीय रिपोर्ट' : 'Hyper-Local Feasibility & Scheme Report'}
             </span>
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               {lang === 'mr' ? 'संस्थागत व्यावसायिक व सवलतीचे शासकीय कर्ज अहवाल' : lang === 'hi' ? 'संस्थागत स्तर की व्यावसायिक व वित्तीय रणनीति' : 'Enterprise Financial Advisory & Concessional Lending Report'}
             </span>
           </div>
@@ -139,17 +139,17 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
             className={`flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer ${
               isSpeaking
                 ? 'bg-amber-500 text-white animate-pulse shadow-md'
-                : 'bg-amber-50 text-amber-950 border border-amber-300 hover:bg-amber-100'
+                : 'bg-amber-50 dark:bg-amber-950/40 text-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/60'
             }`}
             title="Listen to advice"
           >
-            {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-amber-700" />}
+            {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-amber-700 dark:text-amber-400" />}
             <span>{isSpeaking ? (lang === 'mr' ? 'आवाज थांबवा' : lang === 'hi' ? 'आवाज रोकें' : 'Stop Audio') : (lang === 'mr' ? 'सल्ला ऐका' : lang === 'hi' ? 'सलाह सुनें' : 'Listen Voice')}</span>
           </button>
 
           <button
             onClick={onReset}
-            className="flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+            className="flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{lang === 'mr' ? 'नवीन अर्ज' : lang === 'hi' ? 'नया फॉर्म' : 'Start Over'}</span>
@@ -167,13 +167,13 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
       </div>
 
       {/* Module Navigation Tabs */}
-      <div className="flex items-center space-x-2 bg-slate-200/70 p-1.5 rounded-2xl border border-slate-300/60 max-w-xl">
+      <div className="flex items-center space-x-2 bg-slate-200/70 dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-300/60 dark:border-slate-700 max-w-xl transition-colors">
         <button
           onClick={() => setActiveTab('hyperlocal')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
             activeTab === 'hyperlocal'
-              ? 'bg-white text-[#0B3D91] shadow-md'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-700 text-[#0B3D91] dark:text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <Compass className="w-4 h-4 text-[#FF9933]" />
@@ -184,11 +184,11 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
           onClick={() => setActiveTab('financial')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
             activeTab === 'financial'
-              ? 'bg-white text-[#0B3D91] shadow-md'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-700 text-[#0B3D91] dark:text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <IndianRupee className="w-4 h-4 text-[#138808]" />
+          <IndianRupee className="w-4 h-4 text-[#138808] dark:text-emerald-400" />
           <span>{lang === 'mr' ? 'मॉड्यूल २: कर्ज व EMI' : lang === 'hi' ? 'मॉड्यूल 2: लोन संरचना व EMI' : 'Module 2: Scheme & Loan Math'}</span>
         </button>
 
@@ -196,31 +196,31 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
           onClick={() => setActiveTab('actionplan')}
           className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
             activeTab === 'actionplan'
-              ? 'bg-white text-[#0B3D91] shadow-md'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-white dark:bg-slate-700 text-[#0B3D91] dark:text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
-          <Layers className="w-4 h-4 text-purple-600" />
+          <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
           <span>{lang === 'mr' ? 'कृती आराखडा व रोडमॅप' : lang === 'hi' ? 'एक्शन प्लान व रोडमैप' : 'Action Roadmap'}</span>
         </button>
       </div>
 
       {/* Printable Report Container */}
-      <div ref={reportRef} className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-md space-y-6">
+      <div ref={reportRef} className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md space-y-6 transition-colors">
         
         {/* Certificate Style Official Banner */}
-        <div className="border-b-2 border-slate-200 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="border-b-2 border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div className="inline-flex items-center space-x-2 bg-blue-50 text-[#0B3D91] border border-blue-200 px-3 py-1 rounded-lg text-xs font-bold mb-2 shadow-2xs">
-              <Landmark className="w-4 h-4 text-[#0B3D91]" />
+            <div className="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-950/50 text-[#0B3D91] dark:text-blue-300 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-lg text-xs font-bold mb-2 shadow-2xs">
+              <Landmark className="w-4 h-4 text-[#0B3D91] dark:text-blue-400" />
               <span>{matched_scheme.agency || 'State Channelizing Agency (SCA)'}</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-amber-600 font-extrabold">{loan_structure.scheme_type}</span>
+              <span className="text-slate-300 dark:text-slate-600">•</span>
+              <span className="text-amber-600 dark:text-amber-400 font-extrabold">{loan_structure.scheme_type}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-[#0B3D91] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0B3D91] dark:text-blue-400 tracking-tight">
               {(lang === 'mr' || lang === 'hi') ? (matched_scheme.scheme_name_hi || matched_scheme.scheme_name) : matched_scheme.scheme_name}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl">
               {(lang === 'mr' || lang === 'hi') ? (matched_scheme.description_hi || matched_scheme.description) : matched_scheme.description}
             </p>
           </div>

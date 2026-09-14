@@ -208,16 +208,16 @@ const CalculatorPage = () => {
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8">
       
       {/* Header Banner */}
-      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 sm:p-8 rounded-2xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-colors">
         <div className="space-y-2">
-          <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 border border-blue-200/80 px-3 py-1 rounded-full text-xs font-bold">
-            <Coins className="w-3.5 h-3.5 text-blue-600" />
+          <div className="inline-flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200/80 dark:border-blue-800 px-3 py-1 rounded-full text-xs font-bold">
+            <Coins className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
             <span>{lang === 'mr' ? 'संस्थात्मक कर्ज रचना व योजना गणक' : lang === 'hi' ? 'स्मार्ट वित्तीय कैलकुलेटर एवं स्कीम राउटर' : 'Institutional Loan Structuring Engine'}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             {lang === 'mr' ? '१०% स्वभांडवल व ९०% शासकीय सवलतीचे कर्ज गणक' : lang === 'hi' ? '10% मार्जिन मनी एवं 90% लोन कैलकुलेटर' : '10% Margin Money & 90% Concessional Loan Calculator'}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
             {lang === 'mr'
               ? 'तुमच्याकडे उपलब्ध असलेले १०% भांडवल प्रविष्ट करा; हे इंजिन आपोआप एकूण संभाव्य प्रकल्प खर्च (भांडवल × १०), ९०% शासकीय कर्ज पात्रता, योग्य योजना आणि सवलतीसह त्रैमासिक हप्त्यांची अचूक गणना करेल.'
               : lang === 'hi'
@@ -235,16 +235,16 @@ const CalculatorPage = () => {
             setMoratoriumMonths(6);
             setIsWomenApplicant(false);
           }}
-          className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 transition-all flex-shrink-0"
+          className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 transition-all flex-shrink-0 cursor-pointer"
         >
-          <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+          <RotateCcw className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
           <span>{lang === 'mr' ? 'मूळ ₹१० लाख वर रीसेट करा' : lang === 'hi' ? 'डिफ़ॉल्ट ₹10L पर रीसेट करें' : 'Reset to Benchmark (₹10L)'}</span>
         </button>
       </div>
 
       {/* Preset Chips */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+      <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-2 transition-colors">
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
           {lang === 'mr' ? 'अधिकृत योजना पर्याय:' : lang === 'hi' ? 'सरकारी स्कीम प्रीसेट:' : 'Official Scheme Presets:'}
         </span>
         <div className="flex flex-wrap gap-2">
@@ -253,10 +253,10 @@ const CalculatorPage = () => {
               key={idx}
               type="button"
               onClick={() => applyPreset(p)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center space-x-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all flex items-center space-x-1.5 cursor-pointer ${
                 totalCost === p.cost
-                  ? 'bg-[#0B3D91] text-white border-[#0B3D91] shadow-sm'
-                  : 'bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#0B3D91] border-slate-200'
+                  ? 'bg-[#0B3D91] dark:bg-blue-600 text-white border-[#0B3D91] dark:border-blue-500 shadow-sm'
+                  : 'bg-slate-50 dark:bg-slate-800/80 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-[#0B3D91] dark:hover:text-blue-300 border-slate-200 dark:border-slate-700'
               }`}
             >
               <span>{lang === 'mr' ? p.labelMr : lang === 'hi' ? p.labelHi : p.label}</span>
@@ -270,27 +270,27 @@ const CalculatorPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: Interactive Controls (7 Cols) */}
-        <div className="lg:col-span-7 bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-md space-y-6">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-md space-y-6 transition-colors">
           
           <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center space-x-2">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
               <Layers className="w-5 h-5 text-[#FF9933]" />
               <span>{lang === 'mr' ? 'भांडवल व प्रकल्प खर्च मापदंड' : lang === 'hi' ? 'मार्जिन व प्रोजेक्ट लागत पैरामीटर' : 'Capital & Scheme Parameters'}</span>
             </h2>
 
             {/* Mode Toggle */}
-            <div className="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+            <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold">
               <button
                 type="button"
                 onClick={() => setCalcMode('margin')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${calcMode === 'margin' ? 'bg-white text-[#0B3D91] shadow-2xs' : 'text-slate-500'}`}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${calcMode === 'margin' ? 'bg-white dark:bg-slate-700 text-[#0B3D91] dark:text-white shadow-2xs' : 'text-slate-500 dark:text-slate-400'}`}
               >
                 {lang === 'mr' ? '१०% भांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}
               </button>
               <button
                 type="button"
                 onClick={() => setCalcMode('cost')}
-                className={`px-2.5 py-1 rounded-lg transition-all ${calcMode === 'cost' ? 'bg-white text-[#0B3D91] shadow-2xs' : 'text-slate-500'}`}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${calcMode === 'cost' ? 'bg-white dark:bg-slate-700 text-[#0B3D91] dark:text-white shadow-2xs' : 'text-slate-500 dark:text-slate-400'}`}
               >
                 {lang === 'mr' ? 'प्रकल्प खर्च' : lang === 'hi' ? 'प्रोजेक्ट लागत' : 'Project Cost'}
               </button>
@@ -298,13 +298,13 @@ const CalculatorPage = () => {
           </div>
 
           {/* Slider 1: Available Margin Capital (10%) */}
-          <div className="space-y-2 p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
+          <div className="space-y-2 p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 transition-colors">
             <div className="flex justify-between items-center">
-              <label className="text-xs sm:text-sm font-bold text-amber-950">
+              <label className="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-200">
                 {lang === 'mr' ? 'उपलब्ध स्वभांडवल (१०% Margin Capital):' : lang === 'hi' ? 'उपलब्ध मार्जिन पूंजी (Available Margin Capital):' : 'Available Margin Capital (10%):'}
               </label>
-              <div className="bg-white border border-amber-300 px-3 py-1 rounded-xl shadow-2xs">
-                <span className="text-base font-black text-amber-950">
+              <div className="bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 px-3 py-1 rounded-xl shadow-2xs">
+                <span className="text-base font-black text-amber-950 dark:text-amber-300">
                   ₹{marginInput.toLocaleString('en-IN')}
                 </span>
               </div>
@@ -316,9 +316,9 @@ const CalculatorPage = () => {
               step="5000"
               value={marginInput}
               onChange={(e) => handleMarginChange(e.target.value)}
-              className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#FF9933]"
+              className="w-full h-3 bg-slate-200 dark:bg-slate-700/80 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:accent-amber-400 dark:accent-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400/40 transition-all"
             />
-            <div className="flex justify-between text-[11px] text-amber-800 font-medium">
+            <div className="flex justify-between text-[11px] text-amber-800 dark:text-amber-300/80 font-medium">
               <span>₹10,000</span>
               <span>₹1,00,000 ({lang === 'mr' ? 'SIH उदाहरण' : lang === 'hi' ? 'SIH उदाहरण' : 'SIH Example'})</span>
               <span>₹2.5 {lang === 'mr' || lang === 'hi' ? 'लाख' : 'Lakh'}</span>
@@ -327,16 +327,16 @@ const CalculatorPage = () => {
           </div>
 
           {/* Slider 2: Feasible Total Project Cost */}
-          <div className="space-y-2 p-4 rounded-2xl bg-blue-50/60 border border-blue-200">
+          <div className="space-y-2 p-4 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 transition-colors">
             <div className="flex justify-between items-center">
-              <label className="text-xs sm:text-sm font-bold text-blue-950">
+              <label className="text-xs sm:text-sm font-bold text-blue-950 dark:text-blue-200">
                 {lang === 'mr' ? 'व्यवहार्य एकूण प्रकल्प खर्च (भांडवल / १०%):' : lang === 'hi' ? 'व्यवहार्य कुल प्रोजेक्ट लागत (Total Project Cost):' : 'Feasible Project Cost (Margin / 10%):'}
               </label>
-              <div className="bg-white border border-blue-300 px-3 py-1 rounded-xl shadow-2xs">
-                <span className="text-base font-black text-[#0B3D91]">
+              <div className="bg-white dark:bg-slate-800 border border-blue-300 dark:border-blue-700 px-3 py-1 rounded-xl shadow-2xs">
+                <span className="text-base font-black text-[#0B3D91] dark:text-blue-300">
                   ₹{totalCost.toLocaleString('en-IN')}
                 </span>
-                <span className="text-xs text-slate-500 ml-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400 ml-1">
                   ({(totalCost / 100000).toFixed(2)} {lang === 'mr' || lang === 'hi' ? 'लाख' : 'Lakh'})
                 </span>
               </div>
@@ -348,9 +348,9 @@ const CalculatorPage = () => {
               step="25000"
               value={totalCost}
               onChange={(e) => handleTotalCostChange(e.target.value)}
-              className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0B3D91]"
+              className="w-full h-3 bg-slate-200 dark:bg-slate-700/80 rounded-lg appearance-none cursor-pointer accent-blue-600 hover:accent-blue-500 dark:accent-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/40 transition-all"
             />
-            <div className="flex justify-between text-[11px] text-blue-800 font-medium">
+            <div className="flex justify-between text-[11px] text-blue-800 dark:text-blue-300/80 font-medium">
               <span>₹1.40L ({lang === 'mr' ? 'मायक्रो टियर' : lang === 'hi' ? 'माइक्रो टियर' : 'Micro Tier'})</span>
               <span>₹10.0L ({lang === 'mr' ? 'मुदत कर्ज' : lang === 'hi' ? 'टर्म टियर' : 'Term Tier'})</span>
               <span>₹25.0L</span>
@@ -359,7 +359,7 @@ const CalculatorPage = () => {
           </div>
 
           {/* Scheme Auto-Routing Banner */}
-          <div className="p-4 rounded-2xl bg-slate-900 text-white flex items-center justify-between shadow-md">
+          <div className="p-4 rounded-2xl bg-slate-900 dark:bg-slate-950 border border-slate-800 text-white flex items-center justify-between shadow-md">
             <div>
               <span className="text-[10px] uppercase font-extrabold text-[#FF9933] block">
                 {lang === 'mr' ? 'स्वयंचलित योजना निवड (AUTOMATIC SCHEME ROUTER)' : lang === 'hi' ? 'स्वचालित स्कीम चयन (AUTOMATIC ROUTER)' : 'AUTOMATIC SCHEME ROUTER'}
@@ -380,20 +380,20 @@ const CalculatorPage = () => {
           </div>
 
           {/* Women Rebate Toggle */}
-          <div className="p-4 bg-pink-50 border border-pink-200 rounded-2xl flex items-center justify-between">
+          <div className="p-4 bg-pink-50 dark:bg-pink-950/20 border border-pink-200 dark:border-pink-800/60 rounded-2xl flex items-center justify-between transition-colors">
             <div className="flex items-center space-x-3">
               <input
                 type="checkbox"
                 id="calcWomen"
                 checked={isWomenApplicant}
                 onChange={(e) => setIsWomenApplicant(e.target.checked)}
-                className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500"
+                className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500 cursor-pointer"
               />
-              <label htmlFor="calcWomen" className="text-xs sm:text-sm font-bold text-pink-950 cursor-pointer">
+              <label htmlFor="calcWomen" className="text-xs sm:text-sm font-bold text-pink-950 dark:text-pink-200 cursor-pointer">
                 {lang === 'mr' ? 'महिला उद्योजक / बचत गट (१% अतिरिक्त व्याज सवलत लागू करा)' : lang === 'hi' ? 'महिला उद्यमी / SHG (1% अतिरिक्त ब्याज छूट लागू करें)' : 'Women Beneficiary / SHG (Apply 1% Special Rebate)'}
               </label>
             </div>
-            <span className="text-xs font-bold text-pink-700 bg-white px-2.5 py-0.5 rounded-lg border border-pink-200">
+            <span className="text-xs font-bold text-pink-700 dark:text-pink-300 bg-white dark:bg-slate-800 px-2.5 py-0.5 rounded-lg border border-pink-200 dark:border-pink-800">
               -1.0% {lang === 'mr' ? 'सवलत' : lang === 'hi' ? 'छूट' : 'Rate'}
             </span>
           </div>
@@ -404,11 +404,11 @@ const CalculatorPage = () => {
         <div className="lg:col-span-5 space-y-6">
           
           {/* Main Card */}
-          <SpotlightCard className="bg-gradient-to-br from-[#0B3D91] via-[#072a66] to-[#041a3d] text-white p-6 sm:p-7 rounded-3xl shadow-xl border border-blue-500/30 space-y-4 card-glow-interactive relative overflow-hidden">
+          <SpotlightCard className="bg-gradient-to-br from-[#0B3D91] via-[#072a66] to-[#041a3d] dark:from-[#091b3b] dark:via-[#06152e] dark:to-[#030c1d] text-white p-6 sm:p-7 rounded-3xl shadow-2xl border border-blue-500/30 dark:border-blue-400/20 space-y-4 card-glow-interactive relative overflow-hidden transition-all">
             <BackgroundBeams />
             <div className="flex items-center justify-between text-blue-200 text-xs font-bold uppercase tracking-wider relative z-10">
               <span>{lang === 'mr' ? 'अंदाजे मासिक हप्ता (EMI)' : lang === 'hi' ? 'अनुमानित मासिक किश्त (EMI)' : 'Monthly Equated Installment'}</span>
-              <span className="bg-[#138808] text-white text-[10px] px-2.5 py-0.5 rounded-full font-black flex items-center gap-1">
+              <span className="bg-[#138808] text-white text-[10px] px-2.5 py-0.5 rounded-full font-black flex items-center gap-1 shadow-xs">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-radar"></span>
                 100% MATH
               </span>
@@ -416,7 +416,7 @@ const CalculatorPage = () => {
 
             <div className="relative z-10">
               <div className="text-4xl sm:text-5xl font-black text-white tracking-tight flex items-baseline space-x-1">
-                <span>₹{monthlyEMI.toLocaleString('en-IN')}</span>
+                <span className="tabular-nums">₹{monthlyEMI.toLocaleString('en-IN')}</span>
                 <span className="text-xs text-blue-200 font-normal">/{lang === 'mr' ? 'महिना' : lang === 'hi' ? 'माह' : 'mo'}</span>
               </div>
               <p className="text-xs text-blue-200 mt-1 font-medium">
@@ -434,28 +434,28 @@ const CalculatorPage = () => {
                 <span>{lang === 'mr' ? '१०% स्वभांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}: ₹{marginMoney.toLocaleString('en-IN')}</span>
                 <span>{lang === 'mr' ? '९०% शासकीय कर्ज' : lang === 'hi' ? '90% लोन' : '90% Loan'}: ₹{loanAmount.toLocaleString('en-IN')}</span>
               </div>
-              <div className="w-full h-3.5 bg-white/20 rounded-full overflow-hidden flex">
-                <div style={{ width: '10%' }} className="bg-[#FF9933] h-full" title="Margin"></div>
-                <div style={{ width: '90%' }} className="bg-emerald-400 h-full" title="Concessional Loan"></div>
+              <div className="w-full h-3.5 bg-white/20 rounded-full overflow-hidden flex shadow-inner">
+                <div style={{ width: '10%' }} className="bg-[#FF9933] h-full shadow-sm" title="Margin"></div>
+                <div style={{ width: '90%' }} className="bg-emerald-400 h-full shadow-sm" title="Concessional Loan"></div>
               </div>
             </div>
 
             {/* 3 Metrics */}
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 relative z-10">
-              <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
+              <div className="bg-white/10 dark:bg-white/5 p-3 rounded-xl backdrop-blur-xs border border-white/10">
                 <span className="text-[11px] text-blue-200 block font-medium">
                   {lang === 'mr' ? 'मंजूर ९०% शासकीय कर्ज' : lang === 'hi' ? 'स्वीकृत 90% लोन' : '90% Loan Disbursed'}
                 </span>
-                <span className="text-base font-black text-white">
+                <span className="text-base font-black text-white tabular-nums">
                   ₹{loanAmount.toLocaleString('en-IN')}
                 </span>
               </div>
 
-              <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
+              <div className="bg-white/10 dark:bg-white/5 p-3 rounded-xl backdrop-blur-xs border border-white/10">
                 <span className="text-[11px] text-blue-200 block font-medium">
                   {lang === 'mr' ? 'खेळते भांडवल (१८%)' : lang === 'hi' ? 'कार्यशील पूंजी (18%)' : 'Working Capital (18%)'}
                 </span>
-                <span className="text-base font-black text-amber-300">
+                <span className="text-base font-black text-amber-300 tabular-nums">
                   ₹{workingCapital.toLocaleString('en-IN')}
                 </span>
               </div>
@@ -473,7 +473,7 @@ const CalculatorPage = () => {
                   }
                 });
               }}
-              className="w-full py-3.5 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center space-x-2 mt-4 relative z-10"
+              className="w-full py-3.5 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center space-x-2 mt-4 relative z-10 cursor-pointer shadow-lg hover:shadow-xl transition-all"
             >
               <span>{lang === 'mr' ? 'संपूर्ण व्यवसाय अहवाल तयार करा' : lang === 'hi' ? 'पूर्ण व्यवहार्यता रिपोर्ट तैयार करें' : 'Generate Full Feasibility Report'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -485,11 +485,11 @@ const CalculatorPage = () => {
       </div>
 
       {/* Quarterly Amortization Table */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden">
-        <div className="p-5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-[#0B3D91]">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-md overflow-hidden transition-colors">
+        <div className="p-5 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <div className="flex items-center space-x-2 text-[#0B3D91] dark:text-blue-400">
             <FileSpreadsheet className="w-5 h-5 text-[#FF9933]" />
-            <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
+            <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
               {lang === 'mr' 
                 ? `त्रैमासिक हप्ता परतफेड तपशील (${moratoriumMonths} महिने सवलत कालावधीसह)` 
                 : lang === 'hi' 
@@ -497,7 +497,7 @@ const CalculatorPage = () => {
                 : `Quarterly Repayment Schedule (${moratoriumMonths}-Month Moratorium Period Factored)`}
             </h3>
           </div>
-          <span className="text-xs bg-[#0B3D91] text-white px-3 py-1 rounded-full font-bold">
+          <span className="text-xs bg-[#0B3D91] dark:bg-blue-600 text-white px-3 py-1 rounded-full font-bold">
             {tenureYears} {lang === 'mr' ? 'वर्षे' : lang === 'hi' ? 'वर्ष' : 'Years'} ({tenureYears * 4} {lang === 'mr' ? 'तिमाही हप्ते' : lang === 'hi' ? 'किश्तें' : 'Quarters'})
           </span>
         </div>
@@ -505,26 +505,33 @@ const CalculatorPage = () => {
         <div className="p-5 overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-[#0B3D91] text-white">
-                <th className="p-3 font-bold rounded-l">{lang === 'mr' ? 'तिमाही (हप्ता)' : lang === 'hi' ? 'तिमाही (Quarter)' : 'Quarter'}</th>
-                <th className="p-3 font-bold">{lang === 'mr' ? 'कालावधी (महिने)' : lang === 'hi' ? 'अवधि' : 'Months'}</th>
-                <th className="p-3 font-bold">{lang === 'mr' ? 'एकूण हप्ता' : lang === 'hi' ? 'किश्त राशि' : 'Installment Paid'}</th>
-                <th className="p-3 font-bold">{lang === 'mr' ? 'भरलेले मुद्दल' : lang === 'hi' ? 'मूलधन' : 'Principal'}</th>
-                <th className="p-3 font-bold">{lang === 'mr' ? 'व्याज' : lang === 'hi' ? 'ब्याज' : 'Interest'}</th>
-                <th className="p-3 font-bold rounded-r">{lang === 'mr' ? 'शिल्लक कर्ज' : lang === 'hi' ? 'बकाया लोन' : 'Closing Balance'}</th>
+              <tr className="bg-gradient-to-r from-blue-900 to-indigo-950 dark:from-slate-800 dark:to-slate-850 text-white">
+                <th className="p-3.5 font-bold rounded-l-xl">{lang === 'mr' ? 'तिमाही (हप्ता)' : lang === 'hi' ? 'तिमाही (Quarter)' : 'Quarter'}</th>
+                <th className="p-3.5 font-bold">{lang === 'mr' ? 'कालावधी (महिने)' : lang === 'hi' ? 'अवधि' : 'Months'}</th>
+                <th className="p-3.5 font-bold">{lang === 'mr' ? 'एकूण हप्ता' : lang === 'hi' ? 'किश्त राशि' : 'Installment Paid'}</th>
+                <th className="p-3.5 font-bold">{lang === 'mr' ? 'भरलेले मुद्दल' : lang === 'hi' ? 'मूलधन' : 'Principal'}</th>
+                <th className="p-3.5 font-bold">{lang === 'mr' ? 'व्याज' : lang === 'hi' ? 'ब्याज' : 'Interest'}</th>
+                <th className="p-3.5 font-bold rounded-r-xl">{lang === 'mr' ? 'शिल्लक कर्ज' : lang === 'hi' ? 'बकाया लोन' : 'Closing Balance'}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-medium">
               {amortizationSchedule.map((row) => (
-                <tr key={row.quarter} className={row.isMor ? "bg-amber-50/70 font-semibold" : "hover:bg-slate-50"}>
-                  <td className="p-3 font-bold text-[#0B3D91]">
-                    Q{row.quarter} {row.isMor && <span className="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded ml-1 font-bold">{lang === 'mr' ? 'सवलत' : lang === 'hi' ? 'मोरेटोरियम' : 'Moratorium'}</span>}
+                <tr 
+                  key={row.quarter} 
+                  className={`transition-colors tabular-nums ${
+                    row.isMor 
+                      ? "bg-amber-50/80 dark:bg-amber-950/30 font-semibold border-b border-amber-200/50 dark:border-amber-900/40" 
+                      : "odd:bg-white even:bg-slate-50/50 dark:odd:bg-slate-900 dark:even:bg-slate-800/30 hover:bg-blue-50/70 dark:hover:bg-blue-950/30"
+                  }`}
+                >
+                  <td className="p-3.5 font-bold text-[#0B3D91] dark:text-blue-400">
+                    Q{row.quarter} {row.isMor && <span className="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded-md ml-1 font-bold shadow-2xs">{lang === 'mr' ? 'सवलत' : lang === 'hi' ? 'मोरेटोरियम' : 'Moratorium'}</span>}
                   </td>
-                  <td className="p-3 text-slate-600">{row.label}</td>
-                  <td className="p-3 font-extrabold text-slate-900">₹{row.installment.toLocaleString('en-IN')}</td>
-                  <td className="p-3 text-emerald-700">₹{row.principalPaid.toLocaleString('en-IN')}</td>
-                  <td className="p-3 text-amber-700">₹{row.interestPaid.toLocaleString('en-IN')}</td>
-                  <td className="p-3 text-slate-800 font-black">₹{row.closingBalance.toLocaleString('en-IN')}</td>
+                  <td className="p-3.5 text-slate-600 dark:text-slate-300">{row.label}</td>
+                  <td className="p-3.5 font-extrabold text-slate-900 dark:text-white">₹{row.installment.toLocaleString('en-IN')}</td>
+                  <td className="p-3.5 text-emerald-700 dark:text-emerald-400 font-semibold">₹{row.principalPaid.toLocaleString('en-IN')}</td>
+                  <td className="p-3.5 text-amber-700 dark:text-amber-300 font-semibold">₹{row.interestPaid.toLocaleString('en-IN')}</td>
+                  <td className="p-3.5 text-slate-800 dark:text-slate-200 font-black">₹{row.closingBalance.toLocaleString('en-IN')}</td>
                 </tr>
               ))}
             </tbody>

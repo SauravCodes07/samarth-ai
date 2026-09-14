@@ -203,24 +203,24 @@ const Home = () => {
 
             {/* Right Column: Interactive 30-Second Quick Estimator Card */}
             <div className="lg:col-span-5">
-              <SpotlightCard className="bg-white/95 backdrop-blur-md text-slate-900 p-6 sm:p-7 shadow-2xl border border-slate-200 card-glow-interactive animate-fadeIn">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+              <SpotlightCard className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-900 dark:text-white p-6 sm:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 card-glow-interactive animate-fadeIn transition-colors">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 mb-5">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">
+                    <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 tracking-wider">
                       {lang === 'mr' ? 'त्वरित आर्थिक अंदाज' : lang === 'hi' ? 'त्वरित वित्तीय अनुमान' : 'Instant 30-Sec Calculator'}
                     </span>
-                    <h3 className="text-base font-black text-slate-900">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white">
                       {lang === 'mr' ? '१०% भांडवलावर कर्ज तपासा' : lang === 'hi' ? '10% मार्जिन पर लोन देखें' : 'See What 10% Margin Unlocks'}
                     </h3>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-xs">
                     <Calculator className="w-5 h-5" />
                   </div>
                 </div>
 
                 {/* Trade Selector */}
                 <div className="space-y-2 mb-4">
-                  <label className="block text-xs font-bold text-slate-700">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                     {lang === 'mr' ? '१. प्रस्तावित व्यवसाय निवडा:' : lang === 'hi' ? '1. प्रस्तावित व्यवसाय चुनें:' : '1. Select Business Trade:'}
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -235,10 +235,10 @@ const Home = () => {
                             setSelectedTrade(t.id);
                             setProjectCost(t.cost);
                           }}
-                          className={`flex items-center space-x-2 p-2 rounded-xl text-xs font-bold transition-all border text-left ${
+                          className={`flex items-center space-x-2 p-2 rounded-xl text-xs font-bold transition-all border text-left cursor-pointer ${
                             isSel
                               ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                              : 'bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
                           }`}
                         >
                           <Icon className="w-4 h-4 shrink-0" />
@@ -252,10 +252,10 @@ const Home = () => {
                 {/* Budget Slider */}
                 <div className="space-y-2 mb-5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-700">
+                    <span className="font-bold text-slate-700 dark:text-slate-300">
                       {lang === 'mr' ? '२. एकूण प्रकल्प खर्च:' : lang === 'hi' ? '2. कुल प्रोजेक्ट लागत:' : '2. Total Project Cost:'}
                     </span>
-                    <span className="font-black text-blue-700 text-sm">{formatINR(projectCost)}</span>
+                    <span className="font-black text-blue-700 dark:text-blue-400 text-sm">{formatINR(projectCost)}</span>
                   </div>
                   <input
                     type="range"
@@ -264,9 +264,9 @@ const Home = () => {
                     step="25000"
                     value={projectCost}
                     onChange={(e) => setProjectCost(Number(e.target.value))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                    className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+                  <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
                     <span>₹50,000</span>
                     <span>₹5,00,000</span>
                     <span>₹15,00,000</span>
@@ -274,39 +274,39 @@ const Home = () => {
                 </div>
 
                 {/* Calculation Output Box */}
-                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
+                <div className="bg-slate-50 dark:bg-slate-800/70 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-600">
+                    <span className="text-slate-600 dark:text-slate-400">
                       {lang === 'mr' ? 'आपले १०% स्वतःचे भांडवल:' : lang === 'hi' ? 'आपकी 10% मार्जिन पूंजी:' : 'Your 10% Margin Money:'}
                     </span>
-                    <span className="font-black text-emerald-700 text-sm">{formatINR(marginRequired)}</span>
+                    <span className="font-black text-emerald-700 dark:text-emerald-400 text-sm">{formatINR(marginRequired)}</span>
                   </div>
 
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-600">
+                    <span className="text-slate-600 dark:text-slate-400">
                       {lang === 'mr' ? 'सरकारी बँक कर्ज (९०%):' : lang === 'hi' ? 'सरकारी बैंक लोन (90%):' : 'Govt Bank Loan (90%):'}
                     </span>
-                    <span className="font-black text-blue-700 text-sm">{formatINR(loanEligible)}</span>
+                    <span className="font-black text-blue-700 dark:text-blue-400 text-sm">{formatINR(loanEligible)}</span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs border-t border-slate-200/80 pt-2">
+                  <div className="flex items-center justify-between text-xs border-t border-slate-200/80 dark:border-slate-700 pt-2">
                     <div>
-                      <span className="text-slate-500 block text-[10px]">
+                      <span className="text-slate-500 dark:text-slate-400 block text-[10px]">
                         {lang === 'mr' ? 'सवलतीचा व्याजदर' : lang === 'hi' ? 'रियायती ब्याज' : 'Interest Rate'}
                       </span>
-                      <span className="font-bold text-slate-900">{estimatedRate}% p.a.</span>
+                      <span className="font-bold text-slate-900 dark:text-white">{estimatedRate}% p.a.</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block text-[10px]">
+                      <span className="text-slate-500 dark:text-slate-400 block text-[10px]">
                         {lang === 'mr' ? 'हप्ता सवलत (मोरेटोरियम)' : lang === 'hi' ? 'मोरेटोरियम छूट' : 'Moratorium'}
                       </span>
-                      <span className="font-bold text-amber-700">6 {lang === 'mr' ? 'महिने' : lang === 'hi' ? 'माह' : 'Months'}</span>
+                      <span className="font-bold text-amber-700 dark:text-amber-400">6 {lang === 'mr' ? 'महिने' : lang === 'hi' ? 'माह' : 'Months'}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-slate-500 block text-[10px]">
+                      <span className="text-slate-500 dark:text-slate-400 block text-[10px]">
                         {lang === 'mr' ? 'अंदाजे मासिक हप्ता' : lang === 'hi' ? 'अनुमानित EMI' : 'Monthly EMI'}
                       </span>
-                      <span className="font-black text-slate-900">{formatINR(estimatedEmi)}</span>
+                      <span className="font-black text-slate-900 dark:text-white">{formatINR(estimatedEmi)}</span>
                     </div>
                   </div>
                 </div>
@@ -334,10 +334,10 @@ const Home = () => {
           <span className="text-xs font-black uppercase tracking-wider text-blue-600 bg-blue-50 border border-blue-200/80 px-3 py-1 rounded-full">
             {lang === 'mr' ? 'नवीन वापरकर्त्यांसाठी सोपे मार्गदर्शक' : lang === 'hi' ? 'नए उपयोगकर्ताओं हेतु सरल मार्गदर्शक' : 'New to Samarth AI? Start Here'}
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-3">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-3">
             {lang === 'mr' ? '३ सोप्या टप्प्यांत सरकारी कर्ज मिळवा' : lang === 'hi' ? '3 सरल चरणों में सरकारी लोन व रिपोर्ट पाएं' : 'How It Works in 3 Simple Steps'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             {lang === 'mr' 
               ? 'कोणत्याही एजंट किंवा दलालाशिवाय थेट अधिकृत पोर्टलवरून मार्गदर्शन मिळवा' 
               : lang === 'hi' 
@@ -349,20 +349,20 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           
           {/* Step 1 */}
-          <SpotlightCard className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
+          <SpotlightCard className="bg-white dark:bg-slate-900/80 p-7 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                   1
                 </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
                   {lang === 'mr' ? 'प्रारंभ' : lang === 'hi' ? 'शुरुआत' : 'Start'}
                 </span>
               </div>
-              <h3 className="text-lg font-extrabold text-slate-900 mb-2">
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mb-2">
                 {lang === 'mr' ? '१. व्यवसाय व कल्पना निवडा' : lang === 'hi' ? '1. व्यवसाय व ट्रेड चुनें' : '1. Choose Your Trade'}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                 {lang === 'mr' 
                   ? 'डेअरी फार्म, किराणा दुकान, शिलाई बुटीक, ई-रिक्षा किंवा सोलर यापैकी आपला पसंतीचा व्यवसाय निवडा किंवा आवाजाने सांगा.' 
                   : lang === 'hi' 
@@ -370,27 +370,27 @@ const Home = () => {
                   : 'Select from high-demand rural trades like Dairy, Kirana, Tailoring, or Transport—or use our voice input.'}
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600">
+            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
               <span>{lang === 'mr' ? 'आवाजाने किंवा १-क्लिकमध्ये' : lang === 'hi' ? 'बोलकर या 1-क्लिक में' : 'Voice-enabled or 1-click'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </SpotlightCard>
 
           {/* Step 2 */}
-          <SpotlightCard className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-300 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
+          <SpotlightCard className="bg-white dark:bg-slate-900/80 p-7 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-amber-300 dark:hover:border-amber-700 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                   2
                 </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
                   {lang === 'mr' ? '१०% भांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}
                 </span>
               </div>
-              <h3 className="text-lg font-extrabold text-slate-900 mb-2">
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mb-2">
                 {lang === 'mr' ? '२. स्वतःचे १०% भांडवल टाका' : lang === 'hi' ? '2. 10% उपलब्ध मार्जिन डालें' : '2. Enter Your 10% Margin'}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                 {lang === 'mr' 
                   ? 'आपल्याकडे असलेली बचत प्रविष्ट करा. आमचे अल्गोरिदम त्यावरून ९०% सरकारी कर्ज आणि अचूक हप्ता (EMI) काढते.' 
                   : lang === 'hi' 
@@ -398,27 +398,27 @@ const Home = () => {
                   : 'Enter your savings. Our deterministic engine calculates your 90% government loan eligibility and 4%–8% interest rate.'}
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
+            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-amber-700 dark:text-amber-400">
               <span>{lang === 'mr' ? '६ महिने हप्ता सवलत समाविष्ट' : lang === 'hi' ? '6 माह मोरेटोरियम शामिल' : 'Includes 6-month moratorium'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </SpotlightCard>
 
           {/* Step 3 */}
-          <SpotlightCard className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
+          <SpotlightCard className="bg-white dark:bg-slate-900/80 p-7 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-emerald-300 dark:hover:border-emerald-700 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                   3
                 </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
                   {lang === 'mr' ? 'बँक DPR' : lang === 'hi' ? 'बैंक DPR' : 'Bank DPR'}
                 </span>
               </div>
-              <h3 className="text-lg font-extrabold text-slate-900 mb-2">
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mb-2">
                 {lang === 'mr' ? '३. बँक-योग्य DPR अहवाल मिळवा' : lang === 'hi' ? '3. बैंक-योग्य DPR रिपोर्ट पाएं' : '3. Get Bank-Ready DPR'}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
                 {lang === 'mr' 
                   ? 'जिल्हा उद्योग केंद्र (DIC) किंवा बँकेत सादर करण्यासाठी अधिकृत प्रकल्प अहवाल (DPR) आणि अर्ज मार्गदर्शक डाऊनलोड करा.' 
                   : lang === 'hi' 
@@ -426,7 +426,7 @@ const Home = () => {
                   : 'Download your official Detailed Project Report (DPR) with SWOT analysis and step-by-step JanSamarth application guide.'}
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
+            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-700 dark:text-emerald-400">
               <span>{lang === 'mr' ? '१००% मोफत व प्रमाणित' : lang === 'hi' ? '100% निःशुल्क व सत्यापित' : '100% Free & Verified'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
