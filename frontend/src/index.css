@@ -1,138 +1,117 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --primary-gov: #0B3D91;
-  --primary-gov-hover: #082d6b;
-  --accent-saffron: #FF9933;
-  --accent-green: #138808;
-  --bg-offwhite: #F8FAFC;
-  --card-white: #FFFFFF;
-  --text-charcoal: #0F172A;
+  --font-sans: 'Plus Jakarta Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --primary: #0F172A;
+  --primary-accent: #2563EB;
+  --primary-hover: #1D4ED8;
+  --success: #059669;
+  --warning: #D97706;
+  --surface: #FFFFFF;
+  --surface-subtle: #F8FAFC;
+  --surface-border: #E2E8F0;
+  --text-main: #0F172A;
   --text-muted: #64748B;
-  --border-light: #E2E8F0;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Noto Sans', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #F8FAFC;
+  font-family: var(--font-sans);
+  background-color: #FAFCFE;
   color: #0F172A;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.6;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* Glassmorphism & Modern Shadows */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+/* Subtle Grid & Dot Patterns */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(226, 232, 240, 0.45) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.45) 1px, transparent 1px);
 }
 
-.glass-dark {
-  background: rgba(11, 61, 145, 0.92);
+.bg-dots-pattern {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Premium Surface Glass Cards */
+.card-premium {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.05);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-premium:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  transform: translateY(-2px);
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
-.glow-orange {
-  box-shadow: 0 0 25px rgba(255, 153, 51, 0.45);
+/* Clean Accent Gradient Texts */
+.text-gradient-primary {
+  background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #2563EB 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.glow-blue {
-  box-shadow: 0 0 30px rgba(11, 61, 145, 0.35);
+.text-gradient-emerald {
+  background: linear-gradient(135deg, #065F46 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.glow-green {
-  box-shadow: 0 0 25px rgba(19, 136, 8, 0.35);
+.text-gradient-amber {
+  background: linear-gradient(135deg, #92400E 0%, #D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Premium Card Hover Lift */
-.card-hover-lift {
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+/* Smooth Pulse & Micro Animations */
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.02); }
 }
 
-.card-hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.08), 0 8px 16px -6px rgba(15, 23, 42, 0.04);
+.animate-subtle-pulse {
+  animation: subtle-pulse 6s ease-in-out infinite;
 }
 
-/* Animated Shimmer for Badges */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@keyframes mic-wave {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+  70% { box-shadow: 0 0 0 16px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
 }
 
-.animate-shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2.5s infinite;
+.animate-mic-wave {
+  animation: mic-wave 1.5s infinite;
 }
 
-/* Subtle Gradient Glow Animation */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50% { opacity: 0.95; transform: scale(1.02); }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 4s ease-in-out infinite;
-}
-
-/* Pulse animation for voice assistant mic */
-@keyframes mic-pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 153, 51, 0.8);
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.06);
-  }
-  70% {
-    box-shadow: 0 0 0 22px rgba(255, 153, 51, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 153, 51, 0);
-    transform: scale(1);
-  }
-}
-
-.animate-mic-pulse {
-  animation: mic-pulse 1.4s infinite;
-}
-
-/* Smooth fadeIn animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Custom Scrollbars */
+/* Custom Clean Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #F8FAFC;
 }
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;

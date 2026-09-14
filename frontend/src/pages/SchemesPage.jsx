@@ -493,38 +493,37 @@ const SchemesPage = () => {
     <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
 
       {/* Hero Header */}
-      <div className="bg-gradient-to-r from-[#0B3D91] via-[#104eab] to-[#1E3A8A] text-white p-6 sm:p-8 rounded-2xl shadow-lg relative overflow-hidden">
-        <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-72 h-72 bg-white/5 rounded-full pointer-events-none blur-2xl" />
-        
-        <div className="max-w-3xl space-y-3 relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-amber-300 border border-white/10">
-            <Landmark className="w-3.5 h-3.5 text-[#FF9933]" />
-            <span>MyScheme.gov.in & NSFDC Central + State Scheme Repository</span>
+      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xs">
+        <div className="max-w-3xl space-y-3">
+          <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold text-blue-700 border border-blue-200/80">
+            <Building2 className="w-3.5 h-3.5 text-blue-600" />
+            <span>Central & State Concessional Lending Directory</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
             {lang === 'hi' ? 'सरकारी योजना डायरेक्टरी' : 'Government Schemes Directory'}
           </h1>
 
-          <p className="text-xs sm:text-sm text-blue-100 font-medium leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
             {lang === 'hi'
-              ? 'व्यापार, कृषि, MSME, महिला उद्यमिता और स्वरोजगार के लिए भारत सरकार व राज्य सरकारों की 2,700+ वास्तविक योजनाएं।'
-              : 'Explore over 2,700+ live verified central and state government schemes for MSMEs, agriculture, women entrepreneurs, and rural businesses.'}
+              ? 'व्यापार, कृषि, MSME, महिला उद्यमिता और स्वरोजगार के लिए भारत सरकार व राज्य सरकारों की वास्तविक योजनाएं।'
+              : 'Explore verified central and state government schemes for MSMEs, agriculture, women entrepreneurs, and rural businesses.'}
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-semibold">
-            <span className="bg-white/20 px-3 py-1 rounded-lg text-white">
-              🏢 {(filterOptions.total_active_schemes || 2705).toLocaleString()} {lang === 'hi' ? 'कुल योजनाएं' : 'Total Schemes'}
+          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-semibold">
+            <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-700 border border-slate-200/80">
+              🏢 {(filterOptions.total_active_schemes || 11).toLocaleString()} {lang === 'hi' ? 'कुल योजनाएं' : 'Total Schemes'}
             </span>
-            <span className="bg-white/20 px-3 py-1 rounded-lg text-white">
-              🗺️ 38 {lang === 'hi' ? 'राज्य व केंद्र शासित प्रदेश' : 'States & UTs'}
+            <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-700 border border-slate-200/80">
+              🗺️ All India & State Specific
             </span>
-            <span className="bg-white/20 px-3 py-1 rounded-lg text-white">
-              💰 3% - 8% {lang === 'hi' ? 'रियायती ब्याज दर' : 'Subsidized Interest Rates'}
+            <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-200">
+              💰 4% – 8.5% {lang === 'hi' ? 'रियायती ब्याज दर' : 'Subsidized Interest Rates'}
             </span>
           </div>
         </div>
       </div>
+
 
       {/* Filter Control Box */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">

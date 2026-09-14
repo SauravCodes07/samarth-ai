@@ -126,10 +126,11 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
               {lang === 'hi' ? 'हाइपर-लोकल व्यवसाय व्यवहार्यता एवं वित्तीय रिपोर्ट' : 'Hyper-Local Feasibility & Scheme Report'}
             </span>
             <span className="text-xs text-slate-500 font-medium">
-              {lang === 'hi' ? 'SIH 2026 समाधान — संस्थागत स्तर की बिजनेस एडवाइजरी' : 'SIH 2026 Solution — Institutional Grade Advisory'}
+              {lang === 'hi' ? 'संस्थागत स्तर की व्यावसायिक व वित्तीय रणनीति' : 'Enterprise Financial Advisory & Concessional Lending Report'}
             </span>
           </div>
         </div>
+
 
         <div className="flex items-center space-x-2.5">
           {/* Audio Playback */}
@@ -205,7 +206,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
       </div>
 
       {/* Printable Report Container */}
-      <div ref={reportRef} className="bg-white p-6 sm:p-8 rounded-3xl border-2 border-[#0B3D91] shadow-xl space-y-6">
+      <div ref={reportRef} className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-md space-y-6">
         
         {/* Certificate Style Official Banner */}
         <div className="border-b-2 border-slate-200 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

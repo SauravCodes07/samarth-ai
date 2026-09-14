@@ -169,16 +169,16 @@ const CalculatorPage = () => {
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 space-y-8">
       
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-[#0B3D91] via-[#072a66] to-[#041a3d] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 card-hover-lift">
+      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center space-x-2 bg-white/10 text-[#FF9933] px-3.5 py-1 rounded-full text-xs font-black backdrop-blur-md">
-            <Coins className="w-4 h-4" />
-            <span>{lang === 'hi' ? 'SIH 2026 स्मार्ट वित्तीय कैलकुलेटर एवं स्कीम राउटर' : 'SIH 2026 Scheme Router & Margin Calculator'}</span>
+          <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 border border-blue-200/80 px-3 py-1 rounded-full text-xs font-bold">
+            <Coins className="w-3.5 h-3.5 text-blue-600" />
+            <span>{lang === 'hi' ? 'स्मार्ट वित्तीय कैलकुलेटर एवं स्कीम राउटर' : 'Institutional Loan Structuring Engine'}</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight">
-            {lang === 'hi' ? '10% मार्जिन मनी एवं 90% लोन कैलकुलेटर' : '10% Margin Money & 90% Loan Structuring'}
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            {lang === 'hi' ? '10% मार्जिन मनी एवं 90% लोन कैलकुलेटर' : '10% Margin Money & 90% Concessional Loan Calculator'}
           </h1>
-          <p className="text-xs sm:text-sm text-blue-100/90 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
             {lang === 'hi'
               ? 'अपनी उपलब्ध 10% पूंजी दर्ज करें; सिस्टम स्वचालित रूप से अधिकतम प्रोजेक्ट लागत (पूंजी/10%), 90% लोन पात्रता और मोरेटोरियम सहित त्रैमासिक किश्तों की गणना करेगा।'
               : 'Enter your available margin money; the engine calculates total feasible project cost, 90% loan eligibility, scheme routing, and quarterly repayment obligations with moratorium.'}
@@ -194,17 +194,17 @@ const CalculatorPage = () => {
             setMoratoriumMonths(6);
             setIsWomenApplicant(false);
           }}
-          className="flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-white/20 transition-all flex-shrink-0"
+          className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 transition-all flex-shrink-0"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>{lang === 'hi' ? 'डिफ़ॉल्ट ₹10L पर रीसेट करें' : 'Reset to Default (₹10L)'}</span>
+          <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+          <span>{lang === 'hi' ? 'डिफ़ॉल्ट ₹10L पर रीसेट करें' : 'Reset to Benchmark (₹10L)'}</span>
         </button>
       </div>
 
       {/* Preset Chips */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-          {lang === 'hi' ? '⚡ SIH 2026 सरकारी स्कीम प्रीसेट:' : '⚡ Official Scheme Norms Presets:'}
+          {lang === 'hi' ? 'सरकारी स्कीम प्रीसेट:' : 'Official Scheme Presets:'}
         </span>
         <div className="flex flex-wrap gap-2">
           {presets.map((p, idx) => (

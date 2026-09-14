@@ -206,15 +206,15 @@ const FormPage = () => {
     <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-6">
       
       {/* Step Indicator */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm transition-all ${
-              step >= 1 ? 'bg-[#0B3D91] text-white shadow-md' : 'bg-slate-200 text-slate-600'
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
+              step >= 1 ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'
             }`}>
               1
             </div>
-            <span className={`text-xs sm:text-sm font-bold ${step === 1 ? 'text-[#0B3D91]' : 'text-slate-500'}`}>
+            <span className={`text-xs sm:text-sm font-semibold ${step === 1 ? 'text-blue-700' : 'text-slate-600'}`}>
               {lang === 'hi' ? 'व्यवसाय का चयन' : 'Trade Category'}
             </span>
           </div>
@@ -222,42 +222,42 @@ const FormPage = () => {
           <div className="h-0.5 w-8 sm:w-16 bg-slate-200"></div>
 
           <div className="flex items-center space-x-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm transition-all ${
-              step >= 2 ? 'bg-[#0B3D91] text-white shadow-md' : 'bg-slate-200 text-slate-600'
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
+              step >= 2 ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'
             }`}>
               2
             </div>
-            <span className={`text-xs sm:text-sm font-bold ${step === 2 ? 'text-[#0B3D91]' : 'text-slate-500'}`}>
-              {lang === 'hi' ? '10% मार्जिन पूंजी (बजट)' : 'Margin Capital (10%)'}
+            <span className={`text-xs sm:text-sm font-semibold ${step === 2 ? 'text-blue-700' : 'text-slate-600'}`}>
+              {lang === 'hi' ? '10% मार्जिन पूंजी' : 'Margin Budget (10%)'}
             </span>
           </div>
 
           <div className="h-0.5 w-8 sm:w-16 bg-slate-200"></div>
 
           <div className="flex items-center space-x-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm transition-all ${
-              step >= 3 ? 'bg-[#0B3D91] text-white shadow-md' : 'bg-slate-200 text-slate-600'
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${
+              step >= 3 ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-500'
             }`}>
               3
             </div>
-            <span className={`text-xs sm:text-sm font-bold ${step === 3 ? 'text-[#0B3D91]' : 'text-slate-500'}`}>
-              {lang === 'hi' ? 'स्थान व प्रोफाइल' : 'Local Profile'}
+            <span className={`text-xs sm:text-sm font-semibold ${step === 3 ? 'text-blue-700' : 'text-slate-600'}`}>
+              {lang === 'hi' ? 'स्थान व प्रोफाइल' : 'Profile & Location'}
             </span>
           </div>
         </div>
       </div>
 
       {/* Voice Assistant Strip */}
-      <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-300 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+      <div className="bg-white border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center space-x-3 text-center sm:text-left">
-          <div className="p-2.5 bg-[#FF9933]/20 rounded-xl text-amber-900 flex-shrink-0">
-            <Sparkles className="w-5 h-5 text-[#FF9933]" />
+          <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <h4 className="font-extrabold text-sm text-slate-900">
+            <h4 className="font-bold text-sm text-slate-900">
               {lang === 'hi' ? 'आवाज से बोलकर फॉर्म भरें (Voice Assistant)' : 'Voice-Enabled Form Input (Web Speech API)'}
             </h4>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-slate-500">
               {lang === 'hi'
                 ? 'उदा: "मेरे पास 1 लाख रुपये हैं, मुझे डेयरी फार्म शुरू करना है"'
                 : 'e.g. "I have 1 Lakh margin money, want to start a Dairy Farm"'}
@@ -266,6 +266,7 @@ const FormPage = () => {
         </div>
         <MicButton onTranscript={handleVoiceTranscript} />
       </div>
+
 
       {error && (
         <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs sm:text-sm flex items-center space-x-2">

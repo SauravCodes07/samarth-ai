@@ -1,11 +1,10 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   Calculator, 
   Sparkles, 
   ShieldCheck, 
-  CheckCircle2, 
   ArrowRight, 
   Store, 
   Milk, 
@@ -13,374 +12,472 @@ import {
   Truck, 
   SunMedium, 
   Sprout,
-  Landmark,
-  BadgePercent,
-  Compass,
-  PieChart,
-  Users,
-  Award,
-  Zap,
-  Check
+  Building2,
+  CheckCircle2,
+  TrendingUp,
+  Percent,
+  Calendar,
+  Layers,
+  MapPin,
+  ChevronRight,
+  BarChart3,
+  FileCheck
 } from 'lucide-react';
 
 const Home = () => {
   const { lang } = useLanguage();
+  const navigate = useNavigate();
+
+  // Quick interactive estimator state
+  const [projectCost, setProjectCost] = useState(200000); // 2 Lakhs default
+
+  const marginRequired = Math.round(projectCost * 0.10);
+  const loanEligible = Math.round(projectCost * 0.90);
+
+  // Interest rate estimation
+  let estimatedRate = 6.0;
+  let recommendedScheme = 'Laghu Vyavasay Yojana (LVY)';
+  if (projectCost <= 140000) {
+    estimatedRate = 5.0;
+    recommendedScheme = 'Micro Finance Scheme (MFS)';
+  } else if (projectCost > 500000) {
+    estimatedRate = 7.0;
+    recommendedScheme = 'Term Loan Scheme (TLS) - Tier 1';
+  }
+
+  // Monthly EMI estimation (Rough annuity)
+  const tenureYears = projectCost <= 140000 ? 3 : 5;
+  const monthlyRate = (estimatedRate / 100) / 12;
+  const totalMonths = tenureYears * 12;
+  const estimatedEmi = Math.round(
+    (loanEligible * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / 
+    (Math.pow(1 + monthlyRate, totalMonths) - 1)
+  );
 
   const businessCategories = [
     {
       id: 'dairy',
-      name: 'डेयरी व पशुपालन',
-      nameEn: 'Dairy & Animal Husbandry',
-      icon: Milk,
-      range: '₹14,000 Margin -> ₹1.4L - ₹15L Unit',
+      titleEn: 'Dairy & Animal Husbandry',
+      titleHi: 'डेयरी व पशुपालन फार्म',
+      descEn: 'Cattle purchase, shed construction, chilling & milking equipment.',
+      descHi: 'दुधारू पशु, शेड निर्माण एवं आधुनिक मिल्किंग उपकरण।',
+      margin: '₹14,000+',
+      range: '₹1.4L – ₹15L',
       scheme: 'Micro Finance / Term Loan',
-      color: 'border-blue-200 bg-blue-50/50 hover:border-blue-400'
+      icon: Milk,
+      color: 'blue'
     },
     {
       id: 'grocery',
-      name: 'किराना व रिटेल सुपरस्टोर',
-      nameEn: 'Grocery & Retail Store',
+      titleEn: 'Retail Kirana & Daily Needs',
+      titleHi: 'किराना व प्रोविजन स्टोर',
+      descEn: 'Inventory stocking, POS billing counters, cold storage display.',
+      descHi: 'दुकान इन्वेंटरी, बिलिंग काउंटर एवं रेफ्रिजरेटर उपकरण।',
+      margin: '₹10,000+',
+      range: '₹1L – ₹5L',
+      scheme: 'Laghu Vyavasay (LVY)',
       icon: Store,
-      range: '₹10,000 Margin -> ₹1L - ₹5L Unit',
-      scheme: 'Laghu Vyavasay / Micro Finance',
-      color: 'border-amber-200 bg-amber-50/50 hover:border-amber-400'
+      color: 'amber'
     },
     {
       id: 'tailoring',
-      name: 'सिलाई व बुटीक (महिला विशेष 4%)',
-      nameEn: 'Tailoring & Boutique Center',
+      titleEn: 'Tailoring & Boutique (Women Special)',
+      titleHi: 'सिलाई व बुटीक केंद्र (महिला विशेष)',
+      descEn: 'Commercial sewing machines, embroidery tools, fabric stock at 4% interest.',
+      descHi: 'सिलाई मशीन, कढ़ाई उपकरण एवं कपड़ा स्टॉक — मात्र 4% वार्षिक ब्याज।',
+      margin: '₹5,000+',
+      range: '₹50K – ₹1.4L',
+      scheme: 'Mahila Samriddhi (4% p.a.)',
       icon: Scissors,
-      range: '₹5,000 Margin -> ₹50K - ₹1.4L Unit',
-      scheme: 'Mahila Samriddhi Yojana (4% Rate)',
-      color: 'border-pink-200 bg-pink-50/50 hover:border-pink-400'
+      color: 'rose'
     },
     {
       id: 'transport',
-      name: 'ई-रिक्शा व स्वच्छ वाहन सेवा',
-      nameEn: 'E-Rickshaw & Clean Transport',
+      titleEn: 'E-Rickshaw & Green Fleet',
+      titleHi: 'ई-रिक्शा व स्वच्छ वाहन सेवा',
+      descEn: 'Battery operated cargo/passenger rickshaws and solar charging setups.',
+      descHi: 'बैटरी ई-रिक्शा, कार्गो लोडर एवं सोलर चार्जिंग यूनिट।',
+      margin: '₹15,000+',
+      range: '₹1.5L – ₹10L',
+      scheme: 'Green Business Scheme',
       icon: Truck,
-      range: '₹15,000 Margin -> ₹1.5L - ₹10L Unit',
-      scheme: 'Green Business / Term Loan',
-      color: 'border-emerald-200 bg-emerald-50/50 hover:border-emerald-400'
+      color: 'emerald'
     },
     {
       id: 'green',
-      name: 'सोलर व हरित सूक्ष्म उद्यम',
-      nameEn: 'Solar & Clean Energy Ventures',
-      icon: SunMedium,
-      range: '₹20,000 Margin -> ₹2L - ₹30L Unit',
+      titleEn: 'Solar & Renewable Tech',
+      titleHi: 'सोलर पंप व हरित ऊर्जा उद्यम',
+      descEn: 'Solar irrigation pumps, bio-gas digesters, organic fertilizer units.',
+      descHi: 'सोलर सिंचाई पंप, बायोगैस यूनिट व जैविक खाद उत्पादन।',
+      margin: '₹20,000+',
+      range: '₹2L – ₹30L',
       scheme: 'Green Business Scheme',
-      color: 'border-teal-200 bg-teal-50/50 hover:border-teal-400'
+      icon: SunMedium,
+      color: 'teal'
     },
     {
       id: 'agri',
-      name: 'आटा/तेल मिल व कृषि प्रसंस्करण',
-      nameEn: 'Flour/Oil Mill Agro-Industry',
+      titleEn: 'Agro-Processing & Flour/Oil Mills',
+      titleHi: 'आटा/तेल मिल व कृषि प्रसंस्करण',
+      descEn: 'Mini grain mills, cold-pressed oil extractors, spice grinding units.',
+      descHi: 'मिनी आटा-दलिया मिल, तेल निष्कर्षण एवं मसाला पिसाई इकाइयां।',
+      margin: '₹50,000+',
+      range: '₹5L – ₹25L',
+      scheme: 'Term Loan Tier 1 & 2',
       icon: Sprout,
-      range: '₹50,000 Margin -> ₹5L - ₹25L Unit',
-      scheme: 'Term Loan Tier 1 / Tier 2',
-      color: 'border-indigo-200 bg-indigo-50/50 hover:border-indigo-400'
+      color: 'indigo'
     }
   ];
 
+  const handleLaunchAdvisory = (categoryTitle) => {
+    navigate('/advisory', { state: { prefilledBusiness: categoryTitle } });
+  };
+
   return (
-    <div className="space-y-16 pb-16">
+    <div className="space-y-20 pb-20">
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-[#F8FAFC] border-b border-slate-200 py-12 sm:py-20 px-4 sm:px-6">
-        {/* Decorative Background Blur Glows */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-r from-blue-400/10 via-amber-400/10 to-emerald-400/10 blur-3xl pointer-events-none -z-10 animate-pulse-subtle"></div>
+      <section className="relative pt-12 pb-16 lg:pt-20 lg:pb-24 overflow-hidden bg-white border-b border-slate-200/80 bg-grid-pattern">
+        
+        {/* Soft Ambient Radial Blur Background */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-tr from-blue-400/10 via-indigo-500/10 to-teal-400/10 blur-3xl -z-10 pointer-events-none rounded-full animate-subtle-pulse" />
 
-        <div className="max-w-5xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-amber-50 border border-[#0B3D91]/20 text-[#0B3D91] px-4 py-1.5 rounded-full text-xs sm:text-sm font-black shadow-xs">
-            <Landmark className="w-4 h-4 text-[#0B3D91]" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          
+          {/* Subtle Institutional Tag */}
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-blue-200/80 bg-blue-50/70 text-blue-800 text-xs font-semibold mb-6 shadow-2xs">
+            <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-ping" />
             <span>
               {lang === 'hi'
-                ? 'स्मार्ट इंडिया हैकथॉन 2026 — समस्या विवरण आईडी: 26091'
-                : 'Smart India Hackathon 2026 — Problem Statement ID: 26091'}
+                ? 'राष्ट्रीय सूक्ष्म उद्यम वित्तीय सलाहकार प्रणाली • 100% सटीक गणित'
+                : 'National Enterprise Financial Advisory • 10% Margin Capital Architecture'}
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
+          {/* Clean Main Headline */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 max-w-4xl mx-auto leading-[1.15]">
             {lang === 'hi' ? (
               <>
-                हाइपर-लोकल <span className="text-[#0B3D91]">एआई बिजनेस एडवाइजरी</span> एवं <span className="text-[#FF9933]">स्मार्ट स्कीम कैलकुलेटर</span>
+                10% मार्जिन पूंजी से शुरू करें अपना उद्यम,{' '}
+                <span className="text-gradient-primary">90% रियायती सरकारी ऋण</span> के साथ
               </>
             ) : (
               <>
-                Hyper-Local <span className="text-[#0B3D91]">AI Business Advisory</span> & <span className="text-[#FF9933]">Smart Scheme Calculator</span>
+                Unlock Concessional Capital for Your Enterprise with{' '}
+                <span className="text-gradient-primary">10% Margin Money</span>
               </>
             )}
           </h1>
 
-          <p className="max-w-3xl mx-auto text-sm sm:text-lg text-slate-600 font-medium leading-relaxed">
+          {/* Subtitle */}
+          <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto font-normal leading-relaxed">
             {lang === 'hi'
-              ? 'ग्रामीण व अर्ध-शहरी सूक्ष्म उद्यमियों के लिए संस्थागत स्तर का बिजनेस कंसल्टिंग टूल। अपनी उपलब्ध 10% मार्जिन पूंजी दर्ज करें और 5-10 किमी बाजार पहुंच, SWOT, प्रतिस्पर्धी मैपिंग व 90% रियायती लोन की सटीक वित्तीय योजना प्राप्त करें।'
-              : 'Democratizing institutional-grade business consulting for rural entrepreneurs. Input available margin capital (10%) to unlock a 5-10 km radius market study, SWOT breakdown, competitor density, and automated concessional loan structuring (90%).'}
+              ? 'ग्रामीण व अर्ध-शहरी सूक्ष्म उद्यमियों के लिए संस्थागत स्तर का वित्तीय सलाहकार। अपनी पूंजी दर्ज करें और 5–10 किमी बाजार पहुंच, SWOT व सरकारी स्कीमों की बैंक-रेडी वित्तीय योजना प्राप्त करें।'
+              : 'Institutional-grade business advisory for micro-entrepreneurs. Structure low-interest loans, calculate amortization schedules, and get AI-driven 5–10km hyper-local market feasibility.'}
           </p>
 
-          {/* Primary CTA Buttons with High-Quality Hover Effects */}
-          <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-xl mx-auto">
+          {/* Primary Action Buttons */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/advisory"
-              className="w-full sm:w-auto px-7 py-4 bg-gradient-to-r from-[#0B3D91] to-[#072a66] hover:from-[#093275] hover:to-[#041a3d] text-white font-extrabold rounded-2xl shadow-lg flex items-center justify-center space-x-2 text-sm sm:text-base transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-xl group"
+              className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
-              <span>{lang === 'hi' ? 'व्यवहार्यता अध्ययन शुरू करें' : 'Generate Feasibility Study'}</span>
-              <ArrowRight className="w-4 h-4 text-[#FF9933] group-hover:translate-x-1 transition-transform" />
+              <Sparkles className="w-4 h-4 text-blue-200" />
+              <span>{lang === 'hi' ? 'एआई व्यवहार्यता रिपोर्ट शुरू करें' : 'Generate Feasibility Report'}</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
 
             <Link
               to="/calculator"
-              className="w-full sm:w-auto px-7 py-4 bg-gradient-to-r from-[#FF9933] to-amber-500 hover:from-amber-500 hover:to-orange-500 text-slate-950 font-black rounded-2xl shadow-lg flex items-center justify-center space-x-2 text-sm sm:text-base transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-xl"
+              className="inline-flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 px-5 py-3.5 rounded-xl font-semibold text-sm transition-all shadow-2xs hover:border-slate-400"
             >
-              <Calculator className="w-5 h-5" />
-              <span>{lang === 'hi' ? '10% मार्जिन कैलकुलेटर' : '10% Margin Calculator'}</span>
+              <Calculator className="w-4 h-4 text-slate-600" />
+              <span>{lang === 'hi' ? '10% मार्जिन कैलकुलेटर' : 'Smart Loan Calculator'}</span>
             </Link>
 
             <Link
               to="/schemes"
-              className="w-full sm:w-auto px-6 py-4 bg-white hover:bg-slate-50 text-[#0B3D91] font-bold rounded-2xl border-2 border-slate-200 hover:border-[#0B3D91] flex items-center justify-center space-x-2 text-sm sm:text-base transition-all"
+              className="inline-flex items-center space-x-2 text-slate-600 hover:text-slate-900 px-4 py-3.5 font-semibold text-sm transition-colors"
             >
-              <span>{lang === 'hi' ? 'सभी योजनाएं देखें' : 'View All Schemes'}</span>
+              <span>{lang === 'hi' ? 'सभी योजनाएं देखें' : 'Explore All Schemes'}</span>
+              <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {/* Trust Highlights Grid */}
-          <div className="pt-6 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex items-center space-x-2.5 card-hover-lift">
-              <CheckCircle2 className="w-5 h-5 text-[#138808] flex-shrink-0" />
-              <span className="text-xs font-bold text-slate-800">
-                {lang === 'hi' ? '10% मार्जिन : 90% लोन' : '10% Margin : 90% Loan'}
-              </span>
+          {/* Key Pillars Metric Strip */}
+          <div className="mt-14 pt-8 border-t border-slate-200/80 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/60 text-center">
+              <span className="text-2xl sm:text-3xl font-black text-slate-900">10%</span>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                {lang === 'hi' ? 'आवश्यक मार्जिन पूंजी' : 'Entrepreneur Margin'}
+              </p>
             </div>
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex items-center space-x-2.5 card-hover-lift">
-              <CheckCircle2 className="w-5 h-5 text-[#138808] flex-shrink-0" />
-              <span className="text-xs font-bold text-slate-800">
-                {lang === 'hi' ? 'माइक्रो फाइनेंस (6.5%)' : 'Micro Finance (6.5%)'}
-              </span>
+
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/60 text-center">
+              <span className="text-2xl sm:text-3xl font-black text-emerald-600">4% – 8%</span>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                {lang === 'hi' ? 'रियायती वार्षिक ब्याज दर' : 'Concessional Interest'}
+              </p>
             </div>
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex items-center space-x-2.5 card-hover-lift">
-              <CheckCircle2 className="w-5 h-5 text-[#138808] flex-shrink-0" />
-              <span className="text-xs font-bold text-slate-800">
-                {lang === 'hi' ? 'टर्म लोन (8% • 7 वर्ष)' : 'Term Loan (8% • 7 Yrs)'}
-              </span>
+
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/60 text-center">
+              <span className="text-2xl sm:text-3xl font-black text-blue-600">3–6 माह</span>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                {lang === 'hi' ? 'प्रारंभिक मोरेटोरियम' : 'Moratorium Grace Period'}
+              </p>
             </div>
-            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs flex items-center space-x-2.5 card-hover-lift">
-              <CheckCircle2 className="w-5 h-5 text-[#138808] flex-shrink-0" />
-              <span className="text-xs font-bold text-slate-800">
-                {lang === 'hi' ? '3-6 माह मोरेटोरियम' : '3-6 Mo. Moratorium'}
-              </span>
+
+            <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/60 text-center">
+              <span className="text-2xl sm:text-3xl font-black text-amber-600">100% मुफ़्त</span>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                {lang === 'hi' ? 'शून्य दलाली व शुल्क' : 'Direct Official Routing'}
+              </p>
             </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Interactive Quick-Estimator Card */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+            <div>
+              <div className="inline-flex items-center space-x-1.5 text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md mb-2">
+                <Calculator className="w-3.5 h-3.5" />
+                <span>{lang === 'hi' ? 'लाइव त्वरित वित्तीय संरचना' : 'Live Quick Estimator'}</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                {lang === 'hi' 
+                  ? 'अपनी आवश्यक परियोजना लागत चुनें' 
+                  : 'Select Your Target Project Cost'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                {lang === 'hi'
+                  ? 'देखें आपको केवल कितनी मार्जिन पूंजी चाहिए और 90% सरकारी लोन पर कितनी ईएमआई बनेगी।'
+                  : 'Instantly calculate your 10% self-contribution, 90% debt coverage, and estimated monthly EMI.'}
+              </p>
+            </div>
+            
+            <Link
+              to="/calculator"
+              className="inline-flex items-center space-x-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100 px-3.5 py-2 rounded-lg transition-colors self-start md:self-auto"
+            >
+              <span>{lang === 'hi' ? 'विस्तृत कैलकुलेटर खोलें' : 'Advanced Amortization Table'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Slider Control */}
+            <div className="lg:col-span-6 space-y-4">
+              <div className="flex justify-between items-baseline">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  {lang === 'hi' ? 'कुल परियोजना लागत' : 'Total Project Cost'}
+                </span>
+                <span className="text-2xl sm:text-3xl font-extrabold text-blue-700">
+                  ₹{projectCost.toLocaleString('en-IN')}
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min="20000"
+                max="2500000"
+                step="10000"
+                value={projectCost}
+                onChange={(e) => setProjectCost(Number(e.target.value))}
+                className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 focus:outline-none"
+              />
+
+              <div className="flex justify-between text-[11px] text-slate-400 font-medium">
+                <span>₹20,000 (Micro)</span>
+                <span>₹5,00,000 (Small)</span>
+                <span>₹25,00,000 (Enterprise)</span>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center justify-between text-xs">
+                <span className="text-slate-600">
+                  {lang === 'hi' ? 'सुझावित रियायती स्कीम:' : 'Recommended Concessional Scheme:'}
+                </span>
+                <span className="font-bold text-slate-900 text-right">{recommendedScheme}</span>
+              </div>
+            </div>
+
+            {/* Computed Breakdown Output */}
+            <div className="lg:col-span-6 grid grid-cols-3 gap-3">
+              <div className="bg-blue-50/70 border border-blue-200/60 p-4 rounded-xl text-center">
+                <span className="block text-[11px] font-semibold uppercase text-blue-700">
+                  {lang === 'hi' ? 'आपकी पूंजी (10%)' : 'Margin (10%)'}
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+                  ₹{marginRequired.toLocaleString('en-IN')}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-1 block">
+                  {lang === 'hi' ? 'उद्यमी का योगदान' : 'Self Contribution'}
+                </span>
+              </div>
+
+              <div className="bg-emerald-50/70 border border-emerald-200/60 p-4 rounded-xl text-center">
+                <span className="block text-[11px] font-semibold uppercase text-emerald-700">
+                  {lang === 'hi' ? 'सरकारी ऋण (90%)' : 'Govt Loan (90%)'}
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+                  ₹{loanEligible.toLocaleString('en-IN')}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-1 block">
+                  {estimatedRate}% {lang === 'hi' ? 'वार्षिक ब्याज' : 'Interest Rate'}
+                </span>
+              </div>
+
+              <div className="bg-amber-50/70 border border-amber-200/60 p-4 rounded-xl text-center">
+                <span className="block text-[11px] font-semibold uppercase text-amber-700">
+                  {lang === 'hi' ? 'मासिक ईएमआई' : 'Monthly EMI'}
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 mt-1 block">
+                  ₹{estimatedEmi.toLocaleString('en-IN')}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-1 block">
+                  {tenureYears} {lang === 'hi' ? 'वर्ष अवधि' : 'Years Tenure'}
+                </span>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* The 2 Core Modules Section (Directly mapped to Hackathon Requirements) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-          <span className="text-xs font-extrabold text-[#0B3D91] uppercase tracking-wider bg-blue-100/60 px-3 py-1 rounded-full">
-            CORE SYSTEM ARCHITECTURE
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900">
-            {lang === 'hi' ? 'दो प्रमुख मॉड्यूल्स की संपूर्ण कार्यप्रणाली' : 'Two Core System Modules'}
+      {/* Target Business Verticals Grid */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+            {lang === 'hi' ? 'लोकप्रिय उद्यम श्रेणियां' : 'Supported Micro-Enterprise Verticals'}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-sm text-slate-600 mt-2">
             {lang === 'hi'
-              ? 'संस्थागत डेटा व गणितीय सूत्रों पर आधारित निर्णय प्रणाली'
-              : 'Institutional intelligence tailored for grassroots rural and semi-urban realities'}
+              ? 'प्रत्येक श्रेणी के लिए 90% तक सरकारी ऋण, विशेष महिला सब्सिडी और 5–10 किमी बाजार व्यवहार्यता अध्ययन उपलब्ध है।'
+              : 'Pre-configured financial models with verified government concessional funding limits.'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
-          {/* Module 1 Card */}
-          <div className="bg-white p-7 rounded-3xl border-2 border-blue-200 shadow-lg space-y-5 card-hover-lift relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl -z-10"></div>
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-[#0B3D91] flex items-center justify-center font-black shadow-xs">
-                <Compass className="w-6 h-6" />
-              </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-[#0B3D91] uppercase tracking-wider block">
-                  MODULE 1
-                </span>
-                <h3 className="text-xl font-black text-slate-900">
-                  {lang === 'hi' ? 'हाइपर-लोकल व्यवसाय व्यवहार्यता रिपोर्ट' : 'Hyper-Local Business Feasibility Report'}
-                </h3>
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-              {lang === 'hi'
-                ? 'प्राकृतिक भाषा (NLP) संचालित AI इंजन जो ग्राम/ब्लॉक स्तर पर वास्तविक व्यावसायिक रणनीति का निर्माण करता है:'
-                : 'NLP-powered multilingual advisory engine generating a localized, institutional-grade commercial strategy:'}
-            </p>
-
-            <ul className="space-y-2.5 text-xs text-slate-700">
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-blue-50 text-[#0B3D91] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
-                <div>
-                  <strong>Market Reach (5–10 km Radius):</strong> Estimates the immediate consumer base count and primary village distribution channels.
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-blue-50 text-[#0B3D91] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
-                <div>
-                  <strong>Opportunity Analysis:</strong> Uncovers unserved or underserved niches in the chosen sector within the local economy.
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-blue-50 text-[#0B3D91] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
-                <div>
-                  <strong>SWOT Breakdown:</strong> Strengths, Weaknesses, Opportunities, and Threats calibrated specifically to the micro-budget.
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-blue-50 text-[#0B3D91] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">4</span>
-                <div>
-                  <strong>Threats Identification:</strong> Pinpoints supply chain bottlenecks, seasonal demand swings, and single-buyer dependency risks.
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-blue-50 text-[#0B3D91] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">5</span>
-                <div>
-                  <strong>Competitor Mapping & Density:</strong> Localized economic data estimating similar existing units in the block.
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-blue-50 text-[#0B3D91] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">6</span>
-                <div>
-                  <strong>Product Market Value:</strong> Optimal pricing strategies predicting local value based on regional purchasing power.
-                </div>
-              </li>
-            </ul>
-
-            <Link
-              to="/advisory"
-              className="inline-flex items-center space-x-2 text-xs font-black text-[#0B3D91] hover:underline pt-2"
-            >
-              <span>{lang === 'hi' ? 'व्यवहार्यता मॉड्यूल का अनुभव करें' : 'Launch Feasibility Module'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {/* Module 2 Card */}
-          <div className="bg-white p-7 rounded-3xl border-2 border-amber-200 shadow-lg space-y-5 card-hover-lift relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100 rounded-full blur-3xl -z-10"></div>
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center font-black shadow-xs">
-                <Calculator className="w-6 h-6" />
-              </div>
-              <div>
-                <span className="text-[10px] font-extrabold text-amber-800 uppercase tracking-wider block">
-                  MODULE 2
-                </span>
-                <h3 className="text-xl font-black text-slate-900">
-                  {lang === 'hi' ? 'स्मार्ट वित्तीय कैलकुलेटर व स्कीम राउटर' : 'Smart Financial Calculator & Scheme Router'}
-                </h3>
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
-              {lang === 'hi'
-                ? 'शुद्ध पायथन (Deterministic) गणितीय इंजन जो उपलब्ध पूंजी से वित्तीय रोडमैप तैयार करता है:'
-                : 'Deterministic computational engine that automatically maps available margin capital to maximum borrowing capacity:'}
-            </p>
-
-            <ul className="space-y-2.5 text-xs text-slate-700">
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-900 font-bold flex items-center justify-center flex-shrink-0 mt-0.5">7</span>
-                <div>
-                  <strong>Financial Structuring (Margin / 10%):</strong> Automatically establishes total feasible Project Cost and Maximum 90% Loan.
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-900 font-bold flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
-                <div>
-                  <strong>Worked Example:</strong> ₹1,00,000 margin capital &rarr; ₹10,00,000 project cost and ₹9,00,000 loan eligibility.
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-900 font-bold flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
-                <div>
-                  <strong>Scheme Auto-Selection Logic A:</strong> If Project Cost &le; ₹1.40 Lakh &rarr; Micro Finance Scheme (6.5% interest, 3-year tenure, 3-month moratorium).
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-900 font-bold flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
-                <div>
-                  <strong>Scheme Auto-Selection Logic B:</strong> If Project Cost &gt; ₹1.40 Lakh and &le; ₹50.00 Lakh &rarr; Term Loan Scheme (8% interest, 7-year tenure, 6-month moratorium).
-                </div>
-              </li>
-              <li className="flex items-start space-x-2.5">
-                <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-900 font-bold flex items-center justify-center flex-shrink-0 mt-0.5">•</span>
-                <div>
-                  <strong>Quarterly Schedule & Moratorium Generator:</strong> Factors in grace periods, operational working capital (18%), and exact quarterly obligations.
-                </div>
-              </li>
-            </ul>
-
-            <Link
-              to="/calculator"
-              className="inline-flex items-center space-x-2 text-xs font-black text-amber-800 hover:underline pt-2"
-            >
-              <span>{lang === 'hi' ? 'कैलकुलेटर मॉड्यूल का अनुभव करें' : 'Launch Calculator Module'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-        </div>
-      </section>
-
-      {/* Sector Breakdown Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-8">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
-              {lang === 'hi' ? 'लोकप्रिय ग्रामीण व अर्ध-शहरी उद्यम क्षेत्र' : 'Target Micro-Enterprise Sectors'}
-            </h2>
-            <p className="text-xs text-slate-500">
-              {lang === 'hi' ? 'नाबार्ड, एनएसएफडीसी व एमएसएमई द्वारा रियायती वित्तपोषण हेतु स्वीकृत' : 'Approved for concessional financing under NSFDC & Ministry schemes'}
-            </p>
-          </div>
-          <Link
-            to="/advisory"
-            className="text-xs font-bold text-[#0B3D91] hover:underline flex items-center space-x-1"
-          >
-            <span>{lang === 'hi' ? 'अपना व्यवसाय चुनें' : 'Start Advisory Now'}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {businessCategories.map((cat) => {
             const Icon = cat.icon;
             return (
-              <div key={cat.id} className={`p-5 rounded-2xl border ${cat.color} space-y-3 card-hover-lift transition-all`}>
-                <div className="flex items-center space-x-3">
-                  <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-[#0B3D91] shadow-2xs">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-sm text-slate-900">
-                      {lang === 'hi' ? cat.name : cat.nameEn}
-                    </h3>
-                    <span className="text-[11px] text-slate-600 font-bold block">
+              <div
+                key={cat.id}
+                className="card-premium p-5 rounded-xl border border-slate-200 bg-white flex flex-col justify-between group cursor-pointer"
+                onClick={() => handleLaunchAdvisory(lang === 'hi' ? cat.titleHi : cat.titleEn)}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-800 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
                       {cat.range}
                     </span>
                   </div>
+
+                  <h3 className="font-bold text-base text-slate-900 group-hover:text-blue-600 transition-colors">
+                    {lang === 'hi' ? cat.titleHi : cat.titleEn}
+                  </h3>
+
+                  <p className="text-xs text-slate-500 mt-1.5 line-clamp-2">
+                    {lang === 'hi' ? cat.descHi : cat.descEn}
+                  </p>
                 </div>
-                <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-200/60">
-                  <span className="text-slate-500 text-[11px]">
-                    {lang === 'hi' ? 'योजना:' : 'Scheme:'}
+
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-slate-500 font-medium">
+                    {lang === 'hi' ? 'मार्जिन:' : 'Margin:'}{' '}
+                    <strong className="text-slate-800">{cat.margin}</strong>
                   </span>
-                  <span className="font-extrabold text-[#0B3D91] text-[11px]">
-                    {cat.scheme}
+                  <span className="inline-flex items-center text-blue-600 font-semibold group-hover:translate-x-0.5 transition-transform">
+                    <span>{lang === 'hi' ? 'अध्ययन करें' : 'Feasibility'}</span>
+                    <ArrowRight className="w-3 h-3 ml-1" />
                   </span>
                 </div>
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* Core Capabilities 3 Pillars */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-slate-900 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
+          {/* Subtle Glow */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/20 blur-3xl rounded-full pointer-events-none" />
+
+          <div className="relative z-10 text-center max-w-3xl mx-auto mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-400 bg-blue-950 border border-blue-800/80 px-3 py-1 rounded-full">
+              {lang === 'hi' ? 'संस्थागत वास्तुकला' : 'Core Architecture'}
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold mt-3">
+              {lang === 'hi' 
+                ? 'सिर्फ जानकारी नहीं, बैंक-रेडी वित्तीय रणनीति' 
+                : 'Not Just Information — Bank-Ready Financial Strategy'}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+            
+            <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-4">
+                <Percent className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-lg text-white mb-2">
+                {lang === 'hi' ? 'सटीक गणितीय संरचना' : 'Deterministic Loan Structuring'}
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                {lang === 'hi'
+                  ? 'सरकारी दिशा-निर्देशों के आधार पर 10% मार्जिन, 90% लोन शेयर, त्रैमासिक भुगतान चक्र और महिला उद्यमियों के लिए 1% तक ब्याज छूट।'
+                  : 'Calculates exact 10% margin, 90% debt share, quarterly repayment cycles, and women enterprise interest rebates per official norms.'}
+              </p>
+            </div>
+
+            <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4">
+                <MapPin className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-lg text-white mb-2">
+                {lang === 'hi' ? '5–10 किमी हाइपर-लोकल व्यवहार्यता' : 'Hyper-Local Feasibility (5-10km)'}
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                {lang === 'hi'
+                  ? 'स्थानीय बाजार पहुंच, कच्चा माल उपलब्धता, प्रतिस्पर्धी घनत्व, यूनिट लागत व विस्तृत SWOT विश्लेषण की एआई आधारित रिपोर्ट।'
+                  : 'AI evaluates regional catchment radius, raw material access, competitive density, and delivers an actionable SWOT report.'}
+              </p>
+            </div>
+
+            <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center mb-4">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h3 className="font-bold text-lg text-white mb-2">
+                {lang === 'hi' ? 'सत्यापित सरकारी स्कीमें' : 'Verified Direct Scheme Routing'}
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                {lang === 'hi'
+                  ? 'NSFDC, मुद्रा, PMEGP, स्टैंड-अप इंडिया जैसी केंद्रीय व राज्य योजनाओं से स्वचालित मिलान और आधिकारिक पोर्टल लिंक।'
+                  : 'Direct routing to authentic schemes with zero middlemen fees and verified ministry guidelines in Supabase.'}
+              </p>
+            </div>
+
+          </div>
+
+          <div className="mt-10 text-center relative z-10">
+            <Link
+              to="/advisory"
+              className="inline-flex items-center space-x-2 bg-white text-slate-900 hover:bg-slate-100 px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md"
+            >
+              <span>{lang === 'hi' ? 'अभी अपना प्रोजेक्ट प्लान तैयार करें' : 'Create Your Business Feasibility Plan'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
         </div>
       </section>
 
