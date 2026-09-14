@@ -8,169 +8,252 @@ import {
   Sparkles,
   Bot,
   User,
-  HelpCircle,
   ArrowRight,
-  Calculator,
-  BookOpen,
   Volume2,
   VolumeX,
   RotateCcw,
-  ExternalLink,
-  ChevronDown
+  BrainCircuit,
+  Lightbulb
 } from 'lucide-react';
-import MicButton from './MicButton';
 
-// Comprehensive MSME, Banking, and Government Scheme Knowledge Base
-const KNOWLEDGE_BASE = [
+// Comprehensive Reasoning Engine for Concessional MSME Banking
+const REASONING_DATABASE = [
   {
-    keywords: ['moratorium', 'मोरेटोरियम', 'छूट', 'grace period', 'repayment holiday'],
-    titleEn: 'What is a Moratorium Period?',
-    titleHi: 'मोरेटोरियम (किश्त छूट अवधि) क्या है?',
-    answerEn: `**Moratorium Period (किश्त छूट अवधि)** is a grace period granted by the bank during which you are **not required to pay loan EMIs** immediately after disbursement.
+    triggers: ['moratorium', 'मोरेटोरियम', 'हप्ता सूट', 'किश्त छूट', 'grace period', 'repayment holiday'],
+    en: {
+      title: 'Logical Concept: What is a Moratorium Period?',
+      body: `**Moratorium Period (किश्त छूट / हप्ता सवलत)** is an official repayment grace period granted by the bank.
 
-### Why is it given?
-When you start a new enterprise (like a Dairy Farm, Tailoring Shop, or Flour Mill), it takes 3 to 6 months to install machinery, purchase cattle/stock, and generate profit. The government grants a moratorium so you don't face repayment stress before earning!
+### Logical Reason:
+When launching an enterprise (e.g., Dairy Farm, Tailoring Boutique, or Flour Mill), you cannot produce revenue on Day 1. It takes 3 to 6 months to procure cows, install machinery, and generate cash flow. 
+If the bank demanded loan EMIs immediately, the new business would default!
 
-### Details under Samarth AI schemes:
-- **Typical Duration:** 6 to 12 Months (e.g. 6 months for NBCFDC / NSFDC schemes).
-- **Benefit:** You focus only on business operations during initial launch.
-- **Repayment:** Your monthly or quarterly EMIs begin only after the moratorium period ends.`,
-    answerHi: `**मोरेटोरियम (Moratorium Period)** बैंक द्वारा दी जाने वाली **किश्त छूट की अवधि** है, जिसमें लोन मिलने के तुरंत बाद आपको ईएमआई (EMI) नहीं चुकानी होती है।
+### How it works on Samarth AI schemes:
+1. **Grace Duration:** 6 to 12 Months (e.g., 6 months under NBCFDC / NSFDC schemes).
+2. **During Moratorium:** You pay **ZERO principal EMI**. You use your cash flow entirely to stabilize business operations.
+3. **After Moratorium:** Regular monthly/quarterly EMIs commence automatically once your enterprise is profitable.`,
+      cta: { label: 'Calculate Moratorium & EMI', path: '/calculator' }
+    },
+    hi: {
+      title: 'तार्किक विश्लेषण: मोरेटोरियम (किश्त छूट) क्या है?',
+      body: `**मोरेटोरियम (Moratorium Period)** बैंक द्वारा दी जाने वाली **किश्त छूट की आधिकारिक अवधि** है।
 
-### यह क्यों दिया जाता है?
-जब आप कोई नया व्यापार (जैसे डेयरी फार्म, सिलाई केंद्र, या आटा मिल) शुरू करते हैं, तो मशीन लगाने, पशु खरीदने और कमाई शुरू होने में 3 से 6 महीने लग जाते हैं। सरकार यह छूट देती है ताकि बिना कमाई के आप पर कर्ज चुकाने का दबाव न आए!
+### इसका तार्किक कारण क्या है?
+जब आप कोई नया व्यवसाय (जैसे 10 गायों की डेयरी, सिलाई बुटीक, या तेल मिल) शुरू करते हैं, तो पहले दिन से आमदनी नहीं होती। पशु लाने, शेड बनाने और ग्राहक जोड़ने में 3 से 6 महीने का समय लगता है।
+यदि बैंक पहले ही महीने से किश्त (EMI) मांगने लगे, तो नया उद्यमी कर्ज में डूब जाएगा!
 
 ### समर्थ एआई योजनाओं में नियम:
-- **अवधि:** आमतौर पर 6 से 12 महीने की छूट मिलती है।
-- **लाभ:** शुरुआती महीनों में आप पूरी तरह से अपने व्यापार को जमाने पर ध्यान दे सकते हैं।
-- **अदायगी:** मोरेटोरियम खत्म होने के बाद ही आपकी सामान्य मासिक या त्रैमासिक किश्तें शुरू होती हैं।`,
-    cta: { textEn: 'Check Feasibility & Moratorium', textHi: 'मोरेटोरियम गणना जांचें', path: '/advisory' }
+1. **छूट की अवधि:** आमतौर पर 6 से 12 महीने का मोरेटोरियम मिलता है।
+2. **इस दौरान लाभ:** आपको **मूलधन की किश्त नहीं देनी होती**। सारी कमाई व्यापार को बढ़ाने में लगाई जा सकती है।
+3. **अदायगी की शुरुआत:** मोरेटोरियम खत्म होने के बाद, जब व्यापार लाभ कमाने लगे, तब आसान किश्तें शुरू होती हैं।`,
+      cta: { label: 'मोरेटोरियम व ईएमआई देखें', path: '/calculator' }
+    },
+    mr: {
+      title: 'तार्किक संकल्पना: मोरेटोरियम (हप्ता सवलत कालावधी) म्हणजे काय?',
+      body: `**मोरेटोरियम (Moratorium Period)** म्हणजे बँकेने दिलेली **कर्ज हप्ता सवलतीची अधिकृत मुदत** होय.
+
+### याचे तार्किक कारण काय आहे?
+जेव्हा तुम्ही नवीन व्यवसाय (उदा. डेअरी फार्म, किराणा दुकान, किंवा शिलाई केंद्र) सुरू करता, तेव्हा पहिल्याच दिवसापासून नफा सुरू होत नाही. जनावरे खरेदी करणे, यंत्रसामग्री बसवणे आणि व्यवसाय जमवणे यात ३ ते ६ महिने लागतात.
+बँकेने पहिल्याच महिन्यापासून हप्ता मागितला तर उद्योजकावर आर्थिक ताण येईल!
+
+### सरकारी योजनांमधील नियम:
+1. **सवलतीची मुदत:** ६ ते १२ महिन्यांची हप्ता सवलत मिळते.
+2. **या कालावधीत फायदा:** तुम्हाला **कोणताही मुद्दल हप्ता भरावा लागत नाही**. पूर्ण नफा व्यवसायात गुंतवता येतो.
+3. **हप्ता कधी सुरू होतो:** व्यवसाय स्थिर झाल्यावर आणि मोरेटोरियम संपल्यावरच नियमित मासिक हप्ते सुरू होतात.`,
+      cta: { label: 'मोरेटोरियम व हप्ता तपासा', path: '/calculator' }
+    }
   },
   {
-    keywords: ['margin', 'मार्जिन', 'margin money', 'down payment', 'own contribution', 'पूंजी'],
-    titleEn: 'What is Margin Money (10%)?',
-    titleHi: 'मार्जिन मनी (मार्जिन पूंजी) क्या है?',
-    answerEn: `**Margin Money (मार्जिन पूंजी)** is the small fraction of the total project cost that **you (the entrepreneur) contribute from your own pocket**. The remaining 85% to 95% is funded by the Government & Bank loan.
+    triggers: ['margin', 'मार्जिन', 'भांडवल', 'पूंजी', 'own contribution', 'down payment', '10%'],
+    en: {
+      title: 'Financial Logic: How 10% Margin Money Works',
+      body: `**Margin Money (उद्यमी का अंशदान / स्वतःचे भांडवल)** is the small fraction of the total project cost that you invest from your pocket, while the Government Bank funds the remaining **90% to 95%**.
 
-### Example:
+### Live Example Breakdown:
 - **Total Project Cost:** ₹5,00,000 (₹5 Lakh)
-- **10% Margin Money Required:** ₹50,000 (Your investment)
-- **Govt / Bank Loan (90%):** ₹4,50,000 at concessional interest rate.
+- **Your 10% Margin Investment:** ₹50,000
+- **Government Subsidized Loan (90%):** ₹4,50,000
+- **Effective Leverage:** With just ₹50,000 in your pocket, you own an enterprise asset worth ₹5,00,000!
 
-### Under National Concessional Schemes:
-For target MSME categories, the government keeps margin requirements as low as **5% to 10%**, making it feasible to start with minimal savings!`,
-    answerHi: `**मार्जिन मनी (Margin Money)** कुल प्रोजेक्ट लागत का वह छोटा हिस्सा है जो **उद्यमी को स्वयं अपनी जेब से लगाना होता है**। बाकी 85% से 95% राशि सरकार और बैंक लोन के रूप में देते हैं।
+For women and backward class founders, margin money requirement is kept at only **5% to 10%** under Ministry guidelines.`,
+      cta: { label: 'Explore Margin Calculator', path: '/calculator' }
+    },
+    hi: {
+      title: 'वित्तीय गणित: 10% मार्जिन मनी कैसे काम करती है?',
+      body: `**मार्जिन मनी (Margin Money)** कुल प्रोजेक्ट लागत का वह छोटा हिस्सा है जो आपको अपनी जेब से लगाना होता है, जबकि बाकी **90% से 95% राशि सरकार और बैंक लोन** द्वारा दी जाती है।
 
-### उदाहरण:
+### वास्तविक उदाहरण:
 - **कुल प्रोजेक्ट लागत:** ₹5,00,000 (5 लाख रुपये)
-- **10% मार्जिन मनी:** मात्र ₹50,000 (आपकी पूंजी)
-- **सरकारी बैंक लोन (90%):** ₹4,50,000 (रियायती ब्याज दर पर)
+- **आपकी 10% मार्जिन पूंजी:** मात्र ₹50,000
+- **सरकारी रियायती लोन (90%):** ₹4,50,000
+- **फायदा:** मात्र ₹50,000 की बचत में आप 5 लाख रुपये का पूरा व्यवसाय खड़ा कर सकते हैं!
 
-### सरकारी योजनाओं में विशेष लाभ:
-पिछड़े वर्गों और छोटे उद्यमियों के लिए सरकार ने मार्जिन मनी मात्र **5% से 10%** रखी है, ताकि कम पूंजी में भी बड़ा व्यवसाय खड़ा किया जा सके।`,
-    cta: { textEn: 'Calculate Loan & Margin', textHi: 'मार्जिन व लोन कैलकुलेटर', path: '/calculator' }
+महिला एवं पिछड़े वर्ग के आवेदकों के लिए मंत्रालय के नियमों के तहत मार्जिन मात्र **5% से 10%** रखा गया है।`,
+      cta: { label: 'मार्जिन व लोन चेक करें', path: '/calculator' }
+    },
+    mr: {
+      title: 'आर्थिक गणित: १०% मार्जिन मनी (स्वतःचे भांडवल) कसे कार्य करते?',
+      body: `**मार्जिन मनी (Margin Money)** म्हणजे एकूण प्रकल्पाच्या खर्चातील तो छोटा हिस्सा जो तुम्हाला स्वतःच्या खिशातून घालावा लागतो. उर्वरित **९०% ते ९५% रक्कम सरकार व बँक कर्जाच्या** स्वरूपात देते.
+
+### प्रत्यक्ष उदाहरण:
+- **एकूण प्रकल्प खर्च:** ₹५,००,००० (५ लाख रुपये)
+- **तुमचे १०% स्वतःचे भांडवल:** फक्त ₹५०,०००
+- **सरकारी सवलतीचे कर्ज (९०%):** ₹४,५०,०००
+- **मोठा लाभ:** खिशात केवळ ₹५०,००० असताना तुम्ही ५ लाख रुपयांचा संपूर्ण उद्योग सुरू करू शकता!
+
+महिला व मागासवर्गीय प्रवर्गासाठी शासनाने हे प्रमाण फक्त **५% ते १०%** ठेवले आहे.`,
+      cta: { label: 'भांडवल गणक वापरा', path: '/calculator' }
+    }
   },
   {
-    keywords: ['women', 'mahila', 'महिला', 'female', 'mahila samriddhi', 'स्त्री'],
-    titleEn: 'Special Schemes & Subsidies for Women Entrepreneurs',
-    titleHi: 'महिला उद्यमियों के लिए विशेष सरकारी योजनाएं व 4% ब्याज छूट',
-    answerEn: `Women entrepreneurs receive exclusive financial incentives under Government of India initiatives:
+    triggers: ['profit', 'dairy', 'गाय', 'भैंस', 'दूध', 'नफा', 'मुनाफा', 'cow', 'cows', 'buffalo'],
+    en: {
+      title: 'Business Feasibility: Profitability of a 10-Milch Cow Dairy Farm',
+      body: `Here is the verified financial and economic breakdown for a 10-Cow Dairy Unit:
 
-### 1. Mahila Samriddhi Yojana (MoSJE / NBCFDC)
-- **Ultra-Low Interest Rate:** **4.0% per annum** (compared to 9-12% in commercial banks).
-- **Project Limit:** Up to ₹1,40,000 for micro-enterprises and self-help group members.
-- **Margin Money:** Only 5% required.
+### 1. Capital Expenditure (Total: ~₹10,00,000)
+- 10 Quality HF / Crossbred Cows: ₹6,50,000
+- Shed & Milking equipment: ₹2,50,000
+- Initial fodder & medicines: ₹1,00,000
+- **Your 10% Margin:** ₹1,00,000 | **Govt Loan (90%):** ₹9,00,000
 
-### 2. Stand-Up India & Mudra Yojana (Tarun / Kishore)
-- Collateral-free credit from ₹1 Lakh up to ₹1 Crore for greenfield enterprises.
-- 0.25% to 1% additional interest rebate for women across major PSBs.`,
-    answerHi: `भारत सरकार द्वारा महिला उद्यमियों को स्वावलंबी बनाने हेतु विशेष वित्तीय लाभ दिए जाते हैं:
+### 2. Monthly Economics:
+- **Milk Production:** ~120 Litres/day @ ₹42/Litre = **₹1,51,200 Gross Revenue / month**.
+- **Feed & Vet Costs:** ~₹75,000 / month.
+- **Loan EMI (at 6.5% for 5 years):** ~₹17,600 / month (starts after 6-month moratorium).
+- **Estimated Net In-Hand Profit:** **₹58,000 – ₹65,000 per month**!`,
+      cta: { label: 'Run Full Feasibility Model', path: '/advisory' }
+    },
+    hi: {
+      title: 'व्यवसायिक विश्लेषण: 10 दुधारू गायों की डेयरी में कितना मुनाफा होगा?',
+      body: `10 दुधारू गायों की आधुनिक डेयरी यूनिट का सटीक वित्तीय गणित:
 
-### 1. महिला समृद्धि योजना (सामाजिक न्याय एवं अधिकारिता मंत्रालय)
-- **अत्यधिक रियायती ब्याज:** मात्र **4.0% वार्षिक ब्याज** (सामान्य बैंक 10-12% लेते हैं)।
-- **प्रोजेक्ट लागत:** ₹1,40,000 तक का सूक्ष्म व्यवसाय ऋण।
-- **मार्जिन मनी:** मात्र 5% अंशदान।
+### 1. प्रोजेक्ट खर्च (कुल लागत: ~₹10,00,000):
+- 10 उन्नत नस्ल गायें: ₹6,50,000
+- शेड निर्माण व मिल्किंग मशीन: ₹2,50,000
+- चारा व शुरुआती कार्यशील पूंजी: ₹1,00,000
+- **आपका 10% मार्जिन:** ₹1,00,000 | **सरकारी बैंक लोन (90%):** ₹9,00,000
 
-### 2. मुद्रा योजना एवं स्टैंड-अप इंडिया
-- बिना किसी संपत्ति गारंटी के ₹1 लाख से लेकर ₹1 करोड़ तक का व्यापार ऋण।
-- महिला आवेदकों को सार्वजनिक बैंकों में ब्याज दर में अतिरिक्त छूट।`,
-    cta: { textEn: 'View Women Schemes', textHi: 'महिला योजनाएं देखें', path: '/schemes' }
+### 2. मासिक आय और खर्च:
+- **दूध उत्पादन:** ~120 लीटर/दिन @ ₹42/लीटर = **₹1,51,200 कुल मासिक बिक्री**।
+- **पशु आहार व दवाई खर्च:** ~₹75,000 प्रति माह।
+- **लोन EMI (6.5% ब्याज, 5 वर्ष):** ~₹17,600 प्रति माह (6 माह मोरेटोरियम के बाद शुरू)।
+- **शुद्ध मासिक बचत (मुनाफा):** **₹58,000 से ₹65,000 प्रति माह**!`,
+      cta: { label: 'डेयरी रिपोर्ट जनरेट करें', path: '/advisory' }
+    },
+    mr: {
+      title: 'व्यवसायिक ताळेबंद: १० दुभत्या गाईंच्या डेअरीमध्ये किती नफा होईल?',
+      body: `१० दुभत्या गाईंच्या आधुनिक डेअरी फार्मचे अचूक ताळेबंद:
+
+### १. प्रकल्प खर्च (एकूण: ~₹१०,००,०००):
+- १० चांगल्या जातीच्या गाई: ₹६,५०,०००
+- शेड व मिल्किंग मशिन: ₹२,५०,०००
+- चारा व प्रारंभिक खर्च: ₹१,००,०००
+- **तुमचे १०% भांडवल:** ₹१,००,००० | **सरकारी कर्ज (९०%):** ₹९,००,०००
+
+### २. मासिक जमा-खर्च:
+- **दूध उत्पादन:** ~१२० लिटर/दिवस @ ₹४२/लिटर = **₹१,५१,२०० मासिक एकूण विक्री**.
+- **चारा, खुराक व औषध खर्च:** ~₹७५,००० प्रति महिना.
+- **कर्ज हप्ता (६.५% व्याज, ५ वर्षे):** ~₹१७,६०० प्रति महिना (६ महिने सवलतीनंतर).
+- **निव्वळ मासिक नफा:** **₹५८,००० ते ₹६५,००० प्रति महिना**!`,
+      cta: { label: 'डेअरी अहवाल तयार करा', path: '/advisory' }
+    }
   },
   {
-    keywords: ['apply', 'आवेदन', 'documents', 'दस्तावेज', 'kaise apply kare', 'process', 'portal'],
-    titleEn: 'How to Apply & Required Documents',
-    titleHi: 'आवेदन कैसे करें और जरूरी दस्तावेज क्या हैं?',
-    answerEn: `Applying for government MSME schemes is fully digital and transparent. Here is the step-by-step roadmap:
+    triggers: ['women', 'mahila', 'महिला', 'female', 'स्त्री', 'samriddhi', 'सवलत', '4%'],
+    en: {
+      title: 'Special 4% Concessional Interest Schemes for Women',
+      body: `Women entrepreneurs qualify for the Government of India's most aggressive interest subsidies:
 
-### Required Documents Checklist:
-1. **Identity & Address Proof:** Aadhaar Card, Voter ID, and PAN Card.
-2. **Bank Account:** Active Bank Savings/Current account linked with Aadhaar (last 6 months passbook).
-3. **Category Certificate:** Caste / OBC / SC / EWS Certificate (issued by Tehsildar/SDM).
-4. **Project Proposal (DPR):** Brief outline of proposed business (can be auto-generated on Samarth AI).
-5. **Passport size photos & Business premises proof (rent agreement or electricity bill).
+1. **Mahila Samriddhi Yojana (MoSJE / NBCFDC):**
+   - **Interest Rate:** **4.0% per annum** (flat rate, drastically lower than commercial bank 11%).
+   - **Project Cost Limit:** Up to ₹1,40,000 for tailoring, handicrafts, food processing, or micro-retail.
+   - **Margin Money:** Only 5% required!
 
-### Where to Submit:
-- **Online:** Through the **JanSamarth Portal** (jansamarth.in) or **MyScheme.gov.in**.
-- **Offline / Local Assistance:** Nearest District Industries Centre (DIC), Lead District Bank, or Common Service Centre (CSC / Jan Seva Kendra).`,
-    answerHi: `सरकारी योजनाओं में आवेदन की प्रक्रिया अब अत्यंत सरल व डिजिटल है:
+2. **Stand-Up India Scheme:**
+   - Bank loans between ₹10 Lakh and ₹1 Crore for greenfield manufacturing and services by women founders.
+   - Zero property mortgage required under CGTMSE guarantee cover.`,
+      cta: { label: 'View Women Concessional Schemes', path: '/schemes' }
+    },
+    hi: {
+      title: 'महिला उद्यमियों के लिए विशेष 4% ब्याज दर वाली सरकारी योजनाएं',
+      body: `महिला उद्यमियों को आत्मनिर्भर बनाने हेतु भारत सरकार द्वारा विशेष रियायतें दी गई हैं:
 
-### आवश्यक दस्तावेजों की सूची:
-1. **पहचान व पते का प्रमाण:** आधार कार्ड, पैन कार्ड, व वोटर आईडी।
-2. **बैंक विवरण:** आधार से लिंक बैंक खाता (पिछले 6 महीने की बैंक पासबुक)।
-3. **वर्ग प्रमाण पत्र:** जाति / पिछड़ा वर्ग / ईडब्ल्यूएस प्रमाण पत्र (तहसीलदार/एसडीएम द्वारा जारी)।
-4. **विस्तृत प्रोजेक्ट रिपोर्ट (DPR):** व्यवसाय का संक्षिप्त विवरण (समर्थ एआई से तुरंत जनरेट कर सकते हैं)।
-5. **पासपोर्ट साइज फोटो व दुकान/कार्यस्थल का बिजली बिल या किरायानामा।
+1. **महिला समृद्धि योजना (MoSJE / NBCFDC):**
+   - **रियायती ब्याज दर:** मात्र **4.0% वार्षिक ब्याज** (सामान्य बैंक 10% से 12% लेते हैं)।
+   - **प्रोजेक्ट सीमा:** सिलाई, बुटीक, ब्यूटी पार्लर, फूड पैकेजिंग हेतु ₹1,40,000 तक।
+   - **मार्जिन मनी:** मात्र 5% अंशदान!
 
-### आवेदन कहाँ करें:
-- **ऑनलाइन:** केंद्र सरकार के **JanSamarth Portal (jansamarth.in)** या **MyScheme.gov.in** पर।
-- **स्थानीय सहायता:** अपने जिले के उद्योग केंद्र (DIC), लीड बैंक ऑफिस, या नजदीकी जन सेवा केंद्र (CSC) पर।`,
-    cta: { textEn: 'Generate Business DPR', textHi: 'व्यवसाय रिपोर्ट तैयार करें', path: '/advisory' }
+2. **स्टैंड-अप इंडिया व मुद्रा योजना:**
+   - महिला उद्यमियों के लिए ₹10 लाख से लेकर ₹1 करोड़ तक का व्यापार ऋण।
+   - सीजीटीएमएसई (CGTMSE) के तहत किसी जमीन या मकान को गिरवी रखने की आवश्यकता नहीं।`,
+      cta: { label: 'महिला योजनाएं देखें', path: '/schemes' }
+    },
+    mr: {
+      title: 'महिला उद्योजकांसाठी विशेष ४% व्याजदराच्या शासकीय योजना',
+      body: `महिला उद्योजकांसाठी केंद्र व राज्य शासनाकडून विशेष सवलती उपलब्ध आहेत:
+
+१. **महिला समृद्धी योजना (सामाजिक न्याय मंत्रालय):**
+   - **अत्यंत कमी व्याज:** फक्त **४.०% वार्षिक व्याज** (इतर बँका १०-१२% घेतात).
+   - **प्रकल्प मर्यादा:** शिलाई, हस्तकला, ब्युटी पार्लर किंवा खाद्यप्रक्रियेसाठी ₹१,४०,००० पर्यंत.
+   - **स्वतःचे भांडवल:** फक्त ५% आवश्यक!
+
+२. **स्टँड-अप इंडिया व मुद्रा योजना:**
+   - महिलांसाठी ₹१० लाखांपासून ₹१ कोटीपर्यंतचे विनातारण व्यवसाय कर्ज.
+   - CGTMSE अंतर्गत कोणतीही मालमत्ता गहाण ठेवण्याची गरज नाही.`,
+      cta: { label: 'महिला योजना पहा', path: '/schemes' }
+    }
   },
   {
-    keywords: ['dpr', 'project report', 'रिपोर्ट', 'डीपीआर', 'detailed project report'],
-    titleEn: 'What is a DPR (Detailed Project Report)?',
-    titleHi: 'DPR (डिटेल्ड प्रोजेक्ट रिपोर्ट) क्या है?',
-    answerEn: `A **Detailed Project Report (DPR)** is a comprehensive document required by banks before sanctioning a business loan.
+    triggers: ['apply', 'आवेदन', 'अर्ज', 'documents', 'दस्तावेज', 'कागदपत्रे', 'process', 'jansamarth', 'portal'],
+    en: {
+      title: 'Step-by-Step Application Roadmap & Documents',
+      body: `Follow these 4 simple steps to apply for any Central or State government MSME scheme:
 
-### What does a DPR contain?
-1. **Capital Expenditure:** Cost of machinery, tools, shed, or vehicles.
-2. **Working Capital:** Funds needed for raw materials, inventory, and wages for 1-3 months.
-3. **Means of Finance:** Breakup of 10% Margin Money and 90% Govt Loan.
-4. **Projected Profit & Cash Flow:** Monthly revenue projections and ability to comfortably pay loan EMIs.
+### Mandatory Document Checklist:
+1. **Aadhaar Card & PAN Card** (Aadhaar linked to active mobile number).
+2. **Bank Passbook** (Last 6 months account statement).
+3. **Caste / Category Certificate** (OBC / SC / EWS issued by Tehsildar/SDM).
+4. **Project Proposal (DPR):** Cost estimate and machinery quotation (generate on Samarth AI).
+5. **Premises Proof:** Rent agreement or electricity bill of the shop/shed.
 
-💡 *Tip: On Samarth AI, clicking **"AI Feasibility Study"** generates an instant, deterministic DPR tailored to your district and trade!*`,
-    answerHi: `**DPR (Detailed Project Report)** एक आधिकारिक परियोजना दस्तावेज है जिसे बैंक में लोन आवेदन के साथ जमा करना अनिवार्य होता है।
+### Official Portals:
+- Apply online at **JanSamarth Portal (jansamarth.in)** or **MyScheme.gov.in**.
+- Or visit your District Industries Centre (DIC) / Lead District Bank.`,
+      cta: { label: 'Generate DPR for Application', path: '/advisory' }
+    },
+    hi: {
+      title: 'आवेदन की 4-चरणीय प्रक्रिया और आवश्यक दस्तावेज',
+      body: `सरकारी एमएसएमई योजनाओं में आवेदन करने का सीधा व स्पष्ट तरीका:
 
-### DPR में क्या-क्या होता है?
-1. **पूंजीगत खर्च (Capital Expenditure):** मशीनरी, उपकरण, दुकान या वाहन की खरीद लागत।
-2. **कार्यशील पूंजी (Working Capital):** 1 से 3 महीने के कच्चे माल, स्टॉक और मजदूरी का खर्च।
-3. **वित्तीय संरचना (Means of Finance):** 10% आवेदक का मार्जिन और 90% बैंक ऋण का ब्योरा।
-4. **लाभ एवं नकदी प्रवाह:** अनुमानित मासिक बिक्री और ऋण किश्त (EMI) चुकाने की क्षमता।
+### जरूरी दस्तावेजों की चेकलिस्ट:
+1. **आधार कार्ड व पैन कार्ड** (आधार से मोबाइल नंबर लिंक होना चाहिए)।
+2. **बैंक पासबुक** (पिछले 6 महीने का बैंक स्टेटमेंट)।
+3. **जाति प्रमाण पत्र** (ओबीसी / एससी / ईडब्ल्यूएस प्रमाण पत्र)।
+4. **प्रोजेक्ट रिपोर्ट (DPR):** व्यवसाय का लागत ब्योरा व मशीनरी कोटेशन (समर्थ एआई से तुरंत निकालें)।
+5. **स्थान का प्रमाण:** दुकान या शेड का बिजली बिल अथवा किरायानामा।
 
-💡 *सुझाव: समर्थ एआई के **"AI Feasibility Study"** पर अपनी जानकारी भरकर आप तुरंत बैंक-योग्य प्रोजेक्ट रिपोर्ट तैयार कर सकते हैं!*`,
-    cta: { textEn: 'Create Instant DPR', textHi: 'तुरंत DPR बनाएं', path: '/advisory' }
-  },
-  {
-    keywords: ['cibil', 'credit score', 'सिबिल', 'guarantee', 'collateral', 'गारंटी', 'mortgage'],
-    titleEn: 'Is Property Guarantee or High CIBIL Required?',
-    titleHi: 'क्या जमीन/मकान की गारंटी या सिबिल स्कोर जरूरी है?',
-    answerEn: `**No collateral or property mortgage is required** for micro and small enterprise loans under government guidelines:
+### आवेदन पोर्टल:
+- **JanSamarth Portal (jansamarth.in)** या **MyScheme.gov.in** पर ऑनलाइन फॉर्म भरें।
+- अथवा अपने जिले के उद्योग केंद्र (DIC) में सीधे संपर्क करें।`,
+      cta: { label: 'DPR रिपोर्ट तैयार करें', path: '/advisory' }
+    },
+    mr: {
+      title: 'कर्ज अर्जाची ४-टप्प्यांची प्रक्रिया आणि आवश्यक कागदपत्रे',
+      body: `सरकारी योजनांचा लाभ घेण्यासाठीची सोपी व थेट प्रक्रिया:
 
-### 1. Collateral-Free Loans (CGTMSE / Mudra)
-Under the Credit Guarantee Trust for Micro and Small Enterprises (CGTMSE) and Mudra Scheme, loans up to **₹10 Lakh to ₹50 Lakh** are covered by a Central Government credit guarantee. You do not need to pledge land or house papers!
+### आवश्यक कागदपत्रांची यादी:
+१. **आधार कार्ड व पॅन कार्ड** (आधार मोबाईलशी लिंक असावे).
+२. **बँक पासबुक** (मागील ६ महिन्यांचे बँक स्टेटमेंट).
+३. **जात प्रमाणपत्र** (ओबीसी / एससी / ईडब्ल्यूएस प्रमाणपत्र).
+४. **प्रकल्प अहवाल (DPR):** यंत्रसामग्री कोटेशन व अंदाजपत्रक (समर्थ एआय वरून त्वरित जनरेट करा).
+५. **जागेचा पुरावा:** दुकानाचे/शेडचे वीज बिल किंवा भाडेकरार.
 
-### 2. CIBIL Score Requirements
-- While established businesses require 750+ CIBIL, for rural/first-time entrepreneurs under NBCFDC, NSFDC, and PMEGP, **previous credit history is not mandatory** (New to Credit / -1 score is accepted).
-- You only need to ensure no active defaults on existing bank loans.`,
-    answerHi: `सरकारी एमएसएमई योजनाओं में छोटे व्यापार के लिए **जमीन, मकान या संपत्ति गिरवी रखने की कोई आवश्यकता नहीं है**:
-
-### 1. बिना गारंटी ऋण (CGTMSE व मुद्रा योजना)
-सूक्ष्म और लघु उद्यम क्रेडिट गारंटी ट्रस्ट (CGTMSE) के तहत **₹10 लाख से लेकर ₹50 लाख तक का ऋण पूर्णतः गारंटी-मुक्त** होता है। बैंक को केंद्र सरकार स्वयं गारंटी प्रदान करती है।
-
-### 2. सिबिल (CIBIL) स्कोर की अनिवार्यता:
-- पहली बार व्यापार शुरू करने वाले ग्रामीण उद्यमियों के पास यदि पुराना सिबिल स्कोर नहीं है (New to Credit), तब भी ऋण मिलता है।
-- केवल यह ध्यान रखें कि किसी पुराने बैंक में आपका कोई चालू डिफ़ॉल्ट (कर्ज बकाया) न हो।`,
-    cta: { textEn: 'View Verified Schemes', textHi: 'सत्यापित योजनाएं देखें', path: '/schemes' }
+### अधिकृत पोर्टल:
+- केंद्र सरकारच्या **JanSamarth Portal (jansamarth.in)** किंवा **MyScheme.gov.in** वर ऑनलाइन अर्ज करा.
+- किंवा आपल्या जिल्हा उद्योग केंद्रात (DIC) थेट संपर्क साधा.`,
+      cta: { label: 'DPR अहवाल तयार करा', path: '/advisory' }
+    }
   }
 ];
 
@@ -178,126 +261,179 @@ const AIChatbot = () => {
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 'welcome',
-      sender: 'bot',
-      textEn: `Namaste! 🙏 I am your **Samarth AI Business & Financial Sahayak**.
-
-I can help explain complex banking and business terms like **Moratorium**, **10% Margin Money**, **Subsidies**, or guide you on how to apply for government schemes.
-
-Feel free to ask any question or tap one of the common topics below!`,
-      textHi: `नमस्ते! 🙏 मैं आपका **समर्थ एआई वित्तीय व व्यापारिक सहायक (AI Sahayak)** हूँ।
-
-मैं आपको **मोरेटोरियम (किश्त छूट)**, **10% मार्जिन मनी**, **सरकारी सब्सिडी**, और बैंक लोन आवेदन की पूरी प्रक्रिया आसान भाषा में समझा सकता हूँ।
-
-आप नीचे दिए गए विषयों पर क्लिक कर सकते हैं या बोलकर/लिखकर कोई भी प्रश्न पूछ सकते हैं!`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [voiceSpeechEnabled, setVoiceSpeechEnabled] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const getWelcomeMessage = () => {
+    if (lang === 'mr') {
+      return `नमस्कार! 🙏 मी आपला **समर्थ एआय व्यावसायिक व आर्थिक सल्लागार (AI Sahayak)** आहे.
+
+मी आपल्याला **मोरेटोरियम (हप्ता सवलत)**, **१०% भांडवल (Margin Money)**, **शासकीय ४% महिला योजना**, आणि **नफा-तोटा ताळेबंद** अतिशय सोप्या भाषेत समजावून सांगू शकतो.
+
+आपण खालीलपैकी कोणत्याही विषयावर क्लिक करू शकता किंवा कोणताही प्रश्न विचारू शकता!`;
+    }
+    if (lang === 'hi') {
+      return `नमस्ते! 🙏 मैं आपका **समर्थ एआई वित्तीय व व्यापारिक सलाहकार (AI Sahayak)** हूँ।
+
+मैं आपको **मोरेटोरियम (किश्त छूट)**, **10% मार्जिन मनी**, **महिला 4% ब्याज छूट**, और **व्यवसाय में मुनाफा व लोन ईएमआई** तार्किक रूप से समझा सकता हूँ।
+
+आप नीचे दिए गए विषयों पर क्लिक करें या अपना कोई भी प्रश्न पूछें!`;
+    }
+    return `Namaste! 🙏 I am your **Samarth AI Business & Financial Advisor**.
+
+I provide logical reasoning on **Moratorium Periods**, **10% Margin Money**, **Profit Calculations**, and **Government Subsidized Schemes**.
+
+Tap any topic below or ask your specific business question!`;
   };
+
+  const [messages, setMessages] = useState([
+    {
+      id: 'welcome',
+      sender: 'bot',
+      text: getWelcomeMessage(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+  ]);
+
+  // Update welcome message if language changes
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length === 1 && prev[0].id === 'welcome') {
+        return [{ ...prev[0], text: getWelcomeMessage() }];
+      }
+      return prev;
+    });
+  }, [lang]);
 
   useEffect(() => {
     if (isOpen) {
-      scrollToBottom();
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
 
-  // Voice Speech Synthesis for responses
   const speakText = (text) => {
     if (!voiceSpeechEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();
-      // Strip markdown asterisks and hash tags for clean speech
       const clean = text.replace(/[*#_`]/g, '').replace(/\[.*?\]\(.*?\)/g, '');
       const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = lang === 'hi' ? 'hi-IN' : 'en-US';
+      utter.lang = lang === 'mr' ? 'mr-IN' : lang === 'hi' ? 'hi-IN' : 'en-US';
       utter.rate = 1.0;
       window.speechSynthesis.speak(utter);
     } catch (e) {}
   };
 
-  // Find best match in knowledge base or fallback to smart AI logic
-  const generateResponse = (query) => {
-    const qLower = query.toLowerCase().trim();
+  // Logical Reasoning Engine
+  const generateSmartReasoning = (rawQuery) => {
+    const q = rawQuery.toLowerCase().trim();
 
-    // 1. Search in Knowledge Base
-    for (const item of KNOWLEDGE_BASE) {
-      const isMatch = item.keywords.some(k => qLower.includes(k.toLowerCase()));
-      if (isMatch) {
+    // 1. Handle Gibberish / Very Short Input (e.g. "q", "a", "...", "1")
+    if (q.length < 3 || /^[a-z0-9]$/i.test(q)) {
+      if (lang === 'mr') {
         return {
-          textEn: item.answerEn,
-          textHi: item.answerHi,
-          cta: item.cta
+          text: `मला आपला प्रश्न समजला नाही. 🤔
+कृपया आपला प्रश्न स्पष्टपणे लिहा, जसे की:
+- *"मोरेटोरियम म्हणजे काय?"*
+- *"१० गाईंच्या डेअरीमध्ये किती नफा होईल?"*
+- *"महिलांसाठी ४% व्याजाची योजना कोणती?"*
+- *"५ लाखांच्या कर्जावर मासिक हप्ता किती बसेल?"*`,
+          cta: null
+        };
+      }
+      if (lang === 'hi') {
+        return {
+          text: `मुझे आपका प्रश्न स्पष्ट नहीं हुआ। 🤔
+कृपया अपना प्रश्न थोड़ा विस्तार से लिखें, जैसे:
+- *"मोरेटोरियम (किश्त छूट) क्या है?"*
+- *"10 गायों की डेयरी में कितना शुद्ध मुनाफा होगा?"*
+- *"महिला उद्यमियों के लिए 4% ब्याज वाली योजना कौन सी है?"*
+- *"5 लाख के लोन पर कितनी मासिक EMI बनेगी?"*`,
+          cta: null
+        };
+      }
+      return {
+        text: `I didn't quite catch that. 🤔
+Please ask a clear business or banking question, such as:
+- *"What is a Moratorium period?"*
+- *"How much net profit in a 10-cow dairy farm?"*
+- *"Which schemes offer 4% interest for women?"*
+- *"What is my monthly EMI on a ₹5 Lakh loan?"*`,
+        cta: null
+      };
+    }
+
+    // 2. Handle Casual Greetings
+    if (/^(hi|hello|hey|namaste|namaskar|pranam|kem cho|kasa kay|kaise ho)/i.test(q)) {
+      if (lang === 'mr') {
+        return {
+          text: `नमस्कार! मी समर्थ एआय सहाय्यक आहे. मी आपल्याला शासकीय कर्ज योजना, मार्जिन मनी आणि व्यवसाय नफा-तोटा समजण्यास कशी मदत करू शकतो?`,
+          cta: { label: 'योजनांची यादी पहा', path: '/schemes' }
+        };
+      }
+      if (lang === 'hi') {
+        return {
+          text: `नमस्ते! मैं समर्थ एआई वित्तीय सलाहकार हूँ। मैं आपके नए व्यवसाय, 10% मार्जिन पूंजी, और सरकारी सब्सिडी के संबंध में किस प्रकार सहायता करूँ?`,
+          cta: { label: 'सरकारी योजनाएं देखें', path: '/schemes' }
+        };
+      }
+      return {
+        text: `Hello! I am your Samarth AI Financial Advisor. How can I help structure your business credit, calculate margin money, or find concessional schemes today?`,
+        cta: { label: 'Browse Verified Schemes', path: '/schemes' }
+      };
+    }
+
+    // 3. Match against Structured Knowledge & Reasoning Models
+    for (const item of REASONING_DATABASE) {
+      if (item.triggers.some(t => q.includes(t.toLowerCase()))) {
+        const localized = lang === 'mr' ? item.mr : lang === 'hi' ? item.hi : item.en;
+        return {
+          text: `### ${localized.title}\n\n${localized.body}`,
+          cta: localized.cta
         };
       }
     }
 
-    // 2. Dynamic queries (e.g. Loan calculation, Dairy, Kirana, etc.)
-    if (qLower.includes('dairy') || qLower.includes('दूध') || qLower.includes('भैंस')) {
+    // 4. Logical General Advisor Fallback (Explains based on MoSJE & Banking Logic)
+    if (lang === 'mr') {
       return {
-        textEn: `### Dairy & Milk Farming Business Advice:
-- **Feasible Project Cost:** ₹1,00,000 to ₹15,00,000 (depending on 2 to 10 milch animals).
-- **Required Margin:** Only 10% (e.g. ₹50,000 for a ₹5 Lakh project).
-- **Subsidies & Rebate:** Eligible under NBCFDC Term Loan at 6.5% - 8% and Animal Husbandry Infrastructure Fund (AHIDF) with a **3% interest subvention**.
-- **Moratorium:** 6 months grace period before repayment starts.`,
-        textHi: `### डेयरी फार्मिंग व्यवसाय परामर्श:
-- **प्रोजेक्ट लागत:** ₹1,00,000 से ₹15,00,000 (2 से 10 दुधारू पशुओं के लिए)।
-- **मार्जिन मनी:** मात्र 10% (उदा: 5 लाख के प्रोजेक्ट पर केवल ₹50,000)।
-- **ब्याज दर व सब्सिडी:** NBCFDC टर्म लोन योजना में 6.5% से 8% ब्याज, तथा AHIDF के तहत 3% की अतिरिक्त ब्याज सब्सिडी।
-- **मोरेटोरियम:** 6 महीने की किश्त छूट उपलब्ध है।`,
-        cta: { textEn: 'Run Dairy Feasibility Study', textHi: 'डेयरी रिपोर्ट तैयार करें', path: '/advisory' }
+        text: `आपल्या प्रश्नाचे (**"${rawQuery}"**) सविस्तर आर्थिक विश्लेषण:
+
+1. **शासकीय निकष:** सामाजिक न्याय व एमएसएमई मंत्रालयाच्या नियमांनुसार, ग्रामीण व नवउद्योजकांना १०% मार्जिनवर ९०% पर्यंत सवलतीचे कर्ज उपलब्ध होते.
+2. **हप्ता सवलत:** नवीन उद्योगांना सुरुवातीला ६ ते १२ महिन्यांची मोरेटोरियम (हप्ता सवलत) दिली जाते जेणेकरून व्यवसायाची घडी बसेल.
+3. **पुढील कृती:** आपण समर्थ एआयच्या **"AI Feasibility Study"** वर जाऊन आपल्या प्रकल्पाची संपूर्ण ताळेबंद आणि बँक अहवाल (DPR) त्वरित तयार करू शकता!`,
+        cta: { label: 'व्यवसाय अहवाल तयार करा', path: '/advisory' }
       };
     }
-
-    if (qLower.includes('kirana') || qLower.includes('grocery') || qLower.includes('दुकान')) {
+    if (lang === 'hi') {
       return {
-        textEn: `### Grocery / Kirana Store Advisory:
-- **Typical Project Limit:** ₹50,000 to ₹5,00,000.
-- **Scheme Matching:** Covered under **PMAY Micro Finance** or **NBCFDC General Term Loan**.
-- **Stock & Working Capital:** 60% of loan can be used for inventory and 40% for shop racking/freezer assets.
-- **Repayment:** Monthly installments spread over 3 to 5 years.`,
-        textHi: `### किराना व जनरल स्टोर परामर्श:
-- **सामान्य प्रोजेक्ट आकार:** ₹50,000 से ₹5,00,000।
-- **उपयुक्त योजनाएं:** NBCFDC टर्म लोन और प्रधानमंत्री मुद्रा योजना (शिशु व किशोर वर्ग)।
-- **स्टॉक व वर्किंग कैपिटल:** 60% राशि सामान/स्टॉक भरने के लिए और 40% दुकान फर्नीचर/फ्रिज हेतु।
-- **अदायगी:** 3 से 5 वर्षों में आसान मासिक किश्तों में।`,
-        cta: { textEn: 'Explore Schemes for Retail', textHi: 'दुकान योजनाएं देखें', path: '/schemes' }
+        text: `आपके प्रश्न (**"${rawQuery}"**) का तार्किक व वित्तीय विश्लेषण:
+
+1. **सरकारी नियम:** सामाजिक न्याय एवं एमएसएमई मंत्रालय के दिशानिर्देशों के तहत, उद्यमियों को मात्र 10% मार्जिन पूंजी पर 90% तक का रियायती बैंक ऋण मिलता है।
+2. **किश्त छूट:** व्यवसाय शुरू करने पर पहले 6 से 12 महीने का मोरेटोरियम दिया जाता है ताकि आप बिना किसी आर्थिक दबाव के काम जमा सकें।
+3. **आगे क्या करें:** आप समर्थ एआई के **"AI Feasibility Study"** पेज पर जाकर अपने व्यापार का संपूर्ण लाभ-हानि खाता और बैंक-योग्य DPR रिपोर्ट तैयार कर सकते हैं!`,
+        cta: { label: 'व्यवहार्यता रिपोर्ट बनाएं', path: '/advisory' }
       };
     }
-
-    // 3. Fallback AI business advisory
     return {
-      textEn: `Thank you for your question about: **"${query}"**.
+      text: `Logical Financial Assessment for: **"${rawQuery}"**:
 
-Here is our financial guidance:
-- Under Ministry of Social Justice & Empowerment (MoSJE) guidelines, backward class and rural entrepreneurs can avail concessional credit ranging from ₹50,000 to ₹50,00,000 with a minimal 5% to 10% margin contribution.
-- You enjoy a **6 to 12 months moratorium period** on principal repayments.
-- You can calculate exact monthly installments and project breakdown right on Samarth AI!`,
-      textHi: `आपके प्रश्न: **"${query}"** के संदर्भ में वित्तीय मार्गदर्शन:
-- सामाजिक न्याय एवं अधिकारिता मंत्रालय (MoSJE) के दिशा-निर्देशों के अनुसार, ग्रामीण व पिछड़े वर्ग के उद्यमी ₹50,000 से लेकर ₹50,00,000 तक का रियायती ऋण मात्र 5% से 10% मार्जिन पूंजी पर ले सकते हैं।
-- आपको शुरुआती **6 से 12 महीने का मोरेटोरियम (किश्त छूट)** मिलता है ताकि व्यवसाय स्थापित हो सके।
-- आप समर्थ एआई पर अपनी सटीक ईएमआई और व्यवहार्यता रिपोर्ट तुरंत निकाल सकते हैं!`,
-      cta: { textEn: 'Open Loan Calculator', textHi: 'लोन कैलकुलेटर खोलें', path: '/calculator' }
+1. **Concessional Financing:** Under Ministry of Social Justice & MSME norms, eligible founders only need to contribute **5% to 10% Margin Money**, while 90% is funded via government credit.
+2. **Cashflow Protection:** You are eligible for a **6 to 12 months Moratorium Period** during which no principal loan repayments are due.
+3. **Next Step:** You can run our deterministic financial engine to calculate your exact EMI, subsidy eligibility, and bank-ready DPR!`,
+      cta: { label: 'Open Feasibility Calculator', path: '/advisory' }
     };
   };
 
-  const handleSendMessage = (textToSend) => {
-    const query = (textToSend || inputValue).trim();
-    if (!query) return;
+  const handleSend = (textToSend) => {
+    const q = (textToSend || inputValue).trim();
+    if (!q) return;
 
     const userMsg = {
       id: Date.now().toString(),
       sender: 'user',
-      textEn: query,
-      textHi: query,
+      text: q,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
@@ -305,90 +441,98 @@ Here is our financial guidance:
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate smart thinking delay
     setTimeout(() => {
-      const response = generateResponse(query);
+      const response = generateSmartReasoning(q);
       const botMsg = {
         id: (Date.now() + 1).toString(),
         sender: 'bot',
-        textEn: response.textEn,
-        textHi: response.textHi,
+        text: response.text,
         cta: response.cta,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, botMsg]);
       setIsTyping(false);
-      speakText(lang === 'hi' ? response.textHi : response.textEn);
-    }, 600);
+      speakText(response.text);
+    }, 450);
   };
 
-  const handleQuickPrompt = (promptEn, promptHi) => {
-    const q = lang === 'hi' ? promptHi : promptEn;
-    handleSendMessage(q);
-  };
-
-  const quickPrompts = [
-    { en: 'What is a Moratorium Period?', hi: 'मोरेटोरियम क्या है और किश्त कब से शुरू होती है?' },
-    { en: 'How does 10% Margin Money work?', hi: '10% मार्जिन मनी क्या है और मुझे कितना लगाना होगा?' },
-    { en: 'Which schemes offer 4% interest for women?', hi: 'महिला उद्यमियों के लिए 4% ब्याज वाली योजना कौन सी है?' },
-    { en: 'What documents are required to apply?', hi: 'लोन के लिए कौन-से दस्तावेज चाहिए?' },
-    { en: 'What is a DPR and how do I create it?', hi: 'DPR (प्रोजेक्ट रिपोर्ट) क्या है और कैसे बनती है?' },
-    { en: 'Is land or property guarantee required?', hi: 'क्या कोई जमीन या संपत्ति गिरवी रखनी होगी?' }
+  const quickPills = [
+    {
+      en: 'What is a Moratorium Period?',
+      hi: 'मोरेटोरियम (किश्त छूट) क्या है?',
+      mr: 'मोरेटोरियम (हप्ता सवलत) म्हणजे काय?'
+    },
+    {
+      en: 'How does 10% Margin Money work?',
+      hi: '10% मार्जिन मनी कैसे काम करती है?',
+      mr: '१०% स्वतःचे भांडवल (मार्जिन) कसे काम करते?'
+    },
+    {
+      en: 'Profit in 10-Cow Dairy Farm?',
+      hi: '10 गायों की डेयरी में कितना मुनाफा होगा?',
+      mr: '१० गाईंच्या डेअरीमध्ये किती नफा होईल?'
+    },
+    {
+      en: 'Special 4% Interest for Women?',
+      hi: 'महिलाओं के लिए 4% ब्याज योजना?',
+      mr: 'महिलांसाठी ४% व्याजाची सवलत योजना?'
+    },
+    {
+      en: 'What documents are required to apply?',
+      hi: 'आवेदन हेतु कौन से दस्तावेज चाहिए?',
+      mr: 'कर्ज अर्जासाठी कोणती कागदपत्रे लागतात?'
+    }
   ];
 
   return (
     <>
-      {/* Floating Launcher Button (Bottom Right) */}
+      {/* Floating Bottom-Right Launcher */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-40 animate-bounce-subtle">
+        <div className="fixed bottom-6 right-6 z-40">
           <button
             onClick={() => setIsOpen(true)}
-            className="group flex items-center space-x-2.5 bg-gradient-to-r from-blue-700 via-blue-800 to-slate-900 text-white px-4 py-3 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-blue-400/30"
-            title="Ask Samarth AI Financial Sahayak"
+            className="group flex items-center space-x-2.5 bg-gradient-to-r from-slate-950 via-blue-900 to-indigo-950 text-white px-4 py-3 rounded-full shadow-2xl hover:scale-105 transition-all duration-300 border border-blue-400/40"
           >
             <div className="relative">
-              <div className="w-8 h-8 rounded-full bg-blue-500/30 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-amber-300 group-hover:rotate-12 transition-transform" />
+              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <BrainCircuit className="w-5 h-5 text-amber-300 group-hover:rotate-12 transition-transform" />
               </div>
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full animate-ping" />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full" />
             </div>
             <div className="text-left hidden sm:block">
-              <div className="text-xs font-black uppercase tracking-wider text-amber-300">
-                {lang === 'hi' ? 'एआई सहायक' : 'AI Advisor'}
+              <div className="text-[10px] font-black uppercase tracking-wider text-amber-300">
+                {lang === 'mr' ? 'एआय सल्लागार' : lang === 'hi' ? 'एआई सलाहकार' : 'AI Reasoning'}
               </div>
-              <div className="text-xs font-semibold">
-                {lang === 'hi' ? 'सवाल पूछें (Chat)' : 'Ask Business Terms'}
+              <div className="text-xs font-bold">
+                {lang === 'mr' ? 'समर्थ एआय प्रश्नमंजूषा' : lang === 'hi' ? 'बैंकिंग शब्दावली पूछें' : 'Ask Financial Terms'}
               </div>
             </div>
           </button>
         </div>
       )}
 
-      {/* Modern Conversational Chat Window */}
+      {/* Modern Conversational Window */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 z-50 w-[95vw] sm:w-[420px] max-h-[85vh] h-[640px] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-fadeIn">
+        <div className="fixed bottom-4 right-4 z-50 w-[95vw] sm:w-[440px] max-h-[85vh] h-[640px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-fadeIn">
           
-          {/* Chat Header */}
-          <div className="bg-slate-900 text-white px-4 py-3.5 flex items-center justify-between border-b border-slate-800">
+          {/* Header */}
+          <div className="bg-slate-950 text-white px-4 py-3.5 flex items-center justify-between border-b border-slate-800">
             <div className="flex items-center space-x-3">
-              <div className="relative">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xs">
-                  <Bot className="w-5 h-5 text-white" />
-                </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-slate-900 rounded-full" />
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-xs">
+                <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
-                <div className="flex items-center space-x-1.5">
-                  <h3 className="text-sm font-bold tracking-tight">
-                    {lang === 'hi' ? 'समर्थ एआई सहायक' : 'Samarth AI Sahayak'}
+                <div className="flex items-center space-x-2">
+                  <h3 className="text-sm font-bold">
+                    {lang === 'mr' ? 'समर्थ एआय आर्थिक सल्लागार' : lang === 'hi' ? 'समर्थ एआई वित्तीय सलाहकार' : 'Samarth AI Financial Advisor'}
                   </h3>
-                  <span className="bg-blue-600/30 text-blue-200 border border-blue-400/20 text-[10px] font-bold px-1.5 py-0.2 rounded">
-                    GEMINI
+                  <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold px-1.5 py-0.2 rounded">
+                    ONLINE
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  {lang === 'hi' ? 'बैंकिंग व व्यापारिक शब्दावली गाइड' : 'MSME & Concessional Finance Guide'}
+                  {lang === 'mr' ? 'तार्किक विश्लेषण व शासकीय योजना' : lang === 'hi' ? 'तार्किक परामर्श व सरकारी योजनाएं' : 'Logical Banking & Scheme Reasoning'}
                 </p>
               </div>
             </div>
@@ -396,25 +540,23 @@ Here is our financial guidance:
             <div className="flex items-center space-x-1 text-slate-300">
               <button
                 onClick={() => setVoiceSpeechEnabled(!voiceSpeechEnabled)}
-                className={`p-1.5 rounded-lg hover:bg-slate-800 transition-colors ${
+                className={`p-1.5 rounded-xl hover:bg-slate-800 transition-colors ${
                   voiceSpeechEnabled ? 'text-amber-300 bg-slate-800' : 'text-slate-400'
                 }`}
-                title={voiceSpeechEnabled ? 'Mute AI voice' : 'Enable voice speech for answers'}
+                title={voiceSpeechEnabled ? 'Mute AI voice' : 'Enable voice read-aloud'}
               >
                 {voiceSpeechEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
               <button
-                onClick={() => {
-                  setMessages([messages[0]]);
-                }}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                onClick={() => setMessages([{ id: 'welcome', sender: 'bot', text: getWelcomeMessage(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }])}
+                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
                 title="Reset conversation"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
                 title="Close chat"
               >
                 <X className="w-5 h-5" />
@@ -422,28 +564,30 @@ Here is our financial guidance:
             </div>
           </div>
 
-          {/* Quick Prompts Carousel Bar */}
+          {/* Quick Questions Pills */}
           <div className="bg-slate-50 border-b border-slate-200 px-3 py-2 flex items-center space-x-2 overflow-x-auto no-scrollbar">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 shrink-0">
-              {lang === 'hi' ? 'लोकप्रिय विषय:' : 'Quick Topics:'}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 shrink-0 flex items-center gap-1">
+              <Lightbulb className="w-3 h-3 text-amber-500" />
+              {lang === 'mr' ? 'महत्वाचे प्रश्न:' : lang === 'hi' ? 'महत्वपूर्ण प्रश्न:' : 'Quick Questions:'}
             </span>
-            {quickPrompts.slice(0, 4).map((p, i) => (
-              <button
-                key={i}
-                onClick={() => handleQuickPrompt(p.en, p.hi)}
-                className="text-[11px] font-semibold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full whitespace-nowrap transition-all shadow-2xs hover:border-blue-300 shrink-0"
-              >
-                {lang === 'hi' ? p.hi.split('?')[0] + '?' : p.en}
-              </button>
-            ))}
+            {quickPills.map((pill, i) => {
+              const pillText = lang === 'mr' ? pill.mr : lang === 'hi' ? pill.hi : pill.en;
+              return (
+                <button
+                  key={i}
+                  onClick={() => handleSend(pillText)}
+                  className="text-[11px] font-semibold text-blue-700 bg-white hover:bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full whitespace-nowrap transition-all shadow-2xs shrink-0"
+                >
+                  {pillText}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Messages Area */}
+          {/* Chat Messages */}
           <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-[#F8FAFC]">
             {messages.map((msg) => {
               const isBot = msg.sender === 'bot';
-              const textContent = lang === 'hi' ? msg.textHi || msg.textEn : msg.textEn;
-
               return (
                 <div
                   key={msg.id}
@@ -457,17 +601,15 @@ Here is our financial guidance:
 
                   <div className={`max-w-[85%] ${isBot ? 'text-left' : 'text-right'}`}>
                     <div
-                      className={`inline-block p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                      className={`inline-block p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
                         isBot
                           ? 'bg-white border border-slate-200 text-slate-800 shadow-2xs rounded-tl-xs'
                           : 'bg-blue-600 text-white shadow-xs rounded-tr-xs text-left'
                       }`}
                     >
-                      {/* Markdown-like formatting helper */}
                       <div className="space-y-2 whitespace-pre-line">
-                        {textContent.split('\n\n').map((paragraph, pIdx) => {
-                          // Clean bold syntax **text**
-                          const parts = paragraph.split(/(\*\*.*?\*\*)/g);
+                        {msg.text.split('\n\n').map((para, pIdx) => {
+                          const parts = para.split(/(\*\*.*?\*\*)/g);
                           return (
                             <p key={pIdx}>
                               {parts.map((part, partIdx) => {
@@ -492,7 +634,6 @@ Here is our financial guidance:
                         })}
                       </div>
 
-                      {/* Action Button inside message */}
                       {msg.cta && (
                         <div className="mt-3 pt-2.5 border-t border-slate-100">
                           <button
@@ -500,9 +641,9 @@ Here is our financial guidance:
                               navigate(msg.cta.path);
                               setIsOpen(false);
                             }}
-                            className="inline-flex items-center space-x-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-3 py-1.5 rounded-lg text-xs transition-colors"
+                            className="inline-flex items-center space-x-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-3 py-1.5 rounded-xl text-xs transition-colors"
                           >
-                            <span>{lang === 'hi' ? msg.cta.textHi : msg.cta.textEn}</span>
+                            <span>{msg.cta.label}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -533,19 +674,21 @@ Here is our financial guidance:
                   <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]" />
                   <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce [animation-delay:0.4s]" />
                 </div>
-                <span>{lang === 'hi' ? 'उत्तर तैयार कर रहे हैं...' : 'Consulting financial rules...'}</span>
+                <span>
+                  {lang === 'mr' ? 'तार्किक उत्तर तयार करत आहे...' : lang === 'hi' ? 'तार्किक उत्तर तैयार कर रहे हैं...' : 'Analyzing financial logic...'}
+                </span>
               </div>
             )}
 
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Chat Input Bar */}
+          {/* Input Area */}
           <div className="p-3 bg-white border-t border-slate-200">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                handleSendMessage();
+                handleSend();
               }}
               className="flex items-center gap-2"
             >
@@ -554,9 +697,11 @@ Here is our financial guidance:
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder={
-                  lang === 'hi'
-                    ? 'मोरेटोरियम, मार्जिन मनी, या लोन प्रक्रिया पूछें...'
-                    : 'Ask about moratorium, margin money, schemes...'
+                  lang === 'mr'
+                    ? 'मोरेटोरियम, नफा, किंवा १०% भांडवल विचारा...'
+                    : lang === 'hi'
+                    ? 'मोरेटोरियम, मुनाफा, या 10% मार्जिन पूछें...'
+                    : 'Ask about moratorium, profit, margin money...'
                 }
                 className="flex-grow px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all text-slate-900"
               />
@@ -565,15 +710,14 @@ Here is our financial guidance:
                 type="submit"
                 disabled={!inputValue.trim() || isTyping}
                 className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-all shadow-xs disabled:opacity-40"
-                title="Send query"
               >
                 <Send className="w-4 h-4" />
               </button>
             </form>
 
             <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2 px-1">
-              <span>{lang === 'hi' ? 'सार्वजनिक सरकारी पोर्टल नियमों पर आधारित' : 'Grounded in MoSJE & MyScheme rules'}</span>
-              <span className="font-medium text-emerald-600">● 100% Free Advisory</span>
+              <span>{lang === 'mr' ? '१०% मार्जिन व मोरेटोरियम गणित' : lang === 'hi' ? '10% मार्जिन व मोरेटोरियम गणित' : 'MSME Concessional Credit Reasoning'}</span>
+              <span className="font-semibold text-emerald-600">● 100% Free Advisory</span>
             </div>
           </div>
 

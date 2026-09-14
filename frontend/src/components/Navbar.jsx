@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 const Navbar = () => {
-  const { lang, toggleLanguage } = useLanguage();
+  const { lang, setLang } = useLanguage();
   const { user, login, register, loginWithGoogle, logout, isConfigured } = useAuth();
   const location = useLocation();
 
@@ -77,22 +77,31 @@ const Navbar = () => {
       path: '/schemes', 
       labelEn: 'Schemes Directory', 
       labelHi: 'सरकारी योजनाएं', 
+      labelMr: 'सरकारी योजना',
       icon: BookOpen 
     },
     { 
       path: '/calculator', 
       labelEn: 'Loan & EMI Calculator', 
       labelHi: 'स्मार्ट कैलकुलेटर', 
+      labelMr: 'कर्ज व EMI गणक',
       icon: Calculator 
     },
     { 
       path: '/advisory', 
       labelEn: 'AI Feasibility Study', 
       labelHi: 'एआई व्यवहार्यता रिपोर्ट', 
+      labelMr: 'एआय व्यवसाय अहवाल',
       icon: Sparkles,
       highlight: true
     },
   ];
+
+  const getNavLabel = (link) => {
+    if (lang === 'mr') return link.labelMr;
+    if (lang === 'hi') return link.labelHi;
+    return link.labelEn;
+  };
 
   return (
     <>
@@ -139,7 +148,7 @@ const Navbar = () => {
                     }`}
                   >
                     <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                    <span>{lang === 'hi' ? link.labelHi : link.labelEn}</span>
+                    <span>{getNavLabel(link)}</span>
                   </Link>
                 );
               })}
@@ -147,15 +156,36 @@ const Navbar = () => {
 
             {/* Right Action Controls */}
             <div className="hidden sm:flex items-center space-x-3">
-              {/* Language Switcher */}
-              <button
-                onClick={toggleLanguage}
-                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-2xs"
-                title="Toggle Language / भाषा बदलें"
-              >
-                <Globe className="w-3.5 h-3.5 text-slate-500" />
-                <span>{lang === 'hi' ? 'English' : 'हिन्दी'}</span>
-              </button>
+              {/* 3-Language Segmented Switcher */}
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setLang('en')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    lang === 'en' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  EN
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang('hi')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    lang === 'hi' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  हिन्दी
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang('mr')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                    lang === 'mr' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  मराठी
+                </button>
+              </div>
 
               {/* Authentication Button */}
               {user ? (
@@ -183,19 +213,18 @@ const Navbar = () => {
                   className="inline-flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-xs"
                 >
                   <LogIn className="w-3.5 h-3.5" />
-                  <span>{lang === 'hi' ? 'लॉगिन' : 'Sign In'}</span>
+                  <span>{lang === 'mr' ? 'लॉगिन' : lang === 'hi' ? 'लॉगिन' : 'Sign In'}</span>
                 </button>
               )}
             </div>
 
             {/* Mobile Menu Button */}
             <div className="flex md:hidden items-center space-x-2">
-              <button
-                onClick={toggleLanguage}
-                className="px-2.5 py-1 rounded-md border border-slate-200 text-xs font-semibold text-slate-700 bg-white"
-              >
-                {lang === 'hi' ? 'EN' : 'हि'}
-              </button>
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg text-xs font-bold">
+                <button onClick={() => setLang('en')} className={`px-1.5 py-0.5 rounded ${lang === 'en' ? 'bg-white text-blue-700' : 'text-slate-600'}`}>EN</button>
+                <button onClick={() => setLang('hi')} className={`px-1.5 py-0.5 rounded ${lang === 'hi' ? 'bg-white text-blue-700' : 'text-slate-600'}`}>हि</button>
+                <button onClick={() => setLang('mr')} className={`px-1.5 py-0.5 rounded ${lang === 'mr' ? 'bg-white text-blue-700' : 'text-slate-600'}`}>म</button>
+              </div>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100"
