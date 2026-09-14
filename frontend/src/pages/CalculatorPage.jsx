@@ -70,11 +70,36 @@ const CalculatorPage = () => {
 
   // SIH 2026 Presets
   const presets = [
-    { label: "Micro Finance Scheme (<= 1.40L)", cost: 140000, margin: 14000, rate: 6.5, years: 3, mor: 3 },
-    { label: "Term Loan - 5 Lakh Project", cost: 500000, margin: 50000, rate: 8.0, years: 7, mor: 6 },
-    { label: "Term Loan - 10 Lakh (SIH Benchmark)", cost: 1000000, margin: 100000, rate: 8.0, years: 7, mor: 6 },
-    { label: "Term Loan - 25 Lakh Enterprise", cost: 2500000, margin: 250000, rate: 8.0, years: 7, mor: 6 },
-    { label: "Term Loan - Maximum 50 Lakh", cost: 5000000, margin: 500000, rate: 8.0, years: 7, mor: 6 }
+    { 
+      label: "Micro Finance Scheme (<= 1.40L)", 
+      labelHi: "माइक्रो फाइनेंस योजना (<= 1.40 लाख)",
+      labelMr: "मायक्रो फायनान्स योजना (<= १.४० लाख)",
+      cost: 140000, margin: 14000, rate: 6.5, years: 3, mor: 3 
+    },
+    { 
+      label: "Term Loan - 5 Lakh Project", 
+      labelHi: "टर्म लोन - 5 लाख प्रोजेक्ट",
+      labelMr: "मुदत कर्ज - ५ लाख प्रकल्प",
+      cost: 500000, margin: 50000, rate: 8.0, years: 7, mor: 6 
+    },
+    { 
+      label: "Term Loan - 10 Lakh (SIH Benchmark)", 
+      labelHi: "टर्म लोन - 10 लाख (SIH मानक)",
+      labelMr: "मुदत कर्ज - १० लाख (SIH मानक)",
+      cost: 1000000, margin: 100000, rate: 8.0, years: 7, mor: 6 
+    },
+    { 
+      label: "Term Loan - 25 Lakh Enterprise", 
+      labelHi: "टर्म लोन - 25 लाख उद्यम",
+      labelMr: "मुदत कर्ज - २५ लाख उद्योग",
+      cost: 2500000, margin: 250000, rate: 8.0, years: 7, mor: 6 
+    },
+    { 
+      label: "Term Loan - Maximum 50 Lakh", 
+      labelHi: "टर्म लोन - अधिकतम 50 लाख",
+      labelMr: "मुदत कर्ज - कमाल ५० लाख",
+      cost: 5000000, margin: 500000, rate: 8.0, years: 7, mor: 6 
+    }
   ];
 
   const applyPreset = (p) => {
@@ -110,7 +135,13 @@ const CalculatorPage = () => {
   const totalInterest = Math.max(0, totalRepayment - loanAmount);
   const workingCapital = Math.round(totalCost * 0.18);
 
-  const schemeName = totalCost <= 140000 ? "Micro Finance Scheme" : "Term Loan Scheme";
+  const isMicro = totalCost <= 140000;
+  const schemeNameEn = isMicro ? "Micro Finance Scheme" : "Term Loan Scheme";
+  const schemeName = lang === 'mr' 
+    ? (isMicro ? "मायक्रो फायनान्स योजना" : "मुदत कर्ज योजना (Term Loan)")
+    : lang === 'hi'
+    ? (isMicro ? "माइक्रो फाइनेंस योजना" : "टर्म लोन योजना (Term Loan)")
+    : schemeNameEn;
 
   // Generate Quarter-by-Quarter Amortization Schedule with Moratorium
   const generateQuarterlyAmortization = () => {
@@ -133,12 +164,17 @@ const CalculatorPage = () => {
     for (let q = 1; q <= displayQuarters; q++) {
       const mStart = (q - 1) * 3 + 1;
       const mEnd = q * 3;
+      const monthLabel = lang === 'mr' 
+        ? `महिना ${mStart}–${mEnd}` 
+        : lang === 'hi' 
+        ? `माह ${mStart}–${mEnd}` 
+        : `Month ${mStart}–${mEnd}`;
 
       if (q <= morQuarters) {
         const intDue = Math.round(balance * quarterlyRate);
         schedule.push({
           quarter: q,
-          label: `Month ${mStart}-${mEnd} (Moratorium)`,
+          label: `${monthLabel} ${lang === 'mr' ? '(सवलत कालावधी)' : lang === 'hi' ? '(मोरेटोरियम)' : '(Moratorium)'}`,
           isMor: true,
           installment: 0,
           principalPaid: 0,
@@ -151,7 +187,7 @@ const CalculatorPage = () => {
         balance = Math.max(0, balance - princPaid);
         schedule.push({
           quarter: q,
-          label: `Month ${mStart}-${mEnd}`,
+          label: monthLabel,
           isMor: false,
           installment: princPaid + intPaid,
           principalPaid: princPaid,
@@ -173,13 +209,15 @@ const CalculatorPage = () => {
         <div className="space-y-2">
           <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 border border-blue-200/80 px-3 py-1 rounded-full text-xs font-bold">
             <Coins className="w-3.5 h-3.5 text-blue-600" />
-            <span>{lang === 'hi' ? 'स्मार्ट वित्तीय कैलकुलेटर एवं स्कीम राउटर' : 'Institutional Loan Structuring Engine'}</span>
+            <span>{lang === 'mr' ? 'संस्थात्मक कर्ज रचना व योजना गणक' : lang === 'hi' ? 'स्मार्ट वित्तीय कैलकुलेटर एवं स्कीम राउटर' : 'Institutional Loan Structuring Engine'}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            {lang === 'hi' ? '10% मार्जिन मनी एवं 90% लोन कैलकुलेटर' : '10% Margin Money & 90% Concessional Loan Calculator'}
+            {lang === 'mr' ? '१०% स्वभांडवल व ९०% शासकीय सवलतीचे कर्ज गणक' : lang === 'hi' ? '10% मार्जिन मनी एवं 90% लोन कैलकुलेटर' : '10% Margin Money & 90% Concessional Loan Calculator'}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-            {lang === 'hi'
+            {lang === 'mr'
+              ? 'तुमच्याकडे उपलब्ध असलेले १०% भांडवल प्रविष्ट करा; हे इंजिन आपोआप एकूण संभाव्य प्रकल्प खर्च (भांडवल × १०), ९०% शासकीय कर्ज पात्रता, योग्य योजना आणि सवलतीसह त्रैमासिक हप्त्यांची अचूक गणना करेल.'
+              : lang === 'hi'
               ? 'अपनी उपलब्ध 10% पूंजी दर्ज करें; सिस्टम स्वचालित रूप से अधिकतम प्रोजेक्ट लागत (पूंजी/10%), 90% लोन पात्रता और मोरेटोरियम सहित त्रैमासिक किश्तों की गणना करेगा।'
               : 'Enter your available margin money; the engine calculates total feasible project cost, 90% loan eligibility, scheme routing, and quarterly repayment obligations with moratorium.'}
           </p>
@@ -197,14 +235,14 @@ const CalculatorPage = () => {
           className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl border border-slate-200 transition-all flex-shrink-0"
         >
           <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-          <span>{lang === 'hi' ? 'डिफ़ॉल्ट ₹10L पर रीसेट करें' : 'Reset to Benchmark (₹10L)'}</span>
+          <span>{lang === 'mr' ? 'मूळ ₹१० लाख वर रीसेट करा' : lang === 'hi' ? 'डिफ़ॉल्ट ₹10L पर रीसेट करें' : 'Reset to Benchmark (₹10L)'}</span>
         </button>
       </div>
 
       {/* Preset Chips */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
         <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-          {lang === 'hi' ? 'सरकारी स्कीम प्रीसेट:' : 'Official Scheme Presets:'}
+          {lang === 'mr' ? 'अधिकृत योजना पर्याय:' : lang === 'hi' ? 'सरकारी स्कीम प्रीसेट:' : 'Official Scheme Presets:'}
         </span>
         <div className="flex flex-wrap gap-2">
           {presets.map((p, idx) => (
@@ -218,7 +256,7 @@ const CalculatorPage = () => {
                   : 'bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-[#0B3D91] border-slate-200'
               }`}
             >
-              <span>{p.label}</span>
+              <span>{lang === 'mr' ? p.labelMr : lang === 'hi' ? p.labelHi : p.label}</span>
               <span className="opacity-80 font-normal">({(p.cost / 100000).toFixed(1)}L @ {p.rate}%)</span>
             </button>
           ))}
@@ -234,7 +272,7 @@ const CalculatorPage = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center space-x-2">
               <Layers className="w-5 h-5 text-[#FF9933]" />
-              <span>{lang === 'hi' ? 'मार्जिन व प्रोजेक्ट लागत पैरामीटर' : 'Capital & Scheme Parameters'}</span>
+              <span>{lang === 'mr' ? 'भांडवल व प्रकल्प खर्च मापदंड' : lang === 'hi' ? 'मार्जिन व प्रोजेक्ट लागत पैरामीटर' : 'Capital & Scheme Parameters'}</span>
             </h2>
 
             {/* Mode Toggle */}
@@ -244,14 +282,14 @@ const CalculatorPage = () => {
                 onClick={() => setCalcMode('margin')}
                 className={`px-2.5 py-1 rounded-lg transition-all ${calcMode === 'margin' ? 'bg-white text-[#0B3D91] shadow-2xs' : 'text-slate-500'}`}
               >
-                10% Margin
+                {lang === 'mr' ? '१०% भांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}
               </button>
               <button
                 type="button"
                 onClick={() => setCalcMode('cost')}
                 className={`px-2.5 py-1 rounded-lg transition-all ${calcMode === 'cost' ? 'bg-white text-[#0B3D91] shadow-2xs' : 'text-slate-500'}`}
               >
-                Project Cost
+                {lang === 'mr' ? 'प्रकल्प खर्च' : lang === 'hi' ? 'प्रोजेक्ट लागत' : 'Project Cost'}
               </button>
             </div>
           </div>
@@ -260,7 +298,7 @@ const CalculatorPage = () => {
           <div className="space-y-2 p-4 rounded-2xl bg-amber-50/60 border border-amber-200">
             <div className="flex justify-between items-center">
               <label className="text-xs sm:text-sm font-bold text-amber-950">
-                {lang === 'hi' ? 'उपलब्ध मार्जिन पूंजी (Available Margin Capital):' : 'Available Margin Capital (10%):'}
+                {lang === 'mr' ? 'उपलब्ध स्वभांडवल (१०% Margin Capital):' : lang === 'hi' ? 'उपलब्ध मार्जिन पूंजी (Available Margin Capital):' : 'Available Margin Capital (10%):'}
               </label>
               <div className="bg-white border border-amber-300 px-3 py-1 rounded-xl shadow-2xs">
                 <span className="text-base font-black text-amber-950">
@@ -279,9 +317,9 @@ const CalculatorPage = () => {
             />
             <div className="flex justify-between text-[11px] text-amber-800 font-medium">
               <span>₹10,000</span>
-              <span>₹1,00,000 (SIH Example)</span>
-              <span>₹2.5 Lakh</span>
-              <span>₹5 Lakh (Max)</span>
+              <span>₹1,00,000 ({lang === 'mr' ? 'SIH उदाहरण' : lang === 'hi' ? 'SIH उदाहरण' : 'SIH Example'})</span>
+              <span>₹2.5 {lang === 'mr' || lang === 'hi' ? 'लाख' : 'Lakh'}</span>
+              <span>₹5 {lang === 'mr' ? 'लाख (कमाल)' : lang === 'hi' ? 'लाख (अधिकतम)' : 'Lakh (Max)'}</span>
             </div>
           </div>
 
@@ -289,14 +327,14 @@ const CalculatorPage = () => {
           <div className="space-y-2 p-4 rounded-2xl bg-blue-50/60 border border-blue-200">
             <div className="flex justify-between items-center">
               <label className="text-xs sm:text-sm font-bold text-blue-950">
-                {lang === 'hi' ? 'व्यवहार्य कुल प्रोजेक्ट लागत (Total Project Cost):' : 'Feasible Project Cost (Margin / 10%):'}
+                {lang === 'mr' ? 'व्यवहार्य एकूण प्रकल्प खर्च (भांडवल / १०%):' : lang === 'hi' ? 'व्यवहार्य कुल प्रोजेक्ट लागत (Total Project Cost):' : 'Feasible Project Cost (Margin / 10%):'}
               </label>
               <div className="bg-white border border-blue-300 px-3 py-1 rounded-xl shadow-2xs">
                 <span className="text-base font-black text-[#0B3D91]">
                   ₹{totalCost.toLocaleString('en-IN')}
                 </span>
                 <span className="text-xs text-slate-500 ml-1">
-                  ({(totalCost / 100000).toFixed(2)} Lakh)
+                  ({(totalCost / 100000).toFixed(2)} {lang === 'mr' || lang === 'hi' ? 'लाख' : 'Lakh'})
                 </span>
               </div>
             </div>
@@ -310,10 +348,10 @@ const CalculatorPage = () => {
               className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0B3D91]"
             />
             <div className="flex justify-between text-[11px] text-blue-800 font-medium">
-              <span>₹1.40L (Micro Tier)</span>
-              <span>₹10.0L (Term Tier)</span>
+              <span>₹1.40L ({lang === 'mr' ? 'मायक्रो टियर' : lang === 'hi' ? 'माइक्रो टियर' : 'Micro Tier'})</span>
+              <span>₹10.0L ({lang === 'mr' ? 'मुदत कर्ज' : lang === 'hi' ? 'टर्म टियर' : 'Term Tier'})</span>
               <span>₹25.0L</span>
-              <span>₹50.0L (Max Cap)</span>
+              <span>₹50.0L ({lang === 'mr' ? 'कमाल मर्यादा' : lang === 'hi' ? 'अधिकतम सीमा' : 'Max Cap'})</span>
             </div>
           </div>
 
@@ -321,7 +359,7 @@ const CalculatorPage = () => {
           <div className="p-4 rounded-2xl bg-slate-900 text-white flex items-center justify-between shadow-md">
             <div>
               <span className="text-[10px] uppercase font-extrabold text-[#FF9933] block">
-                AUTOMATIC SCHEME ROUTER
+                {lang === 'mr' ? 'स्वयंचलित योजना निवड (AUTOMATIC SCHEME ROUTER)' : lang === 'hi' ? 'स्वचालित स्कीम चयन (AUTOMATIC ROUTER)' : 'AUTOMATIC SCHEME ROUTER'}
               </span>
               <div className="text-sm font-black text-white flex items-center space-x-1.5 mt-0.5">
                 <BadgeCheck className="w-4 h-4 text-emerald-400" />
@@ -329,8 +367,8 @@ const CalculatorPage = () => {
               </div>
               <p className="text-[11px] text-slate-300">
                 {totalCost <= 140000 
-                  ? 'Logic A: 6.5% interest, 3-year tenure, 3-month moratorium' 
-                  : 'Logic B: 8.0% interest, 7-year tenure, 6-month moratorium'}
+                  ? (lang === 'mr' ? 'नियम अ: ६.५% व्याजदर, ३ वर्षांची मुदत, ३ महिने सवलत कालावधी' : lang === 'hi' ? 'नियम A: 6.5% ब्याज, 3 वर्ष अवधि, 3 माह मोरेटोरियम' : 'Logic A: 6.5% interest, 3-year tenure, 3-month moratorium') 
+                  : (lang === 'mr' ? 'नियम ब: ८.०% व्याजदर, ७ वर्षांची मुदत, ६ महिने सवलत कालावधी' : lang === 'hi' ? 'नियम B: 8.0% ब्याज, 7 वर्ष अवधि, 6 माह मोरेटोरियम' : 'Logic B: 8.0% interest, 7-year tenure, 6-month moratorium')}
               </p>
             </div>
             <span className={`text-xs font-bold px-3 py-1 rounded-full ${totalCost <= 140000 ? 'bg-emerald-500 text-white' : 'bg-[#FF9933] text-black'}`}>
@@ -349,11 +387,11 @@ const CalculatorPage = () => {
                 className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500"
               />
               <label htmlFor="calcWomen" className="text-xs sm:text-sm font-bold text-pink-950 cursor-pointer">
-                {lang === 'hi' ? 'महिला उद्यमी / SHG (1% अतिरिक्त ब्याज छूट लागू करें)' : 'Women Beneficiary / SHG (Apply 1% Special Rebate)'}
+                {lang === 'mr' ? 'महिला उद्योजक / बचत गट (१% अतिरिक्त व्याज सवलत लागू करा)' : lang === 'hi' ? 'महिला उद्यमी / SHG (1% अतिरिक्त ब्याज छूट लागू करें)' : 'Women Beneficiary / SHG (Apply 1% Special Rebate)'}
               </label>
             </div>
             <span className="text-xs font-bold text-pink-700 bg-white px-2.5 py-0.5 rounded-lg border border-pink-200">
-              -1.0% Rate
+              -1.0% {lang === 'mr' ? 'सवलत' : lang === 'hi' ? 'छूट' : 'Rate'}
             </span>
           </div>
 
@@ -365,7 +403,7 @@ const CalculatorPage = () => {
           {/* Main Card */}
           <div className="bg-gradient-to-br from-[#0B3D91] via-[#072a66] to-[#041a3d] text-white p-6 sm:p-7 rounded-3xl shadow-xl border border-blue-500/20 space-y-4">
             <div className="flex items-center justify-between text-blue-200 text-xs font-bold uppercase tracking-wider">
-              <span>{lang === 'hi' ? 'अनुमानित मासिक किश्त (EMI)' : 'Monthly Equated Installment'}</span>
+              <span>{lang === 'mr' ? 'अंदाजे मासिक हप्ता (EMI)' : lang === 'hi' ? 'अनुमानित मासिक किश्त (EMI)' : 'Monthly Equated Installment'}</span>
               <span className="bg-[#138808] text-white text-[10px] px-2 py-0.5 rounded-full font-black">
                 100% MATH
               </span>
@@ -374,10 +412,12 @@ const CalculatorPage = () => {
             <div>
               <div className="text-4xl sm:text-5xl font-black text-white tracking-tight flex items-baseline space-x-1">
                 <span>₹{monthlyEMI.toLocaleString('en-IN')}</span>
-                <span className="text-xs text-blue-200 font-normal">/{lang === 'hi' ? 'माह' : 'mo'}</span>
+                <span className="text-xs text-blue-200 font-normal">/{lang === 'mr' ? 'महिना' : lang === 'hi' ? 'माह' : 'mo'}</span>
               </div>
               <p className="text-xs text-blue-200 mt-1 font-medium">
-                {lang === 'hi'
+                {lang === 'mr'
+                  ? `त्रैमासिक हप्ता: ₹${quarterlyInstallment.toLocaleString('en-IN')} (${moratoriumMonths} महिने सवलतीनंतर सुरू)`
+                  : lang === 'hi'
                   ? `त्रैमासिक भुगतान: ₹${quarterlyInstallment.toLocaleString('en-IN')} (${moratoriumMonths} माह की छूट के बाद शुरू)`
                   : `Quarterly payment: ₹${quarterlyInstallment.toLocaleString('en-IN')} (after ${moratoriumMonths}m moratorium)`}
               </p>
@@ -386,8 +426,8 @@ const CalculatorPage = () => {
             {/* Visual Ratio Bar */}
             <div className="space-y-1.5 pt-2">
               <div className="flex justify-between text-xs text-blue-200 font-semibold">
-                <span>10% Margin: ₹{marginMoney.toLocaleString('en-IN')}</span>
-                <span>90% Loan: ₹{loanAmount.toLocaleString('en-IN')}</span>
+                <span>{lang === 'mr' ? '१०% स्वभांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}: ₹{marginMoney.toLocaleString('en-IN')}</span>
+                <span>{lang === 'mr' ? '९०% शासकीय कर्ज' : lang === 'hi' ? '90% लोन' : '90% Loan'}: ₹{loanAmount.toLocaleString('en-IN')}</span>
               </div>
               <div className="w-full h-3.5 bg-white/20 rounded-full overflow-hidden flex">
                 <div style={{ width: '10%' }} className="bg-[#FF9933] h-full" title="Margin"></div>
@@ -399,7 +439,7 @@ const CalculatorPage = () => {
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
               <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
                 <span className="text-[11px] text-blue-200 block font-medium">
-                  {lang === 'hi' ? 'स्वीकृत 90% लोन' : '90% Loan Disbursed'}
+                  {lang === 'mr' ? 'मंजूर ९०% शासकीय कर्ज' : lang === 'hi' ? 'स्वीकृत 90% लोन' : '90% Loan Disbursed'}
                 </span>
                 <span className="text-base font-black text-white">
                   ₹{loanAmount.toLocaleString('en-IN')}
@@ -408,7 +448,7 @@ const CalculatorPage = () => {
 
               <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
                 <span className="text-[11px] text-blue-200 block font-medium">
-                  {lang === 'hi' ? 'कार्यशील पूंजी (18%)' : 'Working Capital (18%)'}
+                  {lang === 'mr' ? 'खेळते भांडवल (१८%)' : lang === 'hi' ? 'कार्यशील पूंजी (18%)' : 'Working Capital (18%)'}
                 </span>
                 <span className="text-base font-black text-amber-300">
                   ₹{workingCapital.toLocaleString('en-IN')}
@@ -421,15 +461,15 @@ const CalculatorPage = () => {
                 navigate('/advisory', {
                   state: {
                     prefilledScheme: {
-                      scheme_name: schemeName,
+                      scheme_name: schemeNameEn,
                       max_cost: totalCost
                     }
                   }
                 });
               }}
-              className="w-full py-3.5 bg-gradient-to-r from-[#FF9933] to-amber-500 hover:from-amber-500 hover:to-orange-500 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg mt-4"
+              className="w-full py-3.5 bg-gradient-to-r from-[#FF9933] to-amber-500 hover:from-amber-500 hover:to-orange-500 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg mt-4 cursor-pointer"
             >
-              <span>{lang === 'hi' ? 'पूर्ण व्यवहार्यता रिपोर्ट तैयार करें' : 'Generate Full Feasibility Report'}</span>
+              <span>{lang === 'mr' ? 'संपूर्ण व्यवसाय अहवाल तयार करा' : lang === 'hi' ? 'पूर्ण व्यवहार्यता रिपोर्ट तैयार करें' : 'Generate Full Feasibility Report'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -444,11 +484,15 @@ const CalculatorPage = () => {
           <div className="flex items-center space-x-2 text-[#0B3D91]">
             <FileSpreadsheet className="w-5 h-5 text-[#FF9933]" />
             <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
-              {lang === 'hi' ? `त्रैमासिक पुनर्भुगतान विवरण (${moratoriumMonths} माह मोरेटोरियम अवधि सहित)` : `Quarterly Repayment Schedule (${moratoriumMonths}-Month Moratorium Period Factored)`}
+              {lang === 'mr' 
+                ? `त्रैमासिक हप्ता परतफेड तपशील (${moratoriumMonths} महिने सवलत कालावधीसह)` 
+                : lang === 'hi' 
+                ? `त्रैमासिक पुनर्भुगतान विवरण (${moratoriumMonths} माह मोरेटोरियम अवधि सहित)` 
+                : `Quarterly Repayment Schedule (${moratoriumMonths}-Month Moratorium Period Factored)`}
             </h3>
           </div>
           <span className="text-xs bg-[#0B3D91] text-white px-3 py-1 rounded-full font-bold">
-            {tenureYears} Years ({tenureYears * 4} Quarters)
+            {tenureYears} {lang === 'mr' ? 'वर्षे' : lang === 'hi' ? 'वर्ष' : 'Years'} ({tenureYears * 4} {lang === 'mr' ? 'तिमाही हप्ते' : lang === 'hi' ? 'किश्तें' : 'Quarters'})
           </span>
         </div>
 
@@ -456,19 +500,19 @@ const CalculatorPage = () => {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-[#0B3D91] text-white">
-                <th className="p-3 font-bold rounded-l">{lang === 'hi' ? 'तिमाही (Quarter)' : 'Quarter'}</th>
-                <th className="p-3 font-bold">{lang === 'hi' ? 'अवधि' : 'Months'}</th>
-                <th className="p-3 font-bold">{lang === 'hi' ? 'किश्त राशि' : 'Installment Paid'}</th>
-                <th className="p-3 font-bold">{lang === 'hi' ? 'मूलधन' : 'Principal'}</th>
-                <th className="p-3 font-bold">{lang === 'hi' ? 'ब्याज' : 'Interest'}</th>
-                <th className="p-3 font-bold rounded-r">{lang === 'hi' ? 'बकाया लोन' : 'Closing Balance'}</th>
+                <th className="p-3 font-bold rounded-l">{lang === 'mr' ? 'तिमाही (हप्ता)' : lang === 'hi' ? 'तिमाही (Quarter)' : 'Quarter'}</th>
+                <th className="p-3 font-bold">{lang === 'mr' ? 'कालावधी (महिने)' : lang === 'hi' ? 'अवधि' : 'Months'}</th>
+                <th className="p-3 font-bold">{lang === 'mr' ? 'एकूण हप्ता' : lang === 'hi' ? 'किश्त राशि' : 'Installment Paid'}</th>
+                <th className="p-3 font-bold">{lang === 'mr' ? 'भरलेले मुद्दल' : lang === 'hi' ? 'मूलधन' : 'Principal'}</th>
+                <th className="p-3 font-bold">{lang === 'mr' ? 'व्याज' : lang === 'hi' ? 'ब्याज' : 'Interest'}</th>
+                <th className="p-3 font-bold rounded-r">{lang === 'mr' ? 'शिल्लक कर्ज' : lang === 'hi' ? 'बकाया लोन' : 'Closing Balance'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium">
               {amortizationSchedule.map((row) => (
                 <tr key={row.quarter} className={row.isMor ? "bg-amber-50/70 font-semibold" : "hover:bg-slate-50"}>
                   <td className="p-3 font-bold text-[#0B3D91]">
-                    Q{row.quarter} {row.isMor && <span className="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded ml-1">Moratorium</span>}
+                    Q{row.quarter} {row.isMor && <span className="text-[10px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded ml-1 font-bold">{lang === 'mr' ? 'सवलत' : lang === 'hi' ? 'मोरेटोरियम' : 'Moratorium'}</span>}
                   </td>
                   <td className="p-3 text-slate-600">{row.label}</td>
                   <td className="p-3 font-extrabold text-slate-900">₹{row.installment.toLocaleString('en-IN')}</td>

@@ -106,11 +106,11 @@ const FormPage = () => {
   ];
 
   const presetMarginAmounts = [
-    { label: '₹14,000 (1.4L Project)', margin: 14000, cost: 140000, scheme: 'Micro Finance (6.5%)' },
-    { label: '₹50,000 (5L Project)', margin: 50000, cost: 500000, scheme: 'Term Loan (8%)' },
-    { label: '₹1,00,000 (10L Project)', margin: 100000, cost: 1000000, scheme: 'Term Loan (8%)' },
-    { label: '₹2,50,000 (25L Project)', margin: 250000, cost: 2500000, scheme: 'Term Loan (8%)' },
-    { label: '₹5,00,000 (50L Project)', margin: 500000, cost: 5000000, scheme: 'Term Loan (8%)' }
+    { label: '₹14,000 (1.4L Project)', labelMr: '₹१४,००० (१.४ लाख प्रकल्प)', margin: 14000, cost: 140000, scheme: 'Micro Finance (6.5%)', schemeMr: 'मायक्रो फायनान्स (६.५%)' },
+    { label: '₹50,000 (5L Project)', labelMr: '₹५०,००० (५ लाख प्रकल्प)', margin: 50000, cost: 500000, scheme: 'Term Loan (8%)', schemeMr: 'मुदत कर्ज (८%)' },
+    { label: '₹1,00,000 (10L Project)', labelMr: '₹१,००,००० (१० लाख प्रकल्प)', margin: 100000, cost: 1000000, scheme: 'Term Loan (8%)', schemeMr: 'मुदत कर्ज (८%)' },
+    { label: '₹2,50,000 (25L Project)', labelMr: '₹२,५०,००० (२५ लाख प्रकल्प)', margin: 250000, cost: 2500000, scheme: 'Term Loan (8%)', schemeMr: 'मुदत कर्ज (८%)' },
+    { label: '₹5,00,000 (50L Project)', labelMr: '₹५,००,००० (५० लाख प्रकल्प)', margin: 500000, cost: 5000000, scheme: 'Term Loan (8%)', schemeMr: 'मुदत कर्ज (८%)' }
   ];
 
   const [voiceFeedback, setVoiceFeedback] = useState(null);
@@ -429,53 +429,6 @@ const FormPage = () => {
         </div>
       )}
 
-      {/* Official Beneficiary Authentication Gate */}
-      {!user && (
-        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white p-6 sm:p-7 rounded-3xl border border-blue-500/30 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 animate-fadeIn">
-          <div className="space-y-1.5 text-center md:text-left">
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-              <Lock className="w-3.5 h-3.5" />
-              <span>{lang === 'mr' ? 'अधिकृत अहवालासाठी लॉगिन आवश्यक' : lang === 'hi' ? 'आधिकारिक रिपोर्ट हेतु प्रमाणीकरण आवश्यक' : 'Authentication Required'}</span>
-            </div>
-            <h3 className="text-lg sm:text-xl font-black">
-              {lang === 'mr' ? 'बँक-योग्य DPR अहवाल व कर्ज सवलत सुरक्षित करण्यासाठी लॉगिन करा' : lang === 'hi' ? 'बैंक-योग्य DPR रिपोर्ट व सब्सिडी सुरक्षित रखने हेतु लॉगिन करें' : 'Sign In to Unlock Bank-Ready DPR & Subsidy Feasibility'}
-            </h3>
-            <p className="text-xs text-slate-300 max-w-xl">
-              {lang === 'mr' 
-                ? 'शासकीय सवलतीचे कर्ज, ४% महिला सवलत आणि बँकेत सादर करण्यासाठी आवश्यक असलेला DPR अहवाल सुरक्षित करण्यासाठी कृपया लॉगिन करा.'
-                : lang === 'hi'
-                ? 'सरकारी रियायती लोन, 4% महिला छूट और बैंक में जमा करने योग्य विस्तृत प्रोजेक्ट रिपोर्ट (DPR) तैयार करने हेतु लॉगिन करें।'
-                : 'Sign in with Google or email to generate bank-compliant Detailed Project Reports, store your advisory records, and apply for government subsidies.'}
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 w-full md:w-auto shrink-0">
-            <button
-              type="button"
-              onClick={loginWithGoogle}
-              className="px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition-all"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
-              </svg>
-              <span>{lang === 'mr' ? 'गुगलने लॉगिन करा' : lang === 'hi' ? 'गूगल से लॉगिन करें' : 'Continue with Google'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => login('beneficiary@samarth.gov.in', 'Demo123!')}
-              className="px-4 py-2 bg-blue-600/80 hover:bg-blue-600 text-white font-bold rounded-xl text-xs border border-blue-400/30 flex items-center justify-center gap-1.5 shadow-xs transition-all"
-            >
-              <span>{lang === 'mr' ? '१-क्लिक सत्यापित लाभार्थी मोड' : lang === 'hi' ? '1-क्लिक सत्यापित लाभार्थी मोड' : '1-Click Beneficiary Access'}</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-
       {error && (
         <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs sm:text-sm flex items-center space-x-2">
           <AlertTriangle className="w-5 h-5 flex-shrink-0 text-rose-600" />
@@ -491,10 +444,10 @@ const FormPage = () => {
           <div className="space-y-6 animate-fadeIn">
             <div>
               <h2 className="text-xl font-black text-[#0B3D91]">
-                {lang === 'hi' ? 'चरण 1: आप कौन सा ग्रामीण व्यवसाय शुरू या बढ़ाना चाहते हैं?' : 'Step 1: Which business do you plan to establish or expand?'}
+                {lang === 'mr' ? 'टप्पा १: आपण कोणता ग्रामीण किंवा सूक्ष्म व्यवसाय सुरू किंवा वाढवू इच्छिता?' : lang === 'hi' ? 'चरण 1: आप कौन सा ग्रामीण व्यवसाय शुरू या बढ़ाना चाहते हैं?' : 'Step 1: Which business do you plan to establish or expand?'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                {lang === 'hi' ? 'प्रस्तावित व्यावसायिक क्षेत्र चुनें (Proposed Business Category):' : 'Select your proposed business category:'}
+                {lang === 'mr' ? 'प्रस्तावित व्यवसाय क्षेत्र निवडा (Proposed Business Category):' : lang === 'hi' ? 'प्रस्तावित व्यावसायिक क्षेत्र चुनें (Proposed Business Category):' : 'Select your proposed business category:'}
               </p>
             </div>
 
@@ -521,7 +474,7 @@ const FormPage = () => {
                     </div>
                     <div>
                       <span className="font-extrabold text-sm text-slate-900 block">
-                        {lang === 'hi' ? b.name : b.nameEn}
+                        {lang === 'mr' ? (b.nameMr || b.name) : lang === 'hi' ? b.name : b.nameEn}
                       </span>
                     </div>
                   </button>
@@ -532,13 +485,13 @@ const FormPage = () => {
             {/* Business Title Details */}
             <div className="space-y-1.5 pt-2">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                {lang === 'hi' ? 'व्यवसाय का नाम या संक्षिप्त विचार (वैकल्पिक):' : 'Specific Enterprise Name / Idea (Optional):'}
+                {lang === 'mr' ? 'व्यवसायाचे विशिष्ट नाव किंवा संकल्पना (पर्यायी):' : lang === 'hi' ? 'व्यवसाय का नाम या संक्षिप्त विचार (वैकल्पिक):' : 'Specific Enterprise Name / Idea (Optional):'}
               </label>
               <input
                 type="text"
                 value={formData.business_title}
                 onChange={(e) => setFormData({ ...formData, business_title: e.target.value })}
-                placeholder={lang === 'hi' ? 'उदा: 4 मुर्राह भैंसों की मिनी डेयरी, किराना सुपरस्टोर...' : 'e.g., 4 Buffaloes Mini Dairy, Ready-made stitching shop...'}
+                placeholder={lang === 'mr' ? 'उदा: ४ मुऱ्हा म्हशींची आधुनिक मिनी डेअरी, शिलाई केंद्र...' : lang === 'hi' ? 'उदा: 4 मुर्राह भैंसों की मिनी डेयरी, किराना सुपरस्टोर...' : 'e.g., 4 Buffaloes Mini Dairy, Ready-made stitching shop...'}
                 className="w-full p-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91]"
               />
             </div>
@@ -549,7 +502,7 @@ const FormPage = () => {
                 onClick={() => setStep(2)}
                 className="px-6 py-3 bg-gradient-to-r from-[#0B3D91] to-[#072a66] hover:from-[#093275] hover:to-[#041a3d] text-white font-bold rounded-xl flex items-center space-x-2 text-sm shadow-md transition-all hover:scale-[1.02]"
               >
-                <span>{lang === 'hi' ? 'अगला: मार्जिन पूंजी दर्ज करें' : 'Next: Margin Capital'}</span>
+                <span>{lang === 'mr' ? 'पुढील: स्वतःचे १०% भांडवल प्रविष्ट करा' : lang === 'hi' ? 'अगला: मार्जिन पूंजी दर्ज करें' : 'Next: Margin Capital'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -561,10 +514,12 @@ const FormPage = () => {
           <div className="space-y-6 animate-fadeIn">
             <div>
               <h2 className="text-xl font-black text-[#0B3D91]">
-                {lang === 'hi' ? 'चरण 2: आपके पास कुल कितनी मार्जिन पूंजी (10%) उपलब्ध है?' : 'Step 2: How much Available Margin Capital (10%) do you possess?'}
+                {lang === 'mr' ? 'टप्पा २: आपल्याकडे एकूण किती स्वतःचे भांडवल (१०% मार्जिन) उपलब्ध आहे?' : lang === 'hi' ? 'चरण 2: आपके पास कुल कितनी मार्जिन पूंजी (10%) उपलब्ध है?' : 'Step 2: How much Available Margin Capital (10%) do you possess?'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                {lang === 'hi'
+                {lang === 'mr'
+                  ? 'शासकीय नियमांनुसार आपल्याला एकूण प्रकल्प खर्चाच्या फक्त १०% स्वतःचे भांडवल द्यावे लागते; उर्वरित ९०% सवलतीचे कर्ज मिळते.'
+                  : lang === 'hi'
                   ? 'सरकारी नियमों के तहत आपको कुल प्रोजेक्ट लागत का केवल 10% मार्जिन मनी देना होता है; बाकी 90% लोन मिलता है।'
                   : 'Under government schemes, you contribute a 10% margin fraction while SCAs fund the remaining 90% as a concessional loan.'}
               </p>
@@ -581,7 +536,7 @@ const FormPage = () => {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {lang === 'hi' ? 'मार्जिन पूंजी से (10%)' : 'By Margin Capital (10%)'}
+                {lang === 'mr' ? '१०% भांडवलाद्वारे' : lang === 'hi' ? 'मार्जिन पूंजी से (10%)' : 'By Margin Capital (10%)'}
               </button>
               <button
                 type="button"
@@ -592,7 +547,7 @@ const FormPage = () => {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {lang === 'hi' ? 'कुल प्रोजेक्ट लागत से' : 'By Total Project Cost'}
+                {lang === 'mr' ? 'एकूण प्रकल्प खर्चाद्वारे' : lang === 'hi' ? 'कुल प्रोजेक्ट लागत से' : 'By Total Project Cost'}
               </button>
             </div>
 
@@ -600,7 +555,7 @@ const FormPage = () => {
             {inputMode === 'margin' ? (
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  {lang === 'hi' ? 'आपकी उपलब्ध मार्जिन पूंजी (Available Margin Capital in ₹):' : 'Available Margin Capital (in ₹):'}
+                  {lang === 'mr' ? 'आपले उपलब्ध स्वतःचे भांडवल (Available Margin Capital in ₹):' : lang === 'hi' ? 'आपकी उपलब्ध मार्जिन पूंजी (Available Margin Capital in ₹):' : 'Available Margin Capital (in ₹):'}
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 font-bold text-lg">
@@ -617,13 +572,13 @@ const FormPage = () => {
                   />
                 </div>
                 <span className="text-xs text-slate-500 font-medium">
-                  {lang === 'hi' ? `उदा: ₹1,00,000 मार्जिन पूंजी = ₹10,00,000 कुल प्रोजेक्ट लागत (₹9,00,000 लोन)` : `Example: ₹1,00,000 margin establishes a ₹10,00,000 project cost and ₹9,00,000 loan eligibility.`}
+                  {lang === 'mr' ? `उदा: ₹१,००,००० भांडवल = ₹१०,००,००० प्रकल्प खर्च (₹९,००,००० शासकीय कर्ज पात्रता)` : lang === 'hi' ? `उदा: ₹1,00,000 मार्जिन पूंजी = ₹10,00,000 कुल प्रोजेक्ट लागत (₹9,00,000 लोन)` : `Example: ₹1,00,000 margin establishes a ₹10,00,000 project cost and ₹9,00,000 loan eligibility.`}
                 </span>
               </div>
             ) : (
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  {lang === 'hi' ? 'कुल प्रोजेक्ट लागत (Total Project Cost in ₹):' : 'Total Project Cost (in ₹):'}
+                  {lang === 'mr' ? 'एकूण अपेक्षित प्रकल्प खर्च (Total Project Cost in ₹):' : lang === 'hi' ? 'कुल प्रोजेक्ट लागत (Total Project Cost in ₹):' : 'Total Project Cost (in ₹):'}
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 font-bold text-lg">
@@ -645,7 +600,7 @@ const FormPage = () => {
             {/* Quick Presets for SIH 2026 Problem Guidelines */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                {lang === 'hi' ? 'त्वरित योजना प्रीसेट (SIH 2026 Norms):' : 'Quick Scheme Presets (SIH 2026 Rules):'}
+                {lang === 'mr' ? 'त्वरित योजना पर्याय (SIH २०२६ निकष):' : lang === 'hi' ? 'त्वरित योजना प्रीसेट (SIH 2026 Norms):' : 'Quick Scheme Presets (SIH 2026 Rules):'}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                 {presetMarginAmounts.map((p, idx) => (
@@ -665,9 +620,9 @@ const FormPage = () => {
                         : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
-                    <div className="font-extrabold text-xs">{p.label}</div>
+                    <div className="font-extrabold text-xs">{lang === 'mr' ? p.labelMr : p.label}</div>
                     <div className={`text-[10px] mt-0.5 ${formData.margin_capital === p.margin ? 'text-amber-300 font-bold' : 'text-slate-500'}`}>
-                      {p.scheme}
+                      {lang === 'mr' ? p.schemeMr : p.scheme}
                     </div>
                   </button>
                 ))}
@@ -679,43 +634,46 @@ const FormPage = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-extrabold text-[#FF9933] uppercase tracking-wider flex items-center space-x-1.5">
                   <Calculator className="w-4 h-4" />
-                  <span>{lang === 'hi' ? 'स्वचालित योजना चयन (Scheme Auto-Selection)' : 'Automated Scheme Router'}</span>
+                  <span>{lang === 'mr' ? 'स्वयंचलित योजना निवड (Scheme Auto-Selection)' : lang === 'hi' ? 'स्वचालित योजना चयन (Scheme Auto-Selection)' : 'Automated Scheme Router'}</span>
                 </span>
                 <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full ${isMicroFinance ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-slate-950'}`}>
-                  {isMicroFinance ? 'Logic A: Micro Finance' : 'Logic B: Term Loan'}
+                  {isMicroFinance ? (lang === 'mr' ? 'पद्धत अ: मायक्रो फायनान्स' : lang === 'hi' ? 'लॉजिक 1: माइक्रो फाइनेंस' : 'Logic A: Micro Finance') : (lang === 'mr' ? 'पद्धत ब: मुदत कर्ज (टर्म लोन)' : lang === 'hi' ? 'लॉजिक 2: टर्म लोन' : 'Logic B: Term Loan')}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
                   <span className="text-[11px] text-slate-300 block font-medium">
-                    {lang === 'hi' ? 'व्यवहार्य प्रोजेक्ट लागत' : 'Feasible Project Cost'}
+                    {lang === 'mr' ? 'एकूण व्यवहार्य प्रकल्प खर्च' : lang === 'hi' ? 'व्यवहार्य प्रोजेक्ट लागत' : 'Feasible Project Cost'}
                   </span>
                   <div className="text-xl font-black text-white">
                     ₹{currentCost.toLocaleString('en-IN')}
                   </div>
-                  <span className="text-[10px] text-slate-400">Available / 10%</span>
+                  <span className="text-[10px] text-slate-400">{lang === 'mr' ? 'उपलब्ध / १०%' : lang === 'hi' ? 'उपलब्ध / 10%' : 'Available / 10%'}</span>
                 </div>
 
                 <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs border border-amber-300/30">
                   <span className="text-[11px] text-amber-200 block font-medium">
-                    {lang === 'hi' ? 'आपकी 10% मार्जिन मनी' : 'Your 10% Margin Share'}
+                    {lang === 'mr' ? 'आपले १०% स्वतःचे भांडवल' : lang === 'hi' ? 'आपकी 10% मार्जिन मनी' : 'Your 10% Margin Share'}
                   </span>
                   <div className="text-xl font-black text-amber-300">
                     ₹{currentMargin.toLocaleString('en-IN')}
                   </div>
-                  <span className="text-[10px] text-amber-200/70">Own capital required</span>
+                  <span className="text-[10px] text-amber-200/70">{lang === 'mr' ? 'स्वतःची आवश्यक रक्कम' : lang === 'hi' ? 'स्वयं की आवश्यक पूंजी' : 'Own capital required'}</span>
                 </div>
 
                 <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs border border-emerald-300/30">
                   <span className="text-[11px] text-emerald-200 block font-medium">
-                    {lang === 'hi' ? '90% सरकारी रियायती लोन' : '90% Loan Eligibility'}
+                    {lang === 'mr' ? '९०% शासकीय सवलतीचे कर्ज' : lang === 'hi' ? '90% सरकारी रियायती लोन' : '90% Loan Eligibility'}
                   </span>
                   <div className="text-xl font-black text-emerald-300">
                     ₹{currentLoan.toLocaleString('en-IN')}
                   </div>
                   <span className="text-[10px] text-emerald-200/70">
-                    {isMicroFinance ? 'Rate: 6.5% • 3 Yrs (3m Mor)' : 'Rate: 8.0% • 7 Yrs (6m Mor)'}
+                    {isMicroFinance 
+                      ? (lang === 'mr' ? 'व्याज: ६.५% • ३ वर्षे (३ महिने सवलत)' : lang === 'hi' ? 'ब्याज: 6.5% • 3 वर्ष (3 माह मोरेटोरियम)' : 'Rate: 6.5% • 3 Yrs (3m Mor)')
+                      : (lang === 'mr' ? 'व्याज: ८.०% • ७ वर्षे (६ महिने सवलत)' : lang === 'hi' ? 'ब्याज: 8.0% • 7 वर्ष (6 माह मोरेटोरियम)' : 'Rate: 8.0% • 7 Yrs (6m Mor)')
+                    }
                   </span>
                 </div>
               </div>
@@ -728,7 +686,7 @@ const FormPage = () => {
                 className="px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl flex items-center space-x-1.5 text-sm transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>{lang === 'hi' ? 'पीछे' : 'Back'}</span>
+                <span>{lang === 'mr' ? 'मागे' : lang === 'hi' ? 'पीछे' : 'Back'}</span>
               </button>
 
               <button
@@ -736,7 +694,7 @@ const FormPage = () => {
                 onClick={() => setStep(3)}
                 className="px-6 py-3 bg-gradient-to-r from-[#0B3D91] to-[#072a66] hover:from-[#093275] hover:to-[#041a3d] text-white font-bold rounded-xl flex items-center space-x-2 text-sm shadow-md transition-all hover:scale-[1.02]"
               >
-                <span>{lang === 'hi' ? 'अगला: स्थान व स्थानीय प्रोफाइल' : 'Next: Local Profile'}</span>
+                <span>{lang === 'mr' ? 'पुढील: स्थान व स्थानिक माहिती' : lang === 'hi' ? 'अगला: स्थान व स्थानीय प्रोफाइल' : 'Next: Local Profile'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -748,10 +706,12 @@ const FormPage = () => {
           <form onSubmit={handleSubmit} className="space-y-6 animate-fadeIn">
             <div>
               <h2 className="text-xl font-black text-[#0B3D91]">
-                {lang === 'hi' ? 'चरण 3: अपनी भौगोलिक स्थिति (ग्राम/ब्लॉक) एवं प्रोफाइल बताएं' : 'Step 3: Geographic Location & Beneficiary Profile'}
+                {lang === 'mr' ? 'टप्पा ३: आपली भौगोलिक स्थिती (गाव/तालुका) व वैयक्तिक माहिती' : lang === 'hi' ? 'चरण 3: अपनी भौगोलिक स्थिति (ग्राम/ब्लॉक) एवं प्रोफाइल बताएं' : 'Step 3: Geographic Location & Beneficiary Profile'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                {lang === 'hi'
+                {lang === 'mr'
+                  ? 'स्थानिक बाजारपेठ (५-१० किमी), स्पर्धा विश्लेषण आणि ग्राहक मागणीसाठी आवश्यक:'
+                  : lang === 'hi'
                   ? 'हाइपर-लोकल बाजार पहुंच, प्रतिस्पर्धा मैपिंग और स्थानीय मांग का विश्लेषण करने के लिए आवश्यक:'
                   : 'Essential to generate 5-10 km radius market reach, competitor density, and pricing analysis:'}
               </p>
@@ -760,13 +720,13 @@ const FormPage = () => {
             {/* Gender / Category (For Women Concession) */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                {lang === 'hi' ? 'आवेदक श्रेणी (Gender / Beneficiary Category):' : 'Beneficiary Category:'}
+                {lang === 'mr' ? 'अर्जदार प्रवर्ग / श्रेणी (Beneficiary Category):' : lang === 'hi' ? 'आवेदक श्रेणी (Gender / Beneficiary Category):' : 'Beneficiary Category:'}
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { id: 'General', label: 'पुरुष / सामान्य', labelEn: 'Male / General' },
-                  { id: 'Female', label: 'महिला (1% छूट पात्र)', labelEn: 'Female (1% Rebate)' },
-                  { id: 'Other', label: 'SHG समूह / अन्य', labelEn: 'SHG / Group' }
+                  { id: 'General', label: 'पुरुष / सामान्य', labelMr: 'पुरुष / सर्वसाधारण', labelEn: 'Male / General' },
+                  { id: 'Female', label: 'महिला (1% छूट पात्र)', labelMr: 'महिला (१% व्याज सवलत पात्र)', labelEn: 'Female (1% Rebate)' },
+                  { id: 'Other', label: 'SHG समूह / अन्य', labelMr: 'बचत गट (SHG) / इतर', labelEn: 'SHG / Group' }
                 ].map((g) => (
                   <button
                     key={g.id}
@@ -778,7 +738,7 @@ const FormPage = () => {
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
-                    {lang === 'hi' ? g.label : g.labelEn}
+                    {lang === 'mr' ? g.labelMr : lang === 'hi' ? g.label : g.labelEn}
                   </button>
                 ))}
               </div>
@@ -787,7 +747,7 @@ const FormPage = () => {
             {/* Experience in Trade */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                {lang === 'hi' ? 'इस कार्य में अनुभव स्तर:' : 'Experience in this trade:'}
+                {lang === 'mr' ? 'या व्यवसायातील कामाचा अनुभव:' : lang === 'hi' ? 'इस कार्य में अनुभव स्तर:' : 'Experience in this trade:'}
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {['New', '1-3 years', '3+ years'].map((exp) => (
@@ -801,9 +761,9 @@ const FormPage = () => {
                         : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
-                    {exp === 'New' ? (lang === 'hi' ? 'नया व्यवसाय (0 वर्ष)' : 'New Venture') :
-                     exp === '1-3 years' ? (lang === 'hi' ? '1 से 3 वर्ष' : '1-3 Years') :
-                     (lang === 'hi' ? '3+ वर्ष का अनुभव' : '3+ Years')}
+                    {exp === 'New' ? (lang === 'mr' ? 'नवीन व्यवसाय (० वर्ष)' : lang === 'hi' ? 'नया व्यवसाय (0 वर्ष)' : 'New Venture') :
+                     exp === '1-3 years' ? (lang === 'mr' ? '१ ते ३ वर्षे अनुभव' : lang === 'hi' ? '1 से 3 वर्ष' : '1-3 Years') :
+                     (lang === 'mr' ? '३+ वर्षांचा दांडगा अनुभव' : lang === 'hi' ? '3+ वर्ष का अनुभव' : '3+ Years')}
                   </button>
                 ))}
               </div>
@@ -813,28 +773,28 @@ const FormPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  {lang === 'hi' ? 'राज्य (State):' : 'State:'}
+                  {lang === 'mr' ? 'राज्य (State):' : lang === 'hi' ? 'राज्य (State):' : 'State:'}
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  placeholder="Uttar Pradesh, Bihar, Rajasthan, MP..."
+                  placeholder={lang === 'mr' ? 'महाराष्ट्र, गुजरात, उत्तर प्रदेश, मध्यप्रदेश...' : 'Maharashtra, Gujarat, Uttar Pradesh, MP...'}
                   className="w-full p-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91]"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  {lang === 'hi' ? 'जिला / ब्लॉक / ग्राम पंचायत (Village / Block):' : 'Village / Block / District:'}
+                  {lang === 'mr' ? 'गाव / तालुका / जिल्हा (Village / Taluka / District):' : lang === 'hi' ? 'जिला / ब्लॉक / ग्राम पंचायत (Village / Block):' : 'Village / Block / District:'}
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.district}
                   onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                  placeholder={lang === 'hi' ? 'उदा: वाराणसी (चिरईगांव ब्लॉक)' : 'e.g. Varanasi (Chiraigaon Block)'}
+                  placeholder={lang === 'mr' ? 'उदा: पुणे (बारामती तालुका) किंवा कोल्हापूर' : lang === 'hi' ? 'उदा: वाराणसी (चिरईगांव ब्लॉक)' : 'e.g. Pune (Baramati Taluka) / Varanasi'}
                   className="w-full p-3 rounded-xl border border-slate-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91]"
                 />
               </div>
@@ -847,7 +807,7 @@ const FormPage = () => {
                 className="px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold rounded-xl flex items-center space-x-1.5 text-sm transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>{lang === 'hi' ? 'पीछे' : 'Back'}</span>
+                <span>{lang === 'mr' ? 'मागे' : lang === 'hi' ? 'पीछे' : 'Back'}</span>
               </button>
 
               <button
@@ -858,11 +818,11 @@ const FormPage = () => {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>{lang === 'hi' ? 'हाइपर-लोकल रिपोर्ट तैयार हो रही है...' : 'Synthesizing Feasibility Study...'}</span>
+                    <span>{lang === 'mr' ? 'स्थानिक व्यवसाय अहवाल तयार होत आहे...' : lang === 'hi' ? 'हाइपर-लोकल रिपोर्ट तैयार हो रही है...' : 'Synthesizing Feasibility Study...'}</span>
                   </>
                 ) : (
                   <>
-                    <span>{lang === 'hi' ? 'व्यवहार्यता अध्ययन व वित्तीय योजना तैयार करें' : 'Generate Full Feasibility & Loan Plan'}</span>
+                    <span>{lang === 'mr' ? 'व्यवहार्यता अहवाल व कर्ज आराखडा तयार करा' : lang === 'hi' ? 'व्यवहार्यता अध्ययन व वित्तीय योजना तैयार करें' : 'Generate Full Feasibility & Loan Plan'}</span>
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}

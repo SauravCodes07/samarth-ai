@@ -76,6 +76,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+
+  const openAuthModal = (mode = 'login') => {
+    setAuthMode(mode);
+    setShowAuthModal(true);
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+  };
+
   const logout = async () => {
     if (isSupabaseConfigured && supabase) {
       await signOut();
@@ -85,7 +97,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isConfigured: isSupabaseConfigured, login, register, loginWithGoogle, logout }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        loading, 
+        isConfigured: isSupabaseConfigured, 
+        login, 
+        register, 
+        loginWithGoogle, 
+        logout,
+        showAuthModal,
+        setShowAuthModal,
+        authMode,
+        setAuthMode,
+        openAuthModal,
+        closeAuthModal
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

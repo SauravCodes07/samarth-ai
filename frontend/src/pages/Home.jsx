@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Calculator, 
   Sparkles, 
@@ -32,7 +33,16 @@ import {
 
 const Home = () => {
   const { lang } = useLanguage();
+  const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
+
+  const handleFeatureAccess = (path = '/advisory') => {
+    if (!user) {
+      openAuthModal('login');
+    } else {
+      navigate(path);
+    }
+  };
 
   // Interactive Quick Estimator
   const [selectedTrade, setSelectedTrade] = useState('dairy');
@@ -141,14 +151,15 @@ const Home = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-                <Link
-                  to="/advisory"
+                <button
+                  type="button"
+                  onClick={() => handleFeatureAccess('/advisory')}
                   className="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-all duration-200 shadow-lg hover:shadow-blue-500/25 hover:scale-102"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   <span>{lang === 'mr' ? 'व्यवसाय अहवाल तयार करा' : lang === 'hi' ? 'व्यवहार्यता रिपोर्ट बनाएं' : 'Get AI Feasibility Study'}</span>
                   <ArrowRight className="w-4 h-4" />
-                </Link>
+                </button>
 
                 <Link
                   to="/schemes"
@@ -290,13 +301,14 @@ const Home = () => {
                 </div>
 
                 {/* Direct CTA */}
-                <Link
-                  to="/advisory"
+                <button
+                  type="button"
+                  onClick={() => handleFeatureAccess('/advisory')}
                   className="mt-4 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
                 >
                   <span>{lang === 'mr' ? 'संपूर्ण बँक अहवाल (DPR) काढा' : lang === 'hi' ? 'पूरी बैंक रिपोर्ट (DPR) निकालें' : 'Generate Full Bank DPR'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                </button>
 
               </div>
             </div>

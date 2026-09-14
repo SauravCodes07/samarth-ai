@@ -22,11 +22,20 @@ import {
 
 const Navbar = () => {
   const { lang, setLang } = useLanguage();
-  const { user, login, register, loginWithGoogle, logout, isConfigured } = useAuth();
+  const { 
+    user, 
+    login, 
+    register, 
+    loginWithGoogle, 
+    logout, 
+    isConfigured, 
+    showAuthModal, 
+    setShowAuthModal, 
+    authMode, 
+    setAuthMode 
+  } = useAuth();
   const location = useLocation();
 
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
@@ -118,14 +127,14 @@ const Navbar = () => {
               <div className="flex flex-col">
                 <div className="flex items-center space-x-2">
                   <span className="text-lg font-extrabold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
-                    {lang === 'hi' ? 'समर्थ AI' : 'Samarth AI'}
+                    {lang === 'mr' ? 'समर्थ AI' : lang === 'hi' ? 'समर्थ AI' : 'Samarth AI'}
                   </span>
                   <span className="hidden sm:inline-block text-[11px] font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded-md">
                     Enterprise
                   </span>
                 </div>
                 <span className="text-[11px] text-slate-500 font-medium">
-                  {lang === 'hi' ? 'उद्यम वित्तीय सलाहकार मंच' : 'National MSME Financial Advisory'}
+                  {lang === 'mr' ? 'राष्ट्रीय सूक्ष्म व लघु उद्योग वित्तीय सल्लागार' : lang === 'hi' ? 'उद्यम वित्तीय सलाहकार मंच' : 'National MSME Financial Advisory'}
                 </span>
               </div>
             </Link>
@@ -298,11 +307,13 @@ const Navbar = () => {
               </div>
               <h3 className="text-xl font-bold text-slate-900">
                 {authMode === 'login' 
-                  ? (lang === 'hi' ? 'अपने खाते में प्रवेश करें' : 'Sign In to Your Account') 
-                  : (lang === 'hi' ? 'नया खाता बनाएं' : 'Create an Account')}
+                  ? (lang === 'mr' ? 'आपल्या खात्यात प्रवेश करा' : lang === 'hi' ? 'अपने खाते में प्रवेश करें' : 'Sign In to Your Account') 
+                  : (lang === 'mr' ? 'नवीन खाते तयार करा' : lang === 'hi' ? 'नया खाता बनाएं' : 'Create an Account')}
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                {lang === 'hi' 
+                {lang === 'mr'
+                  ? 'आपल्या शासकीय योजना व आर्थिक गणना सुरक्षित ठेवण्यासाठी'
+                  : lang === 'hi' 
                   ? 'अपनी योजनाओं व वित्तीय गणनाओं को सुरक्षित रखने के लिए' 
                   : 'Save and track your loan structures and advisory reports'}
               </p>
@@ -319,7 +330,7 @@ const Navbar = () => {
               type="button"
               onClick={handleGoogleAuth}
               disabled={authLoading}
-              className="w-full mb-4 flex items-center justify-center gap-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg text-sm transition-all shadow-2xs hover:shadow-xs disabled:opacity-50"
+              className="w-full mb-4 flex items-center justify-center gap-3 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-semibold py-2.5 rounded-lg text-sm transition-all shadow-2xs hover:shadow-xs disabled:opacity-50 cursor-pointer"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -339,7 +350,7 @@ const Navbar = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>{lang === 'hi' ? 'गूगल के साथ जारी रखें' : 'Continue with Google'}</span>
+              <span>{lang === 'mr' ? 'गूगल द्वारे सुरू ठेवा' : lang === 'hi' ? 'गूगल के साथ जारी रखें' : 'Continue with Google'}</span>
             </button>
 
             <div className="relative my-4">
@@ -348,7 +359,7 @@ const Navbar = () => {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-white px-2 text-slate-400 font-medium">
-                  {lang === 'hi' ? 'या ईमेल द्वारा' : 'Or continue with email'}
+                  {lang === 'mr' ? 'किंवा ईमेल द्वारे' : lang === 'hi' ? 'या ईमेल द्वारा' : 'Or continue with email'}
                 </span>
               </div>
             </div>
@@ -356,7 +367,7 @@ const Navbar = () => {
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  {lang === 'hi' ? 'ईमेल पता' : 'Email Address'}
+                  {lang === 'mr' ? 'ईमेल पत्ता' : lang === 'hi' ? 'ईमेल पता' : 'Email Address'}
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -373,7 +384,7 @@ const Navbar = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  {lang === 'hi' ? 'पासवर्ड' : 'Password'}
+                  {lang === 'mr' ? 'पासवर्ड' : lang === 'hi' ? 'पासवर्ड' : 'Password'}
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -391,35 +402,46 @@ const Navbar = () => {
               <button
                 type="submit"
                 disabled={authLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-all shadow-sm hover:shadow-md disabled:opacity-50 cursor-pointer"
               >
                 {authLoading 
-                  ? (lang === 'hi' ? 'प्रतीक्षा करें...' : 'Processing...') 
+                  ? (lang === 'mr' ? 'प्रतीक्षा करा...' : lang === 'hi' ? 'प्रतीक्षा करें...' : 'Processing...') 
                   : authMode === 'login' 
-                    ? (lang === 'hi' ? 'लॉगिन करें' : 'Sign In') 
-                    : (lang === 'hi' ? 'रजिस्टर करें' : 'Create Account')}
+                    ? (lang === 'mr' ? 'लॉगिन करा' : lang === 'hi' ? 'लॉगिन करें' : 'Sign In') 
+                    : (lang === 'mr' ? 'नोंदणी करा' : lang === 'hi' ? 'रजिस्टर करें' : 'Create Account')}
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  await login('beneficiary@samarth.gov.in', 'Demo123!');
+                  setShowAuthModal(false);
+                }}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-xs transition-all border border-slate-200 cursor-pointer"
+              >
+                {lang === 'mr' ? '१-क्लिक चाचणी मोड (Demo Login)' : lang === 'hi' ? '1-क्लिक टेस्ट मोड (डेमो लॉगिन)' : '1-Click Quick Demo Login'}
               </button>
             </form>
 
             <div className="mt-5 text-center text-xs text-slate-500">
               {authMode === 'login' ? (
                 <>
-                  <span>{lang === 'hi' ? 'खाता नहीं है? ' : "Don't have an account? "}</span>
+                  <span>{lang === 'mr' ? 'खाते नाही? ' : lang === 'hi' ? 'खाता नहीं है? ' : "Don't have an account? "}</span>
                   <button
                     onClick={() => { setAuthMode('register'); setAuthError(''); }}
                     className="text-blue-600 font-semibold hover:underline"
                   >
-                    {lang === 'hi' ? 'नया खाता बनाएं' : 'Sign Up'}
+                    {lang === 'mr' ? 'नवीन खाते बनवा' : lang === 'hi' ? 'नया खाता बनाएं' : 'Sign Up'}
                   </button>
                 </>
               ) : (
                 <>
-                  <span>{lang === 'hi' ? 'पहले से खाता है? ' : 'Already have an account? '}</span>
+                  <span>{lang === 'mr' ? 'आधीच खाते आहे? ' : lang === 'hi' ? 'पहले से खाता है? ' : 'Already have an account? '}</span>
                   <button
                     onClick={() => { setAuthMode('login'); setAuthError(''); }}
                     className="text-blue-600 font-semibold hover:underline"
                   >
-                    {lang === 'hi' ? 'लॉगिन करें' : 'Sign In'}
+                    {lang === 'mr' ? 'लॉगिन करा' : lang === 'hi' ? 'लॉगिन करें' : 'Sign In'}
                   </button>
                 </>
               )}

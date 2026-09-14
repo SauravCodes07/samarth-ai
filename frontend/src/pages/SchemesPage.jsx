@@ -95,9 +95,9 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
-              {lang === 'hi' && scheme.scheme_name_hi ? scheme.scheme_name_hi : scheme.scheme_name}
+              {(lang === 'mr' || lang === 'hi') && scheme.scheme_name_hi ? scheme.scheme_name_hi : scheme.scheme_name}
             </h2>
-            {scheme.scheme_name_hi && lang !== 'hi' && (
+            {scheme.scheme_name_hi && lang === 'en' && (
               <p className="text-xs text-blue-100 font-medium">{scheme.scheme_name_hi}</p>
             )}
           </div>
@@ -110,36 +110,34 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 border border-slate-200 p-4 rounded-xl">
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                <Coins className="w-3.5 h-3.5 text-[#0B3D91]" /> Max Project Limit
+                <Coins className="w-3.5 h-3.5 text-[#0B3D91]" /> {lang === 'mr' ? 'कमाल मर्यादा' : lang === 'hi' ? 'अधिकतम सीमा' : 'Max Project Limit'}
               </span>
               <p className="text-lg font-extrabold text-slate-900">{formatCurrency(scheme.max_cost)}</p>
-              <span className="text-[10px] text-slate-500">Min: {formatCurrency(scheme.min_cost)}</span>
+              <span className="text-[10px] text-slate-500">{lang === 'mr' ? 'किमान:' : lang === 'hi' ? 'न्यूनतम:' : 'Min:'} {formatCurrency(scheme.min_cost)}</span>
             </div>
 
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                <Percent className="w-3.5 h-3.5 text-emerald-600" /> Interest Rate
+                <Percent className="w-3.5 h-3.5 text-[#138808]" /> {lang === 'mr' ? 'व्याजदर' : lang === 'hi' ? 'ब्याज दर' : 'Interest Rate'}
               </span>
-              <p className="text-lg font-extrabold text-emerald-700">{scheme.interest_rate ?? 5}% p.a.</p>
-              {Number(scheme.interest_rebate_women) > 0 && (
-                <span className="text-[10px] text-emerald-600 font-semibold">-{scheme.interest_rebate_women}% for Women</span>
-              )}
+              <p className="text-lg font-extrabold text-[#138808]">{scheme.interest_rate ?? 5}% p.a.</p>
+              <span className="text-[10px] text-emerald-600 font-semibold">{lang === 'mr' ? 'सवलतीचा शासकीय दर' : lang === 'hi' ? 'रियायती दर' : 'Subsidized Rate'}</span>
             </div>
 
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" /> Margin Money
+                <Calendar className="w-3.5 h-3.5 text-[#FF9933]" /> {lang === 'mr' ? 'मुदत' : lang === 'hi' ? 'पुनर्भुगतान अवधि' : 'Tenure'}
               </span>
-              <p className="text-lg font-extrabold text-amber-900">{scheme.margin_percent ?? 10}%</p>
-              <span className="text-[10px] text-slate-500">Govt Share: {scheme.govt_loan_percent ?? 90}%</span>
+              <p className="text-lg font-extrabold text-slate-900">{scheme.repayment_years ?? 5} {lang === 'mr' ? 'वर्षे' : lang === 'hi' ? 'वर्ष' : 'Years'}</p>
+              <span className="text-[10px] text-slate-500">{lang === 'mr' ? 'त्रैमासिक हप्ते' : lang === 'hi' ? 'त्रैमासिक किश्तें' : 'Quarterly EMIs'}</span>
             </div>
 
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-indigo-600" /> Tenure / Repay
+                <Clock className="w-3.5 h-3.5 text-amber-600" /> {lang === 'mr' ? 'सवलत कालावधी' : lang === 'hi' ? 'मोरेटोरियम' : 'Moratorium'}
               </span>
-              <p className="text-lg font-extrabold text-slate-900">{scheme.repayment_years ?? 5} Years</p>
-              <span className="text-[10px] text-slate-500">Moratorium: {scheme.moratorium_months ?? 6} mos</span>
+              <p className="text-lg font-extrabold text-amber-700">{scheme.moratorium_months ?? 6} {lang === 'mr' ? 'महिने' : lang === 'hi' ? 'माह' : 'Months'}</p>
+              <span className="text-[10px] text-amber-600 font-semibold">{lang === 'mr' ? 'हप्ता सुरू होण्यापूर्वी' : lang === 'hi' ? 'किश्त छूट' : 'Pre-EMI Grace'}</span>
             </div>
           </div>
 
@@ -147,10 +145,10 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
           <div className="space-y-2">
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
               <Info className="w-4 h-4 text-[#0B3D91]" />
-              {lang === 'hi' ? 'योजना का विवरण' : 'Scheme Description & Objectives'}
+              {lang === 'mr' ? 'योजनेचा तपशील व उद्दिष्टे' : lang === 'hi' ? 'योजना का विवरण' : 'Scheme Description & Objectives'}
             </h3>
             <p className="text-sm text-slate-700 leading-relaxed bg-white border border-slate-100 p-4 rounded-xl">
-              {lang === 'hi' && scheme.description_hi ? scheme.description_hi : (scheme.description || 'Details available under official portal.')}
+              {(lang === 'mr' || lang === 'hi') && scheme.description_hi ? scheme.description_hi : (scheme.description || 'Details available under official portal.')}
             </p>
           </div>
 
@@ -159,7 +157,7 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
             <div className="space-y-2">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                {lang === 'hi' ? 'लाभ और सब्सिडी' : 'Benefits & Subsidies'}
+                {lang === 'mr' ? 'फायदे आणि सबसिडी' : lang === 'hi' ? 'लाभ और सब्सिडी' : 'Benefits & Subsidies'}
               </h3>
               <div className="text-sm text-slate-700 leading-relaxed bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl whitespace-pre-line">
                 {scheme.benefits}
@@ -171,7 +169,7 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
           <div className="space-y-2">
             <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
               <Building2 className="w-4 h-4 text-indigo-600" />
-              {lang === 'hi' ? 'पात्रता मानदंड' : 'Eligibility Criteria'}
+              {lang === 'mr' ? 'पात्रता निकष' : lang === 'hi' ? 'पात्रता मानदंड' : 'Eligibility Criteria'}
             </h3>
             <div className="bg-indigo-50/40 border border-indigo-100 p-4 rounded-xl space-y-2">
               {eligibilityItems.length > 1 ? (
@@ -185,7 +183,7 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
                 </ul>
               ) : (
                 <p className="text-xs text-slate-700 leading-relaxed">
-                  {lang === 'hi' && scheme.eligibility_hi ? scheme.eligibility_hi : (scheme.eligibility || 'Open to eligible citizens meeting basic identity criteria.')}
+                  {(lang === 'mr' || lang === 'hi') && scheme.eligibility_hi ? scheme.eligibility_hi : (scheme.eligibility || 'Open to eligible citizens meeting basic identity criteria.')}
                 </p>
               )}
             </div>
@@ -196,7 +194,7 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
             <div className="space-y-2">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-amber-600" />
-                {lang === 'hi' ? 'आवश्यक दस्तावेज' : 'Required Documents'}
+                {lang === 'mr' ? 'आवश्यक कागदपत्रे' : lang === 'hi' ? 'आवश्यक दस्तावेज' : 'Required Documents'}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {docs.map((doc, idx) => (
@@ -210,9 +208,9 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
 
           {/* Department & Ministry Info */}
           <div className="text-xs text-slate-500 border-t border-slate-100 pt-3 flex flex-wrap justify-between gap-2">
-            <span><strong>Ministry:</strong> {scheme.ministry || 'Central Government of India'}</span>
-            {scheme.department && <span><strong>Department:</strong> {scheme.department}</span>}
-            <span><strong>Category:</strong> {scheme.category || 'General'}</span>
+            <span><strong>{lang === 'mr' ? 'मंत्रालय:' : lang === 'hi' ? 'मंत्रालय:' : 'Ministry:'}</strong> {scheme.ministry || 'Central Government of India'}</span>
+            {scheme.department && <span><strong>{lang === 'mr' ? 'विभाग:' : lang === 'hi' ? 'विभाग:' : 'Department:'}</strong> {scheme.department}</span>}
+            <span><strong>{lang === 'mr' ? 'प्रवर्ग:' : lang === 'hi' ? 'श्रेणी:' : 'Category:'}</strong> {scheme.category || 'General'}</span>
           </div>
 
         </div>
@@ -228,7 +226,7 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0B3D91] hover:underline"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                {lang === 'hi' ? 'आधिकारिक पोर्टल पर देखें' : 'View on Official Portal (MyScheme.gov.in)'}
+                {lang === 'mr' ? 'अधिकृत पोर्टलवर पहा (MyScheme.gov.in)' : lang === 'hi' ? 'आधिकारिक पोर्टल पर देखें' : 'View on Official Portal (MyScheme.gov.in)'}
               </a>
             )}
           </div>
@@ -238,13 +236,13 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
               onClick={onClose}
               className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
             >
-              {lang === 'hi' ? 'बंद करें' : 'Close'}
+              {lang === 'mr' ? 'बंद करा' : lang === 'hi' ? 'बंद करें' : 'Close'}
             </button>
             <button
               onClick={() => onSelectForLoan(scheme)}
-              className="px-5 py-2.5 bg-[#0B3D91] hover:bg-[#1e5bb8] text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition-all hover:scale-[1.02]"
+              className="px-5 py-2.5 bg-[#0B3D91] hover:bg-[#1e5bb8] text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition-all hover:scale-[1.02] cursor-pointer"
             >
-              <span>{lang === 'hi' ? 'इस योजना पर लोन बनाएं' : 'Structure Loan for this Scheme'}</span>
+              <span>{lang === 'mr' ? 'या योजनेवर कर्ज आराखडा तयार करा' : lang === 'hi' ? 'इस योजना पर लोन बनाएं' : 'Structure Loan for this Scheme'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -255,18 +253,18 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
   );
 };
 
-// Scheme Card
+// Compact Scheme Card Component with Enhanced Visual Hierarchy
 const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3.5 hover:border-[#0B3D91] hover:shadow-md transition-all flex flex-col justify-between group">
-      <div className="space-y-2.5">
-        
-        {/* Header Badges */}
-        <div className="flex items-start gap-2 justify-between">
-          <div className="space-y-1 flex-1 min-w-0">
+    <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-blue-300 transition-all duration-200 flex flex-col justify-between group space-y-3">
+      
+      {/* Header Row */}
+      <div className="space-y-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] font-bold text-[#0B3D91] bg-blue-50 px-2 py-0.5 rounded border border-blue-200 truncate max-w-[170px]" title={s.ministry || s.agency}>
-                {s.ministry || s.agency || 'Govt. of India'}
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                {s.ministry ? s.ministry.split(' ').slice(0, 3).join(' ') : (s.agency || 'Govt')}
               </span>
               {s.state && s.state !== 'Central / All India' && (
                 <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
@@ -278,13 +276,13 @@ const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
               className="text-sm sm:text-base font-bold text-[#1A1A1A] leading-snug line-clamp-2 group-hover:text-[#0B3D91] transition-colors cursor-pointer"
               onClick={() => onOpenModal(s)}
             >
-              {lang === 'hi' && s.scheme_name_hi ? s.scheme_name_hi : s.scheme_name}
+              {(lang === 'mr' || lang === 'hi') && s.scheme_name_hi ? s.scheme_name_hi : s.scheme_name}
             </h2>
           </div>
 
           <div className="text-right flex-shrink-0 pl-2">
             <span className="text-base sm:text-lg font-black text-[#138808]">{s.interest_rate ?? 5}%</span>
-            <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider">Interest p.a.</span>
+            <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider">{lang === 'mr' ? 'वार्षिक व्याज' : lang === 'hi' ? 'वार्षिक ब्याज' : 'Interest p.a.'}</span>
           </div>
         </div>
 
@@ -300,24 +298,24 @@ const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
 
         {/* Description Excerpt */}
         <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-          {lang === 'hi' && s.description_hi ? s.description_hi : (s.description || 'Details available under official portal.')}
+          {(lang === 'mr' || lang === 'hi') && s.description_hi ? s.description_hi : (s.description || 'Details available under official portal.')}
         </p>
 
         {/* Financial Metrics Box */}
         <div className="grid grid-cols-3 gap-1 bg-[#F8FAFC] border border-slate-100 p-2.5 rounded-lg text-center">
           <div>
-            <span className="text-[9px] text-slate-500 block font-bold uppercase tracking-wider">Max Limit</span>
+            <span className="text-[9px] text-slate-500 block font-bold uppercase tracking-wider">{lang === 'mr' ? 'कमाल मर्यादा' : lang === 'hi' ? 'अधिकतम सीमा' : 'Max Limit'}</span>
             <span className="text-xs font-black text-slate-800">
               {formatCurrency(s.max_cost)}
             </span>
           </div>
           <div className="border-x border-slate-200">
-            <span className="text-[9px] text-slate-500 block font-bold uppercase tracking-wider">Margin</span>
+            <span className="text-[9px] text-slate-500 block font-bold uppercase tracking-wider">{lang === 'mr' ? 'स्वभांडवल' : lang === 'hi' ? 'मार्जिन' : 'Margin'}</span>
             <span className="text-xs font-black text-amber-900">{s.margin_percent ?? 10}%</span>
           </div>
           <div>
-            <span className="text-[9px] text-slate-500 block font-bold uppercase tracking-wider">Tenure</span>
-            <span className="text-xs font-black text-slate-800">{s.repayment_years ?? 5} Yrs</span>
+            <span className="text-[9px] text-slate-500 block font-bold uppercase tracking-wider">{lang === 'mr' ? 'मुदत' : lang === 'hi' ? 'अवधि' : 'Tenure'}</span>
+            <span className="text-xs font-black text-slate-800">{s.repayment_years ?? 5} {lang === 'mr' ? 'वर्षे' : lang === 'hi' ? 'वर्ष' : 'Yrs'}</span>
           </div>
         </div>
 
@@ -327,17 +325,17 @@ const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
       <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
         <button
           onClick={() => onOpenModal(s)}
-          className="flex-1 py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors"
+          className="flex-1 py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer"
         >
           <Info className="w-3.5 h-3.5 text-slate-500" />
-          <span>{lang === 'hi' ? 'विवरण देखें' : 'View Details'}</span>
+          <span>{lang === 'mr' ? 'तपशील पहा' : lang === 'hi' ? 'विवरण देखें' : 'View Details'}</span>
         </button>
 
         <button
           onClick={() => onSelectForLoan(s)}
-          className="py-2 px-3 bg-[#0B3D91] hover:bg-[#1e5bb8] text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors shadow-sm"
+          className="py-2 px-3 bg-[#0B3D91] hover:bg-[#1e5bb8] text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors shadow-sm cursor-pointer"
         >
-          <span>{lang === 'hi' ? 'लोन बनाएं' : 'Apply'}</span>
+          <span>{lang === 'mr' ? 'कर्ज मिळवा' : lang === 'hi' ? 'लोन बनाएं' : 'Apply'}</span>
           <ArrowRight className="w-3 h-3" />
         </button>
 
@@ -516,28 +514,30 @@ const SchemesPage = () => {
         <div className="max-w-3xl space-y-3">
           <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold text-blue-700 border border-blue-200/80">
             <Building2 className="w-3.5 h-3.5 text-blue-600" />
-            <span>Central & State Concessional Lending Directory</span>
+            <span>{lang === 'mr' ? 'केंद्र व राज्य शासन सवलत कर्ज निर्देशिका' : lang === 'hi' ? 'केंद्रीय एवं राज्य रियायती ऋण डायरेक्टरी' : 'Central & State Concessional Lending Directory'}</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-            {lang === 'hi' ? 'सरकारी योजना डायरेक्टरी' : 'Government Schemes Directory'}
+            {lang === 'mr' ? 'शासकीय योजना निर्देशिका' : lang === 'hi' ? 'सरकारी योजना डायरेक्टरी' : 'Government Schemes Directory'}
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
-            {lang === 'hi'
+            {lang === 'mr'
+              ? 'उद्योग, कृषी, MSME, महिला उद्योजकता आणि स्वयंरोजगारासाठी केंद्र व राज्य शासनाच्या अधिकृत सवलतीच्या कर्ज योजना.'
+              : lang === 'hi'
               ? 'व्यापार, कृषि, MSME, महिला उद्यमिता और स्वरोजगार के लिए भारत सरकार व राज्य सरकारों की वास्तविक योजनाएं।'
               : 'Explore verified central and state government schemes for MSMEs, agriculture, women entrepreneurs, and rural businesses.'}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-semibold">
             <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-700 border border-slate-200/80">
-              🏢 {(filterOptions.total_active_schemes || 11).toLocaleString()} {lang === 'hi' ? 'कुल योजनाएं' : 'Total Schemes'}
+              🏢 {(filterOptions.total_active_schemes || 11).toLocaleString()} {lang === 'mr' ? 'एकूण योजना' : lang === 'hi' ? 'कुल योजनाएं' : 'Total Schemes'}
             </span>
             <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-700 border border-slate-200/80">
-              🗺️ All India & State Specific
+              🗺️ {lang === 'mr' ? 'संपूर्ण भारत व राज्यस्तरीय' : lang === 'hi' ? 'अखिल भारतीय व राज्य विशिष्ट' : 'All India & State Specific'}
             </span>
             <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-200">
-              💰 4% – 8.5% {lang === 'hi' ? 'रियायती ब्याज दर' : 'Subsidized Interest Rates'}
+              💰 4% – 8.5% {lang === 'mr' ? 'सवलतीचे व्याजदर' : lang === 'hi' ? 'रियायती ब्याज दर' : 'Subsidized Interest Rates'}
             </span>
           </div>
         </div>
@@ -558,7 +558,9 @@ const SchemesPage = () => {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder={
-                lang === 'hi'
+                lang === 'mr'
+                  ? 'योजनेचे नाव, मंत्रालय, कीवर्ड किंवा राज्य शोधा...'
+                  : lang === 'hi'
                   ? 'योजना का नाम, मंत्रालय, कीवर्ड या राज्य खोजें...'
                   : 'Search by scheme name, ministry, keyword, or benefits...'
               }
@@ -584,7 +586,7 @@ const SchemesPage = () => {
               }}
               className="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] focus:bg-white transition-all"
             >
-              <option value="All">{lang === 'hi' ? '📍 सभी राज्य / ऑल इंडिया' : '📍 All States / All India'}</option>
+              <option value="All">{lang === 'mr' ? '📍 सर्व राज्ये / संपूर्ण भारत' : lang === 'hi' ? '📍 सभी राज्य / ऑल इंडिया' : '📍 All States / All India'}</option>
               {(filterOptions.states || []).map((st) => (
                 <option key={st} value={st}>
                   {st}
@@ -603,11 +605,11 @@ const SchemesPage = () => {
               }}
               className="w-full py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] focus:bg-white transition-all"
             >
-              <option value="">{lang === 'hi' ? '⚡ डिफ़ॉल्ट क्रम' : '⚡ Sort: Recommended'}</option>
-              <option value="interest_asc">{lang === 'hi' ? '📉 ब्याज दर: कम से ज्यादा' : '📉 Interest Rate: Low to High'}</option>
-              <option value="limit_desc">{lang === 'hi' ? '💰 लोन सीमा: ज्यादा से कम' : '💰 Loan Limit: High to Low'}</option>
-              <option value="limit_asc">{lang === 'hi' ? '💵 लोन सीमा: कम से ज्यादा' : '💵 Loan Limit: Low to High'}</option>
-              <option value="name_asc">{lang === 'hi' ? '🔤 नाम: A से Z' : '🔤 Name: A to Z'}</option>
+              <option value="">{lang === 'mr' ? '⚡ शिफारस केलेला क्रम' : lang === 'hi' ? '⚡ डिफ़ॉल्ट क्रम' : '⚡ Sort: Recommended'}</option>
+              <option value="interest_asc">{lang === 'mr' ? '📉 व्याजदर: कमी ते जास्त' : lang === 'hi' ? '📉 ब्याज दर: कम से ज्यादा' : '📉 Interest Rate: Low to High'}</option>
+              <option value="limit_desc">{lang === 'mr' ? '💰 कर्ज मर्यादा: जास्त ते कमी' : lang === 'hi' ? '💰 लोन सीमा: ज्यादा से कम' : '💰 Loan Limit: High to Low'}</option>
+              <option value="limit_asc">{lang === 'mr' ? '💵 कर्ज मर्यादा: कमी ते जास्त' : lang === 'hi' ? '💵 लोन सीमा: कम से ज्यादा' : '💵 Loan Limit: Low to High'}</option>
+              <option value="name_asc">{lang === 'mr' ? '🔤 नाव: A ते Z' : lang === 'hi' ? '🔤 नाम: A से Z' : '🔤 Name: A to Z'}</option>
             </select>
           </div>
 
@@ -618,14 +620,14 @@ const SchemesPage = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
               <Tag className="w-3.5 h-3.5 text-[#0B3D91]" />
-              {lang === 'hi' ? 'श्रेणी फ़िल्टर' : 'Filter by Category'}
+              {lang === 'mr' ? 'प्रवर्गानुसार फिल्टर' : lang === 'hi' ? 'श्रेणी फ़िल्टर' : 'Filter by Category'}
             </span>
             {hasActiveFilters && (
               <button
                 onClick={handleResetFilters}
                 className="text-xs text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1 underline"
               >
-                <RefreshCw className="w-3 h-3" /> {lang === 'hi' ? 'फ़िल्टर हटाएं' : 'Reset Filters'}
+                <RefreshCw className="w-3 h-3" /> {lang === 'mr' ? 'फिल्टर काढा' : lang === 'hi' ? 'फ़िल्टर हटाएं' : 'Reset Filters'}
               </button>
             )}
           </div>
@@ -642,7 +644,7 @@ const SchemesPage = () => {
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
-              {lang === 'hi' ? 'सभी श्रेणियां' : 'All Categories'}
+              {lang === 'mr' ? 'सर्व प्रवर्ग' : lang === 'hi' ? 'सभी श्रेणियां' : 'All Categories'}
             </button>
             {(filterOptions.categories || []).map((cat) => (
               <button
@@ -667,7 +669,7 @@ const SchemesPage = () => {
         <div className="flex items-center gap-2 overflow-x-auto pt-1 border-t border-slate-100">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex-shrink-0 flex items-center gap-1">
             <Coins className="w-3.5 h-3.5 text-amber-600" />
-            {lang === 'hi' ? 'लोन बजट:' : 'Loan Budget:'}
+            {lang === 'mr' ? 'कर्ज मर्यादा:' : lang === 'hi' ? 'लोन बजट:' : 'Loan Budget:'}
           </span>
           <div className="flex gap-1.5 flex-wrap">
             {INVESTMENT_RANGES.map((range, idx) => (
@@ -683,7 +685,7 @@ const SchemesPage = () => {
                     : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
                 }`}
               >
-                {lang === 'hi' ? range.labelHi : range.label}
+                {lang === 'mr' ? (range.labelHi || range.label) : lang === 'hi' ? range.labelHi : range.label}
               </button>
             ))}
           </div>
@@ -696,11 +698,11 @@ const SchemesPage = () => {
         <div className="text-sm font-bold text-slate-800">
           {!loading && (
             <span>
-              {lang === 'hi' ? 'दिखाए जा रहे हैं ' : 'Showing '}
+              {lang === 'mr' ? 'दाखवले जात आहेत ' : lang === 'hi' ? 'दिखाए जा रहे हैं ' : 'Showing '}
               <span className="text-[#0B3D91] font-black">{(data.schemes || []).length}</span>
-              {lang === 'hi' ? ' कुल ' : ' of '}
+              {lang === 'mr' ? ' एकूण ' : lang === 'hi' ? ' कुल ' : ' of '}
               <span className="text-slate-900 font-black">{(data.total || 0).toLocaleString()}</span>
-              {lang === 'hi' ? ' सरकारी योजनाएं' : ' Government Schemes'}
+              {lang === 'mr' ? ' शासकीय योजना' : lang === 'hi' ? ' सरकारी योजनाएं' : ' Government Schemes'}
               {search && <span className="text-slate-500 font-normal ml-1">for "{search}"</span>}
               {selectedState !== 'All' && <span className="text-indigo-600 ml-1">in {selectedState}</span>}
             </span>
@@ -708,7 +710,7 @@ const SchemesPage = () => {
         </div>
 
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <span>{lang === 'hi' ? 'प्रति पृष्ठ:' : 'Per page:'}</span>
+          <span>{lang === 'mr' ? 'प्रति पृष्ठ:' : lang === 'hi' ? 'प्रति पृष्ठ:' : 'Per page:'}</span>
           <select
             value={limit}
             onChange={(e) => {
@@ -729,14 +731,14 @@ const SchemesPage = () => {
         <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-sm flex items-center gap-3 shadow-sm">
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-600" />
           <div className="flex-1">
-            <p className="font-bold">Error loading schemes</p>
+            <p className="font-bold">{lang === 'mr' ? 'योजना लोड करण्यात त्रुटी' : lang === 'hi' ? 'योजनाएं लोड करने में समस्या' : 'Error loading schemes'}</p>
             <p className="text-xs text-rose-600">{error}</p>
           </div>
           <button
             onClick={load}
             className="px-3 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-bold hover:bg-rose-700"
           >
-            Retry
+            {lang === 'mr' ? 'पुन्हा प्रयत्न करा' : lang === 'hi' ? 'पुनः प्रयास करें' : 'Retry'}
           </button>
         </div>
       )}
@@ -746,9 +748,9 @@ const SchemesPage = () => {
         <div className="flex flex-col items-center justify-center py-20 gap-3 bg-white rounded-2xl border border-slate-200 shadow-sm">
           <Loader2 className="w-8 h-8 animate-spin text-[#0B3D91]" />
           <span className="text-sm text-slate-700 font-bold">
-            {lang === 'hi' ? 'सरकारी योजनाएं लोड हो रही हैं...' : 'Querying real-time scheme repository...'}
+            {lang === 'mr' ? 'शासकीय योजना लोड होत आहेत...' : lang === 'hi' ? 'सरकारी योजनाएं लोड हो रही हैं...' : 'Querying real-time scheme repository...'}
           </span>
-          <span className="text-xs text-slate-400">Filtering across 2,700+ verified schemes</span>
+          <span className="text-xs text-slate-400">Filtering across verified central & state schemes</span>
         </div>
       )}
 
@@ -774,10 +776,12 @@ const SchemesPage = () => {
             <IndianRupee className="w-6 h-6" />
           </div>
           <h3 className="text-base font-bold text-slate-800">
-            {lang === 'hi' ? 'कोई योजना नहीं मिली' : 'No schemes match your filters'}
+            {lang === 'mr' ? 'कोणतीही योजना आढळली नाही' : lang === 'hi' ? 'कोई योजना नहीं मिली' : 'No schemes match your filters'}
           </h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            {lang === 'hi'
+            {lang === 'mr'
+              ? 'कृपया शोध शब्द बदला किंवा फिल्टर काढून सर्व योजना पहा.'
+              : lang === 'hi'
               ? 'कृपया अपना खोज शब्द बदलें या फ़िल्टर हटाकर सभी योजनाओं को देखें।'
               : 'Try relaxing your search terms, selecting "All States", or resetting budget range.'}
           </p>
@@ -785,7 +789,7 @@ const SchemesPage = () => {
             onClick={handleResetFilters}
             className="px-4 py-2 bg-[#0B3D91] text-white rounded-xl text-xs font-bold shadow hover:bg-[#1e5bb8] transition-colors"
           >
-            {lang === 'hi' ? 'सभी फ़िल्टर रीसेट करें' : 'Reset All Filters'}
+            {lang === 'mr' ? 'सर्व फिल्टर रीसेट करा' : lang === 'hi' ? 'सभी फ़िल्टर रीसेट करें' : 'Reset All Filters'}
           </button>
         </div>
       )}
@@ -795,9 +799,9 @@ const SchemesPage = () => {
         <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           
           <div className="text-xs text-slate-500 font-medium">
-            Page <strong className="text-slate-800">{page}</strong> of{' '}
+            {lang === 'mr' ? 'पृष्ठ' : lang === 'hi' ? 'पृष्ठ' : 'Page'} <strong className="text-slate-800">{page}</strong> {lang === 'mr' ? 'पैकी' : lang === 'hi' ? 'का' : 'of'}{' '}
             <strong className="text-slate-800">{data.total_pages}</strong>
-            <span className="text-slate-400 ml-2">({(data.total || 0).toLocaleString()} total schemes)</span>
+            <span className="text-slate-400 ml-2">({(data.total || 0).toLocaleString()} {lang === 'mr' ? 'एकूण योजना' : lang === 'hi' ? 'कुल योजनाएं' : 'total schemes'})</span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -806,7 +810,7 @@ const SchemesPage = () => {
               disabled={page === 1}
               className="px-2.5 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-colors"
             >
-              First
+              {lang === 'mr' ? 'पहिले' : lang === 'hi' ? 'पहला' : 'First'}
             </button>
 
             <button
@@ -835,7 +839,7 @@ const SchemesPage = () => {
               disabled={page === data.total_pages}
               className="px-2.5 py-1.5 text-xs font-bold text-slate-600 border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-colors"
             >
-              Last
+              {lang === 'mr' ? 'शेवटचे' : lang === 'hi' ? 'अंतिम' : 'Last'}
             </button>
           </div>
 
@@ -846,7 +850,9 @@ const SchemesPage = () => {
       <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
         <ShieldCheck className="w-4 h-4 flex-shrink-0 text-amber-700 mt-0.5" />
         <span className="leading-relaxed">
-          {lang === 'hi'
+          {lang === 'mr'
+            ? 'सूचना: ही योजना माहिती अधिकृत शासकीय स्रोतांवरून (MyScheme.gov.in, NSFDC, MSME, MoSJE) घेतली आहे. अंतिम कर्ज वितरण आणि सबसिडी बँक पडताळणी व अधिकृत नियमांवर अवलंबून आहे.'
+            : lang === 'hi'
             ? 'सूचना: यह योजना डेटाबेस आधिकारिक सरकारी स्रोतों (MyScheme.gov.in, NSFDC, MSME, MoSJE) से सिंक किया गया है। आवेदन करने से पहले अपने नजदीकी बैंक शाखा या कॉमन सर्विस सेंटर (CSC) से नियम व शर्तें अवश्य सत्यापित करें।'
             : 'Notice: Sourced directly from official Government of India repositories (MyScheme.gov.in, NSFDC, MSME, MoSJE). Final loan disbursement and subsidies are subject to standard bank appraisal and official scheme guidelines.'}
         </span>

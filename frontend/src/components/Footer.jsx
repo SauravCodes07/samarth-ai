@@ -28,10 +28,12 @@ const Footer = () => {
             </div>
             <div>
               <h4 className="font-semibold text-white text-sm">
-                {lang === 'hi' ? '100% सटीक गणितीय ढांचा' : '100% Deterministic Financials'}
+                {lang === 'mr' ? '१००% अचूक गणितीय आराखडा' : lang === 'hi' ? '100% सटीक गणितीय ढांचा' : '100% Deterministic Financials'}
               </h4>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                {lang === 'hi' 
+                {lang === 'mr'
+                  ? 'शासकीय निकषांनुसार १०% स्वभांडवल व ९०% सवलतीचे शासकीय कर्ज'
+                  : lang === 'hi' 
                   ? 'सरकारी दिशानिर्देशों के अनुरूप 10% मार्जिन व 90% ऋण संरचना' 
                   : 'Calculated strictly adhering to MoSJE & NSFDC lending guidelines'}
               </p>
@@ -44,10 +46,12 @@ const Footer = () => {
             </div>
             <div>
               <h4 className="font-semibold text-white text-sm">
-                {lang === 'hi' ? 'दलालों से शून्य निर्भरता' : 'Zero Middleman Dependency'}
+                {lang === 'mr' ? 'दलालांवर शून्य अवलंबित्व' : lang === 'hi' ? 'दलालों से शून्य निर्भरता' : 'Zero Middleman Dependency'}
               </h4>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                {lang === 'hi' 
+                {lang === 'mr'
+                  ? 'थेट अधिकृत शासकीय पोर्टल आणि बँक शाखांशी थेट पारदर्शक जोडणी'
+                  : lang === 'hi' 
                   ? 'सीधे आधिकारिक सरकारी पोर्टलों और बैंक शाखाओं से संपर्क' 
                   : 'Direct, transparent scheme information with verified source links'}
               </p>
@@ -60,12 +64,14 @@ const Footer = () => {
             </div>
             <div>
               <h4 className="font-semibold text-white text-sm">
-                {lang === 'hi' ? 'सरल व समावेशी भाषा' : 'Inclusive Multi-Lingual Advisory'}
+                {lang === 'mr' ? 'सर्वसमावेशक बहुभाषिक सल्ला' : lang === 'hi' ? 'सरल व समावेशी भाषा' : 'Inclusive Multi-Lingual Advisory'}
               </h4>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                {lang === 'hi' 
+                {lang === 'mr'
+                  ? 'ग्रामीण व सूक्ष्म उद्योजकांसाठी मराठी, हिंदी व इंग्रजीत सुलभ अहवाल'
+                  : lang === 'hi' 
                   ? 'बिना किसी जटिल बैंकिंग शब्दों के स्पष्ट रिपोर्ट' 
-                  : 'Plain-language summaries in Hindi & English tailored for rural founders'}
+                  : 'Plain-language summaries in Hindi, Marathi & English tailored for rural founders'}
               </p>
             </div>
           </div>
@@ -83,38 +89,40 @@ const Footer = () => {
               <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
                 <Building2 className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-base tracking-tight">Samarth AI</span>
+              <span className="font-bold text-base tracking-tight">{lang === 'mr' ? 'समर्थ AI' : lang === 'hi' ? 'समर्थ AI' : 'Samarth AI'}</span>
             </div>
             <p className="text-slate-400 text-xs leading-relaxed">
-              {lang === 'hi'
+              {lang === 'mr'
+                ? 'भारतातील ग्रामीण व सूक्ष्म उद्योजकांसाठी संस्थात्मक वित्तीय सल्लागार आणि अचूक शासकीय योजना मॅपिंग व्यासपीठ.'
+                : lang === 'hi'
                 ? 'भारत के सूक्ष्म एवं ग्रामीण उद्यमियों के लिए संस्थागत वित्तीय सलाहकार व स्मार्ट स्कीम मैपिंग मंच।'
                 : 'National digital advisory infrastructure bridging the financial literacy gap for rural and micro-enterprises across Bharat.'}
             </p>
             <div className="pt-2 flex items-center space-x-2 text-[11px] text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Supabase Production Cloud Live</span>
+              <span>{lang === 'mr' ? 'सुपाबेस क्लाउड लाइव्ह जोडलेले' : lang === 'hi' ? 'सुपाबेस क्लाउड लाइव्ह सक्रिय' : 'Supabase Production Cloud Live'}</span>
             </div>
           </div>
 
           {/* Quick Tools */}
           <div>
             <h5 className="font-bold text-white uppercase tracking-wider text-[11px] mb-3">
-              {lang === 'hi' ? 'वित्तीय टूल्स' : 'Financial Engines'}
+              {lang === 'mr' ? 'वित्तीय साधने' : lang === 'hi' ? 'वित्तीय टूल्स' : 'Financial Engines'}
             </h5>
             <ul className="space-y-2 text-xs">
               <li>
                 <Link to="/calculator" className="hover:text-white transition-colors">
-                  {lang === 'hi' ? '10% मार्जिन लोन कैलकुलेटर' : 'Smart Loan & EMI Calculator'}
+                  {lang === 'mr' ? '१०% भांडवल कर्ज व EMI गणक' : lang === 'hi' ? '10% मार्जिन लोन कैलकुलेटर' : 'Smart Loan & EMI Calculator'}
                 </Link>
               </li>
               <li>
                 <Link to="/advisory" className="hover:text-white transition-colors">
-                  {lang === 'hi' ? 'हाइपर-लोकल व्यवहार्यता रिपोर्ट' : 'Hyper-Local Feasibility Engine'}
+                  {lang === 'mr' ? 'हायपर-लोकल व्यवसाय व्यवहार्यता अहवाल' : lang === 'hi' ? 'हाइपर-लोकल व्यवहार्यता रिपोर्ट' : 'Hyper-Local Feasibility Engine'}
                 </Link>
               </li>
               <li>
                 <Link to="/schemes" className="hover:text-white transition-colors">
-                  {lang === 'hi' ? 'सरकारी स्कीम डायरेक्टरी' : 'Government Schemes Directory'}
+                  {lang === 'mr' ? 'शासकीय योजना निर्देशिका' : lang === 'hi' ? 'सरकारी स्कीम डायरेक्टरी' : 'Government Schemes Directory'}
                 </Link>
               </li>
             </ul>
@@ -123,25 +131,27 @@ const Footer = () => {
           {/* Supported Schemes */}
           <div>
             <h5 className="font-bold text-white uppercase tracking-wider text-[11px] mb-3">
-              {lang === 'hi' ? 'प्रमुख योजनाएं' : 'Featured Schemes'}
+              {lang === 'mr' ? 'प्रमुख शासकीय योजना' : lang === 'hi' ? 'प्रमुख योजनाएं' : 'Featured Schemes'}
             </h5>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li>Micro Finance Scheme (MFS) - NSFDC</li>
-              <li>Mahila Samriddhi Yojana (4% p.a.)</li>
-              <li>Laghu Vyavasay Yojana (LVY)</li>
-              <li>Term Loan Scheme (TLS Tier 1 & 2)</li>
-              <li>Pradhan Mantri MUDRA Yojana (PMMY)</li>
-              <li>Prime Minister Employment Gen. (PMEGP)</li>
+              <li>{lang === 'mr' ? 'मायक्रो फायनान्स योजना (MFS) - NSFDC' : lang === 'hi' ? 'माइक्रो फाइनेंस स्कीम (MFS) - NSFDC' : 'Micro Finance Scheme (MFS) - NSFDC'}</li>
+              <li>{lang === 'mr' ? 'महिला समृद्धी योजना (४% वार्षिक दर)' : lang === 'hi' ? 'महिला समृद्धि योजना (4% वार्षिक)' : 'Mahila Samriddhi Yojana (4% p.a.)'}</li>
+              <li>{lang === 'mr' ? 'लघु व्यवसाय योजना (LVY)' : lang === 'hi' ? 'लघु व्यवसाय योजना (LVY)' : 'Laghu Vyavasay Yojana (LVY)'}</li>
+              <li>{lang === 'mr' ? 'मुदत कर्ज योजना (TLS टियर १ व २)' : lang === 'hi' ? 'टर्म लोन स्कीम (TLS Tier 1 & 2)' : 'Term Loan Scheme (TLS Tier 1 & 2)'}</li>
+              <li>{lang === 'mr' ? 'प्रधानमंत्री मुद्रा योजना (PMMY)' : lang === 'hi' ? 'प्रधानमंत्री मुद्रा योजना (PMMY)' : 'Pradhan Mantri MUDRA Yojana (PMMY)'}</li>
+              <li>{lang === 'mr' ? 'पंतप्रधान रोजगार निर्मिती योजना (PMEGP)' : lang === 'hi' ? 'प्रधानमंत्री रोजगार सृजन कार्यक्रम (PMEGP)' : 'Prime Minister Employment Gen. (PMEGP)'}</li>
             </ul>
           </div>
 
           {/* Regulatory & Disclaimer */}
           <div>
             <h5 className="font-bold text-white uppercase tracking-wider text-[11px] mb-3">
-              {lang === 'hi' ? 'सत्यापन व दिशानिर्देश' : 'Verification & Sources'}
+              {lang === 'mr' ? 'पडताळणी व अधिकृत स्रोत' : lang === 'hi' ? 'सत्यापन व दिशानिर्देश' : 'Verification & Sources'}
             </h5>
             <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
-              {lang === 'hi'
+              {lang === 'mr'
+                ? 'सामाजिक न्याय आणि सक्षमीकरण मंत्रालय (MoSJE), NSFDC व MSME च्या अधिकृत सवलतीच्या कर्ज नियमांवर आधारित.'
+                : lang === 'hi'
                 ? 'यह प्रणाली सामाजिक न्याय एवं अधिकारिता मंत्रालय (MoSJE) व NSFDC के रियायती वित्तीय मानदंडों पर आधारित है।'
                 : 'Grounded on official concessional credit guidelines from MoSJE, NSFDC, MSME and National SC/ST Hub.'}
             </p>
@@ -151,7 +161,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-1 text-blue-400 hover:text-blue-300 text-xs"
             >
-              <span>NSFDC Official Portal</span>
+              <span>{lang === 'mr' ? 'NSFDC अधिकृत पोर्टल' : lang === 'hi' ? 'NSFDC आधिकारिक पोर्टल' : 'NSFDC Official Portal'}</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>
@@ -160,9 +170,11 @@ const Footer = () => {
 
         {/* Bottom Legal Notice */}
         <div className="mt-8 pt-6 border-t border-slate-800 text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© {new Date().getFullYear()} Samarth AI Platform. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {lang === 'mr' ? 'समर्थ AI व्यासपीठ. सर्व हक्क राखीव.' : lang === 'hi' ? 'समर्थ AI प्लेटफॉर्म। सर्वाधिकार सुरक्षित।' : 'Samarth AI Platform. All rights reserved.'}</p>
           <p className="text-slate-500">
-            Enterprise GovTech Suite • Smart India Hackathon 2026 (PS ID: 26091)
+            {lang === 'mr' 
+              ? 'एंटरप्राइज गव्हटेक सूट • स्मार्ट इंडिया हॅकाथॉन २०२६ (PS ID: 26091)' 
+              : 'Enterprise GovTech Suite • Smart India Hackathon 2026 (PS ID: 26091)'}
           </p>
         </div>
 
