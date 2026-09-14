@@ -85,17 +85,16 @@ const Home = () => {
   return (
     <div className="space-y-16 pb-16">
       
-      {/* Hero Section with Cinematic Background & Gradient Overlay */}
+      {/* Hero Section with High-Impact Crisp Photographic Background & Modern Overlay */}
       <section className="relative overflow-hidden bg-slate-950 text-white min-h-[640px] flex items-center">
-        {/* Background Image Layer - Crisp, Bold & High Vibrancy */}
+        {/* Crisp Photographic Background - 100% Sharp, Vibrant and Bold */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-75 contrast-115 saturate-120 scale-100 transition-all duration-700"
+          className="absolute inset-0 bg-cover bg-center opacity-90 contrast-110 saturate-110"
           style={{ backgroundImage: `url('/hero-bg.jpg')` }}
         />
-        {/* Crisp Directional Gradient Overlay (Bold & High Contrast for pristine text legibility) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-transparent" />
+        {/* Sleek directional gradient so left text has crisp contrast while the right photo remains vibrant */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/30" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(37,99,235,0.25),transparent_60%)]" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -339,62 +338,86 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           
           {/* Step 1 */}
-          <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 font-black text-lg flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-              1
+          <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 relative group flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                  1
+                </div>
+                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                  {lang === 'mr' ? 'प्रारंभ' : lang === 'hi' ? 'शुरुआत' : 'Start'}
+                </span>
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900 mb-2">
+                {lang === 'mr' ? '१. व्यवसाय व कल्पना निवडा' : lang === 'hi' ? '1. व्यवसाय व ट्रेड चुनें' : '1. Choose Your Trade'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                {lang === 'mr' 
+                  ? 'डेअरी फार्म, किराणा दुकान, शिलाई बुटीक, ई-रिक्षा किंवा सोलर यापैकी आपला पसंतीचा व्यवसाय निवडा किंवा आवाजाने सांगा.' 
+                  : lang === 'hi' 
+                  ? 'डेयरी फार्म, किराना दुकान, सिलाई बुटीक, ई-रिक्शा या सोलर में से अपना व्यवसाय चुनें अथवा बोलकर बताएं।' 
+                  : 'Select from high-demand rural trades like Dairy, Kirana, Tailoring, or Transport—or use our voice input.'}
+              </p>
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">
-              {lang === 'mr' ? 'व्यवसाय व कल्पना निवडा' : lang === 'hi' ? 'व्यवसाय व ट्रेड चुनें' : '1. Choose Your Trade'}
-            </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              {lang === 'mr' 
-                ? 'डेअरी फार्म, किराणा दुकान, शिलाई बुटीक, ई-रिक्षा किंवा सोलर यापैकी आपला पसंतीचा व्यवसाय निवडा किंवा आवाजाने सांगा.' 
-                : lang === 'hi' 
-                ? 'डेयरी फार्म, किराना दुकान, सिलाई बुटीक, ई-रिक्शा या सोलर में से अपना व्यवसाय चुनें अथवा बोलकर बताएं।' 
-                : 'Select from high-demand rural trades like Dairy, Kirana, Tailoring, or Transport—or use our voice input.'}
-            </p>
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-blue-600">
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600">
               <span>{lang === 'mr' ? 'आवाजाने किंवा १-क्लिकमध्ये' : lang === 'hi' ? 'बोलकर या 1-क्लिक में' : 'Voice-enabled or 1-click'}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
 
           {/* Step 2 */}
-          <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 font-black text-lg flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-              2
+          <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-300 transition-all duration-300 relative group flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                  2
+                </div>
+                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                  {lang === 'mr' ? '१०% भांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}
+                </span>
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900 mb-2">
+                {lang === 'mr' ? '२. स्वतःचे १०% भांडवल टाका' : lang === 'hi' ? '2. 10% उपलब्ध मार्जिन डालें' : '2. Enter Your 10% Margin'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                {lang === 'mr' 
+                  ? 'आपल्याकडे असलेली बचत प्रविष्ट करा. आमचे अल्गोरिदम त्यावरून ९०% सरकारी कर्ज आणि अचूक हप्ता (EMI) काढते.' 
+                  : lang === 'hi' 
+                  ? 'अपनी उपलब्ध बचत दर्ज करें। हमारा एल्गोरिदम तुरंत 90% सरकारी लोन और सटीक मासिक किश्त की गणना करता है।' 
+                  : 'Enter your savings. Our deterministic engine calculates your 90% government loan eligibility and 4%–8% interest rate.'}
+              </p>
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">
-              {lang === 'mr' ? '१०% स्वतःचे भांडवल टाका' : lang === 'hi' ? '10% उपलब्ध मार्जिन डालें' : '2. Enter Your 10% Margin'}
-            </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              {lang === 'mr' 
-                ? 'आपल्याकडे असलेली बचत प्रविष्ट करा. आमचे अल्गोरिदम त्यावरून ९०% सरकारी कर्ज आणि अचूक हप्ता (EMI) काढते.' 
-                : lang === 'hi' 
-                ? 'अपनी उपलब्ध बचत दर्ज करें। हमारा एल्गोरिदम तुरंत 90% सरकारी लोन और सटीक मासिक किश्त की गणना करता है।' 
-                : 'Enter your savings. Our deterministic engine calculates your 90% government loan eligibility and 4%–8% interest rate.'}
-            </p>
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-amber-600">
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700">
               <span>{lang === 'mr' ? '६ महिने हप्ता सवलत समाविष्ट' : lang === 'hi' ? '6 माह मोरेटोरियम शामिल' : 'Includes 6-month moratorium'}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
 
           {/* Step 3 */}
-          <div className="bg-white p-7 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all relative group">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 font-black text-lg flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-              3
+          <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 relative group flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                  3
+                </div>
+                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  {lang === 'mr' ? 'बँक DPR' : lang === 'hi' ? 'बैंक DPR' : 'Bank DPR'}
+                </span>
+              </div>
+              <h3 className="text-lg font-extrabold text-slate-900 mb-2">
+                {lang === 'mr' ? '३. बँक-योग्य DPR अहवाल मिळवा' : lang === 'hi' ? '3. बैंक-योग्य DPR रिपोर्ट पाएं' : '3. Get Bank-Ready DPR'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                {lang === 'mr' 
+                  ? 'जिल्हा उद्योग केंद्र (DIC) किंवा बँकेत सादर करण्यासाठी अधिकृत प्रकल्प अहवाल (DPR) आणि अर्ज मार्गदर्शक डाऊनलोड करा.' 
+                  : lang === 'hi' 
+                  ? 'जिला उद्योग केंद्र (DIC) या बैंक में जमा करने हेतु आधिकारिक प्रोजेक्ट रिपोर्ट (DPR) और आवेदन गाइड तुरंत प्राप्त करें।' 
+                  : 'Download your official Detailed Project Report (DPR) with SWOT analysis and step-by-step JanSamarth application guide.'}
+              </p>
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">
-              {lang === 'mr' ? 'बँक-योग्य DPR अहवाल मिळवा' : lang === 'hi' ? 'बैंक-योग्य DPR रिपोर्ट पाएं' : '3. Get Bank-Ready DPR'}
-            </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              {lang === 'mr' 
-                ? 'जिल्हा उद्योग केंद्र (DIC) किंवा बँकेत सादर करण्यासाठी अधिकृत प्रकल्प अहवाल (DPR) आणि अर्ज मार्गदर्शक डाऊनलोड करा.' 
-                : lang === 'hi' 
-                ? 'जिला उद्योग केंद्र (DIC) या बैंक में जमा करने हेतु आधिकारिक प्रोजेक्ट रिपोर्ट (DPR) और आवेदन गाइड तुरंत प्राप्त करें।' 
-                : 'Download your official Detailed Project Report (DPR) with SWOT analysis and step-by-step JanSamarth application guide.'}
-            </p>
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center text-xs font-semibold text-emerald-600">
-              <span>{lang === 'mr' ? '१००% मोफत व सुरक्षित' : lang === 'hi' ? '100% निःशुल्क व सुरक्षित' : '100% Free & Verified'}</span>
+            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700">
+              <span>{lang === 'mr' ? '१००% मोफत व प्रमाणित' : lang === 'hi' ? '100% निःशुल्क व सत्यापित' : '100% Free & Verified'}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
 
