@@ -121,27 +121,85 @@ const FormPage = () => {
     const detected = [];
 
     let updatedType = null;
-    if (lower.includes('dairy') || lower.includes('doodh') || lower.includes('दूध') || lower.includes('गाय') || lower.includes('भैंस') || lower.includes('पशु')) {
+    
+    // 1. Dairy & Milk Farming (English, Hindi, Marathi)
+    if (
+      lower.includes('dairy') || lower.includes('milk') || lower.includes('doodh') || lower.includes('dudh') ||
+      lower.includes('दूध') || lower.includes('दुग्ध') || lower.includes('डेअरी') || lower.includes('डेयरी') ||
+      lower.includes('गाय') || lower.includes('भैंस') || lower.includes('म्हैस') || lower.includes('गोठा') ||
+      lower.includes('पशु') || lower.includes('पशुपालन') || lower.includes('गोपालन') || lower.includes('तूप') ||
+      lower.includes('पनीर') || lower.includes('cattle') || lower.includes('livestock') || lower.includes('buffalo') ||
+      lower.includes('cow') || lower.includes('ghee') || lower.includes('paneer')
+    ) {
       updatedType = 'Dairy Farm';
-      detected.push('डेयरी / Dairy Farm');
-    } else if (lower.includes('kirana') || lower.includes('grocery') || lower.includes('किराना') || lower.includes('दुकान') || lower.includes('store') || lower.includes('shop')) {
+      detected.push(lang === 'mr' ? 'डेअरी व दुग्ध व्यवसाय' : lang === 'hi' ? 'डेयरी व दूध उत्पादन' : 'Dairy & Milk Farming');
+    }
+    // 2. Grocery / Kirana Shop (English, Hindi, Marathi)
+    else if (
+      lower.includes('kirana') || lower.includes('grocery') || lower.includes('किराना') || lower.includes('किराणा') ||
+      lower.includes('general store') || lower.includes('जनरल स्टोर') || lower.includes('जनरल स्टोअर') ||
+      lower.includes('सुपरमार्केट') || lower.includes('supermarket') || lower.includes('राशन') || lower.includes('परचून') ||
+      lower.includes('वाणसामान') || lower.includes('kirana store') || lower.includes('grocery shop')
+    ) {
       updatedType = 'Grocery / Kirana Store';
-      detected.push('किराना स्टोर / Grocery');
-    } else if (lower.includes('tailor') || lower.includes('silai') || lower.includes('सिलाई') || lower.includes('बुटीक') || lower.includes('boutique') || lower.includes('कपड़ा')) {
+      detected.push(lang === 'mr' ? 'किराणा व जनरल स्टोअर' : lang === 'hi' ? 'किराना व जनरल स्टोर' : 'Grocery / Kirana Shop');
+    }
+    // 3. Tailoring & Boutique (English, Hindi, Marathi)
+    else if (
+      lower.includes('tailor') || lower.includes('tailoring') || lower.includes('silai') || lower.includes('shilai') ||
+      lower.includes('सिलाई') || lower.includes('शिलाई') || lower.includes('बुटीक') || lower.includes('boutique') ||
+      lower.includes('कपड़ा') || lower.includes('कपडे') || lower.includes('शिंपी') || lower.includes('दर्जी') ||
+      lower.includes('sewing') || lower.includes('stitching') || lower.includes('garment') || lower.includes('dress') ||
+      lower.includes('शिवणकाम') || lower.includes('भरतकाम')
+    ) {
       updatedType = 'Tailoring & Boutique';
-      detected.push('सिलाई / Tailoring');
-    } else if (lower.includes('rickshaw') || lower.includes('रिक्शा') || lower.includes('ऑटो') || lower.includes('auto') || lower.includes('transport') || lower.includes('गाड़ी')) {
+      detected.push(lang === 'mr' ? 'शिलाई व बुटीक केंद्र' : lang === 'hi' ? 'सिलाई व बुटीक सेंटर' : 'Tailoring & Boutique');
+    }
+    // 4. E-Rickshaw / Transport (English, Hindi, Marathi)
+    else if (
+      lower.includes('rickshaw') || lower.includes('e-rickshaw') || lower.includes('erickshaw') || lower.includes('रिक्शा') ||
+      lower.includes('रिक्षा') || lower.includes('ई-रिक्शा') || lower.includes('ई-रिक्षा') || lower.includes('ऑटो') ||
+      lower.includes('auto') || lower.includes('transport') || lower.includes('वाहतूक') || lower.includes('ट्रांसपोर्ट') ||
+      lower.includes('टेम्पो') || lower.includes('tempo') || lower.includes('गाड़ी') || lower.includes('वाहन') ||
+      lower.includes('लोडर') || lower.includes('loader') || lower.includes('cab') || lower.includes('taxi')
+    ) {
       updatedType = 'E-Rickshaw / Transport';
-      detected.push('ई-रिक्शा / Transport');
-    } else if (lower.includes('solar') || lower.includes('सोलर') || lower.includes('सौर') || lower.includes('energy')) {
+      detected.push(lang === 'mr' ? 'ई-रिक्षा वाहतूक सेवा' : lang === 'hi' ? 'ई-रिक्शा व वाहन सेवा' : 'E-Rickshaw / Transport');
+    }
+    // 5. Solar & Clean Energy (English, Hindi, Marathi)
+    else if (
+      lower.includes('solar') || lower.includes('सोलर') || lower.includes('सौर') || lower.includes('सौर ऊर्जा') ||
+      lower.includes('solar panel') || lower.includes('solar pump') || lower.includes('सोलर पंप') || lower.includes('रूफटॉप') ||
+      lower.includes('rooftop solar') || lower.includes('clean energy') || lower.includes('renewable') || lower.includes('हरित ऊर्जा')
+    ) {
       updatedType = 'Solar & Renewable Energy';
-      detected.push('सोलर / Solar');
-    } else if (lower.includes('mill') || lower.includes('चक्की') || lower.includes('आटा') || lower.includes('तेल') || lower.includes('flour') || lower.includes('oil')) {
+      detected.push(lang === 'mr' ? 'सौर ऊर्जा व्यवसाय' : lang === 'hi' ? 'सोलर व हरित व्यवसाय' : 'Solar & Clean Energy');
+    }
+    // 6. Flour/Oil Mill Processing (English, Hindi, Marathi)
+    else if (
+      lower.includes('mill') || lower.includes('गिरणी') || lower.includes('चक्की') || lower.includes('आटा चक्की') ||
+      lower.includes('पिठाची गिरणी') || lower.includes('तेल घाणी') || lower.includes('तेल मिल') || lower.includes('कोल्हू') ||
+      lower.includes('flour mill') || lower.includes('oil mill') || lower.includes('expeller') || lower.includes('dal mill') ||
+      lower.includes('दाल मिल') || lower.includes('प्रसंस्करण') || lower.includes('processing') || lower.includes('food processing')
+    ) {
       updatedType = 'Agri Processing / Mill';
-      detected.push('आटा/तेल मिल / Mill');
-    } else if (lower.includes('artisan') || lower.includes('हस्तशिल्प') || lower.includes('दस्तकारी') || lower.includes('craft')) {
+      detected.push(lang === 'mr' ? 'पिठाची/तेलाची गिरणी' : lang === 'hi' ? 'आटा/तेल मिल व प्रसंस्करण' : 'Flour/Oil Mill Processing');
+    }
+    // 7. Handicrafts & Artisan (English, Hindi, Marathi)
+    else if (
+      lower.includes('artisan') || lower.includes('handicraft') || lower.includes('craft') || lower.includes('हस्तशिल्प') ||
+      lower.includes('हस्तकला') || lower.includes('दस्तकारी') || lower.includes('कारागीर') || lower.includes('कारीगर') ||
+      lower.includes('शिल्पकार') || lower.includes('कुम्हार') || lower.includes('कुंभार') || lower.includes('मूर्ती') ||
+      lower.includes('मूर्ति') || lower.includes('pottery') || lower.includes('weaving') || lower.includes('विणकाम') ||
+      lower.includes('हातमाग') || lower.includes('हथकरघा') || lower.includes('सुतार') || lower.includes('बढ़ई')
+    ) {
       updatedType = 'Handicrafts / Artisan';
-      detected.push('हस्तशिल्प / Handicrafts');
+      detected.push(lang === 'mr' ? 'हस्तकला व कारागीर' : lang === 'hi' ? 'हस्तशिल्प व दस्तकारी' : 'Handicrafts & Artisan');
+    }
+    // 8. Other Micro Business (Fallback for ANY other business idea in any language)
+    else {
+      updatedType = 'Other Micro Business';
+      detected.push(lang === 'mr' ? 'इतर लघु व्यवसाय (लघु उद्योग)' : lang === 'hi' ? 'अन्य छोटा व्यवसाय (सूक्ष्म उद्यम)' : 'Other Micro Business');
     }
 
     // Gender detection
