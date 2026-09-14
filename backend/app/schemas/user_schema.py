@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any
 
 class AdvisoryRequest(BaseModel):
@@ -13,6 +13,8 @@ class AdvisoryRequest(BaseModel):
     preferred_language: Optional[str] = Field("hi", description="Preferred response language: hi or en")
 
 class SchemeResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     slug: Optional[str] = None
     scheme_name: str
@@ -41,18 +43,15 @@ class SchemeResponse(BaseModel):
     verification_status: Optional[str] = "bulk_imported"
     is_active: Optional[bool] = True
 
-    class Config:
-        from_attributes = True
-
 class SchemesPageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     total: int
     page: int
     limit: int
     total_pages: int
     schemes: List[SchemeResponse]
 
-    class Config:
-        from_attributes = True
 
 class QuarterlyRepaymentSchedule(BaseModel):
     quarter: int

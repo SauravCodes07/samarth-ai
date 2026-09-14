@@ -5,7 +5,9 @@ Ministry of Social Justice and Empowerment (MoSJE), and National SC/ST Hub Guide
 """
 
 from app.database.db_connection import SessionLocal, engine, Base
-from app.models.scheme_model import Scheme
+from app.models.scheme_model import Scheme, VerificationLog, SchemeReport
+from app.models.user_model import AdvisorySubmission
+
 
 AUTHENTIC_SCHEMES = [
     {
