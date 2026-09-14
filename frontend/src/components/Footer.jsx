@@ -86,8 +86,8 @@ const Footer = () => {
           {/* Brand Column */}
           <div className="space-y-3 md:col-span-1">
             <div className="flex items-center space-x-2.5 text-white">
-              <div className="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center shadow-xs overflow-hidden">
-                <img src="/logo.png" alt="Samarth AI Logo" className="w-full h-full object-contain" />
+              <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-xs overflow-hidden relative">
+                <img src="/logo.png" alt="Samarth AI Logo" className="w-full h-full object-cover scale-145" />
               </div>
               <span className="font-bold text-base tracking-tight">{lang === 'mr' ? 'समर्थ AI' : lang === 'hi' ? 'समर्थ AI' : 'Samarth AI'}</span>
             </div>

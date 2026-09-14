@@ -121,11 +121,11 @@ const Navbar = () => {
             
             {/* Brand Logo */}
             <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-center p-1 group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden">
+              <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden relative">
                 <img 
                   src="/logo.png" 
                   alt="Samarth AI Logo" 
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-cover scale-145 drop-shadow-xs transition-transform"
                 />
               </div>
               <div className="flex flex-col">
