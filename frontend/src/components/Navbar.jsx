@@ -115,13 +115,6 @@ const Navbar = () => {
       icon: Sparkles,
       highlight: true
     },
-    ...(user ? [{ 
-      path: '/profile', 
-      labelEn: 'Profile & Entitlements', 
-      labelHi: 'प्रोफाइल व पात्रता', 
-      labelMr: 'माझे प्रोफाइल',
-      icon: User 
-    }] : []),
   ];
 
   const getNavLabel = (link) => {
@@ -135,34 +128,34 @@ const Navbar = () => {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
         {/* Main Navbar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 gap-3">
             
             {/* Brand Logo */}
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-11 h-11 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden relative">
+            <Link to="/" className="flex items-center space-x-2.5 shrink-0 group">
+              <div className="w-10 h-10 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden relative shrink-0">
                 <img 
                   src="/logo.png" 
                   alt="Samarth AI Logo" 
                   className="w-full h-full object-cover scale-145 drop-shadow-xs transition-transform"
                 />
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-center space-x-2">
-                  <span className="text-lg font-extrabold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+              <div className="flex flex-col shrink-0">
+                <div className="flex items-center space-x-1.5 whitespace-nowrap">
+                  <span className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
                     {lang === 'mr' ? 'समर्थ AI' : lang === 'hi' ? 'समर्थ AI' : 'Samarth AI'}
                   </span>
-                  <span className="hidden sm:inline-block text-[11px] font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200/60 px-2 py-0.5 rounded-md">
+                  <span className="hidden lg:inline-block text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200/60 px-1.5 py-0.2 rounded-md">
                     Enterprise
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium">
+                <span className="hidden xl:inline text-[10px] text-slate-500 font-medium whitespace-nowrap">
                   {lang === 'mr' ? 'राष्ट्रीय सूक्ष्म व लघु उद्योग वित्तीय सल्लागार' : lang === 'hi' ? 'उद्यम वित्तीय सलाहकार मंच' : 'National MSME Financial Advisory'}
                 </span>
               </div>
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center space-x-1 lg:space-x-2">
+            <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5 shrink-0">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = location.pathname === link.path;
@@ -178,7 +171,7 @@ const Navbar = () => {
                         navigate(link.path);
                       }
                     }}
-                    className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                       isActive
                         ? 'text-blue-700 bg-blue-50/80 border border-blue-200/80'
                         : link.highlight
@@ -186,7 +179,7 @@ const Navbar = () => {
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
                     <span>{getNavLabel(link)}</span>
                     {link.highlight && (
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-radar"></span>
@@ -200,13 +193,13 @@ const Navbar = () => {
             </nav>
 
             {/* Right Action Controls */}
-            <div className="hidden sm:flex items-center space-x-3">
+            <div className="hidden sm:flex items-center space-x-2 shrink-0">
               {/* 3-Language Segmented Switcher */}
-              <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
                 <button
                   type="button"
                   onClick={() => setLang('en')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
                     lang === 'en' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -215,7 +208,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => setLang('hi')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
                     lang === 'hi' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -224,7 +217,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => setLang('mr')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                  className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
                     lang === 'mr' ? 'bg-white text-blue-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -234,24 +227,24 @@ const Navbar = () => {
 
               {/* Authentication Button & Profile Trigger */}
               {user ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5">
                   <button
                     type="button"
                     onClick={() => navigate('/profile')}
-                    className="shine-button flex items-center space-x-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 py-1.5 px-3 rounded-xl text-xs font-bold text-blue-900 transition-all cursor-pointer shadow-2xs group"
+                    className="shine-button flex items-center space-x-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 py-1.5 px-2.5 rounded-xl text-xs font-bold text-blue-900 transition-all cursor-pointer shadow-2xs group whitespace-nowrap"
                     title={lang === 'mr' ? 'माझे प्रोफाइल पहा' : lang === 'hi' ? 'मेरा प्रोफाइल देखें' : 'View Beneficiary Profile'}
                   >
-                    <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black group-hover:scale-105 transition-transform">
+                    <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black group-hover:scale-105 transition-transform shrink-0">
                       {user.email?.[0]?.toUpperCase() || 'U'}
                     </div>
-                    <span className="max-w-[110px] truncate">{user.email?.split('@')[0]}</span>
-                    <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">
+                    <span className="max-w-[95px] truncate">{user.email?.split('@')[0]}</span>
+                    <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded-full font-bold">
                       {lang === 'mr' ? 'प्रोफाइल' : lang === 'hi' ? 'प्रोफाइल' : 'Profile'}
                     </span>
                   </button>
                   <button
                     onClick={logout}
-                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
                     title="Sign Out"
                   >
                     <LogOut className="w-4 h-4" />
@@ -263,7 +256,7 @@ const Navbar = () => {
                     setAuthMode('login');
                     setShowAuthModal(true);
                   }}
-                  className="shine-button inline-flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                  className="shine-button inline-flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer whitespace-nowrap"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>{lang === 'mr' ? 'लॉगिन' : lang === 'hi' ? 'लॉगिन' : 'Sign In'}</span>
