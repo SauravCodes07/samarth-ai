@@ -1,18 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://zcbvtrglxlrhgsfgoyuh.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjYnZ0cmdseGxyaGdzZmdveXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzMDczNjMsImV4cCI6MjEwNDg4MzM2M30.bKITwGhfHmHGMOwRNUHIXS91yi801MYZIItmVUWRy6U';
 
-// If credentials are not set yet, fallback gracefully without crashing
+// Always active with fallback credentials
 export const isSupabaseConfigured = Boolean(
   supabaseUrl && 
   supabaseAnonKey && 
-  !supabaseUrl.includes('placeholder') &&
-  !supabaseAnonKey.includes('placeholder')
+  !supabaseUrl.includes('placeholder')
 );
 
 export const supabase = isSupabaseConfigured 
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
+        },
+      },
+    })
   : null;
 
 /**
@@ -55,14 +60,15 @@ export const getCurrentUser = async () => {
  */
 export const logInquiryToSupabase = async (payload) => {
   if (!isSupabaseConfigured || !supabase) {
-    // Graceful offline/local mode
     return { data: null, error: null, offline: true };
   }
   try {
+    const user = await getCurrentUser();
     const { data, error } = await supabase
       .from('advisory_inquiries')
       .insert([
         {
+          user_id: user?.id || null,
           business_type: payload.business_type,
           business_title: payload.business_title,
           margin_capital: payload.margin_capital,
@@ -74,10 +80,51 @@ export const logInquiryToSupabase = async (payload) => {
           experience_level: payload.experience_level,
           created_at: new Date().toISOString()
         }
-      ]);
+      ])
+      .select();
     return { data, error, offline: false };
   } catch (err) {
     console.warn('Supabase logging skipped/failed:', err);
     return { data: null, error: err, offline: false };
   }
+};
+
+/**
+ * Fetch live inquiries from Supabase
+ */
+export const fetchRecentInquiries = async (limit = 10) => {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from('advisory_inquiries')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return data || [];
+  } catch (err) {
+    console.warn('Failed to fetch inquiries:', err);
+    return [];
+  }
+};
+
+/**
+ * Subscribe to real-time changes across all connected devices
+ */
+export const subscribeToInquiries = (callback) => {
+  if (!supabase) return () => {};
+  const channel = supabase
+    .channel('realtime_inquiries')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'advisory_inquiries' },
+      (payload) => {
+        callback && callback(payload);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };

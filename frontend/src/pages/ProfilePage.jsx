@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { fetchRecentInquiries, subscribeToInquiries } from '../services/supabaseClient';
 import SpotlightCard from '../components/ui/SpotlightCard';
 import ShineButton from '../components/ui/ShineButton';
 import BackgroundBeams from '../components/ui/BackgroundBeams';
@@ -21,13 +22,39 @@ import {
   Award,
   Coins,
   FileCheck,
-  Building
+  Building,
+  Activity,
+  Radio
 } from 'lucide-react';
 
 const ProfilePage = () => {
   const { lang } = useLanguage();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [inquiries, setInquiries] = useState([]);
+  const [loadingInquiries, setLoadingInquiries] = useState(true);
+
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    const loadInquiries = async () => {
+      setLoadingInquiries(true);
+      const data = await fetchRecentInquiries(6);
+      setInquiries(data);
+      setLoadingInquiries(false);
+    };
+
+    loadInquiries();
+
+    // Listen to real-time additions across all mobile and web devices
+    unsubscribe = subscribeToInquiries((payload) => {
+      if (payload.eventType === 'INSERT' && payload.new) {
+        setInquiries(prev => [payload.new, ...prev.slice(0, 5)]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   if (!user) {
     return (
@@ -238,6 +265,54 @@ const ProfilePage = () => {
                 </div>
               </SpotlightCard>
 
+            </div>
+
+            {/* LIVE REAL-TIME CLOUD INQUIRIES FEED */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+                  <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
+                    <Activity className="w-4 h-4 text-emerald-600" />
+                    <span>{lang === 'mr' ? 'थेट क्लाउड चौकशी व अहवाल इतिहास (Real-Time)' : lang === 'hi' ? 'लाइव क्लाउड पूछताछ व डीपीआर इतिहास (Real-Time)' : 'Live Cloud Inquiries & Feasibility History (Real-Time)'}</span>
+                  </h3>
+                </div>
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  {lang === 'mr' ? 'थेट जोडणी सुरू' : lang === 'hi' ? 'लाइव सिंक सक्रिय' : 'Real-Time Active'}
+                </span>
+              </div>
+
+              {loadingInquiries ? (
+                <div className="py-6 text-center text-xs text-slate-400 font-medium">
+                  {lang === 'mr' ? 'क्लाउडवरून डेटा लोड होत आहे...' : lang === 'hi' ? 'क्लाउड से डेटा लोड हो रहा है...' : 'Connecting to Supabase live stream...'}
+                </div>
+              ) : inquiries.length === 0 ? (
+                <div className="py-6 text-center text-xs text-slate-400 font-medium">
+                  {lang === 'mr' ? 'अद्याप कोणतीही चौकशी नोंदवली गेली नाही.' : lang === 'hi' ? 'अभी तक कोई पूछताछ दर्ज नहीं हुई है।' : 'No inquiries recorded yet. Generate your first DPR to see it live!'}
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto pr-1">
+                  {inquiries.map((inq) => (
+                    <div key={inq.id} className="py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/80 px-2 rounded-lg transition-colors">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900">{inq.business_type}</span>
+                          {inq.business_title && (
+                            <span className="text-[11px] text-slate-500 truncate max-w-[150px] sm:max-w-[200px]">({inq.business_title})</span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-slate-400">
+                          {inq.state || 'All India'} {inq.district ? `• ${inq.district}` : ''} • {new Date(inq.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-extrabold text-blue-700 block">₹{Number(inq.investment_amount || 0).toLocaleString('en-IN')}</span>
+                        <span className="text-[10px] text-slate-500 font-medium">Margin: ₹{Number(inq.margin_capital || 0).toLocaleString('en-IN')}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
