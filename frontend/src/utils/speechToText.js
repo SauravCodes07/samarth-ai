@@ -1,9 +1,11 @@
 /**
- * Web Speech API Utility for Voice Input
- * Provides speech-to-text functionality, audio cues (start chime), and live word streaming.
+ * Web Speech API Utility for Concessional MSME Banking & Voice Advisory
+ * Provides high-accuracy speech-to-text, audio cues (Google-style chime),
+ * trilingual speech synthesis (TTS) for Marathi, Hindi, and English,
+ * and live interim transcript streaming.
  */
 
-// Synthesize a pleasant dual-frequency "start listening" chime using Web Audio API (no external file needed)
+// Synthesize a pleasant dual-frequency "start listening" chime using Web Audio API
 export const playListeningChime = () => {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -13,9 +15,9 @@ export const playListeningChime = () => {
     const gain = ctx.createGain();
 
     osc.type = 'sine';
-    // Two-tone rising chime (Google Assistant style 440Hz -> 880Hz)
-    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-    osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.12); // G5
+    // Two-tone rising chime (Google Assistant style C5 -> G5)
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.12);
 
     gain.gain.setValueAtTime(0.2, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
@@ -39,9 +41,9 @@ export const playStopChime = () => {
     const gain = ctx.createGain();
 
     osc.type = 'sine';
-    // Soft descending tone
-    osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
-    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.15); // A4
+    // Soft descending tone (E5 -> A4)
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.15);
 
     gain.gain.setValueAtTime(0.15, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
@@ -65,7 +67,54 @@ export const isSpeechRecognitionSupported = () => {
   );
 };
 
-export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN', onInterim = null) => {
+export const getLocaleForLang = (lang) => {
+  if (lang === 'mr') return 'mr-IN';
+  if (lang === 'hi') return 'hi-IN';
+  return 'en-IN';
+};
+
+/**
+ * Trilingual Text-to-Speech (TTS) announcement
+ * Strictly respects active language: Marathi -> mr-IN, Hindi -> hi-IN, English -> en-IN
+ */
+export const speakConfirmation = (lang = 'en') => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+
+    let text = 'Your voice input has been recorded and form details filled successfully.';
+    let locale = 'en-IN';
+
+    if (lang === 'mr') {
+      text = 'आपली माहिती यशस्वीरित्या नोंदवली गेली आहे आणि अर्ज भरला गेला आहे.';
+      locale = 'mr-IN';
+    } else if (lang === 'hi') {
+      text = 'आपकी जानकारी सफलतापूर्वक दर्ज कर ली गई है और फॉर्म भर दिया गया है।';
+      locale = 'hi-IN';
+    }
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = locale;
+    utter.rate = 0.95;
+    utter.pitch = 1.0;
+
+    // Pick appropriate voice if available
+    const voices = window.speechSynthesis.getVoices() || [];
+    const matchedVoice = voices.find(v => v.lang === locale || v.lang.startsWith(locale.split('-')[0]));
+    if (matchedVoice) {
+      utter.voice = matchedVoice;
+    }
+
+    window.speechSynthesis.speak(utter);
+  } catch (err) {
+    console.debug('TTS notice:', err);
+  }
+};
+
+/**
+ * Initialize Speech Recognition with high accuracy and locale compliance
+ */
+export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-IN', onInterim = null) => {
   const SpeechRecognition = 
     window.SpeechRecognition || 
     window.webkitSpeechRecognition || 
@@ -79,12 +128,15 @@ export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN', 
 
   try {
     const recognition = new SpeechRecognition();
-    recognition.lang = lang || 'hi-IN';
+    recognition.lang = langCode || 'hi-IN';
     recognition.continuous = false;
-    recognition.interimResults = true; // Enable live real-time interim speech-to-text
-    recognition.maxAlternatives = 1;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 3;
+
+    let hasDeliveredFinal = false;
 
     recognition.onstart = () => {
+      hasDeliveredFinal = false;
       playListeningChime();
     };
 
@@ -93,8 +145,9 @@ export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN', 
       let interimTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcriptText = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
+        const item = event.results[i];
+        const transcriptText = item[0].transcript;
+        if (item.isFinal) {
           finalTranscript += transcriptText;
         } else {
           interimTranscript += transcriptText;
@@ -105,20 +158,33 @@ export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN', 
         onInterim(interimTranscript);
       }
 
-      if (finalTranscript) {
+      if (finalTranscript && !hasDeliveredFinal) {
+        hasDeliveredFinal = true;
         playStopChime();
-        onResult && onResult(finalTranscript);
+        onResult && onResult(finalTranscript.trim());
       }
     };
 
     recognition.onerror = (event) => {
-      console.warn('Speech recognition warning/error:', event.error);
+      console.warn('Speech recognition status:', event.error);
       if (event.error === 'not-allowed') {
-        onError && onError('Microphone access denied. Please click the camera/mic icon in your browser URL bar to allow microphone.');
+        onError && onError(
+          langCode.startsWith('mr')
+            ? 'मायक्रोफोन परवानगी नाकारली गेली आहे. कृपया ब्राउझरमध्ये मायक्रोफोन चालू करा.'
+            : langCode.startsWith('hi')
+            ? 'माइक्रोफोन अनुमति अस्वीकृत है। कृपया ब्राउज़र सेटिंग्स में माइक ऑन करें।'
+            : 'Microphone permission denied. Please allow microphone access in your browser bar.'
+        );
       } else if (event.error === 'no-speech') {
-        onError && onError('No speech detected. Please speak closer to your microphone.');
-      } else {
-        onError && onError(`Voice error: ${event.error}`);
+        onError && onError(
+          langCode.startsWith('mr')
+            ? 'कोणताही आवाज ऐकू आला नाही. कृपया माईक जवळ बोलण्याचा प्रयत्न करा.'
+            : langCode.startsWith('hi')
+            ? 'कोई आवाज नहीं सुनाई दी। कृपया माइक के पास बोलें।'
+            : 'No speech detected. Please speak closer to your microphone.'
+        );
+      } else if (event.error !== 'aborted') {
+        onError && onError(`Voice notice: ${event.error}`);
       }
     };
 
@@ -129,7 +195,7 @@ export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN', 
     return recognition;
   } catch (err) {
     console.error('Failed to initialize speech recognition:', err);
-    onError && onError('Could not access microphone.');
+    onError && onError('Could not initialize microphone.');
     return null;
   }
 };
