@@ -13,8 +13,11 @@ import {
   VolumeX,
   RotateCcw,
   BrainCircuit,
-  Lightbulb
+  Lightbulb,
+  Mic,
+  MicOff
 } from 'lucide-react';
+import { initSpeechRecognition, isSpeechRecognitionSupported } from '../utils/speechToText';
 
 // Comprehensive Reasoning Engine for Concessional MSME Banking
 const REASONING_DATABASE = [
@@ -264,7 +267,61 @@ const AIChatbot = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [voiceSpeechEnabled, setVoiceSpeechEnabled] = useState(false);
+  const [isListeningVoice, setIsListeningVoice] = useState(false);
+  const [liveVoiceText, setLiveVoiceText] = useState('');
+  const recognitionRef = useRef(null);
   const messagesEndRef = useRef(null);
+
+  const startChatVoiceInput = () => {
+    if (!isSpeechRecognitionSupported()) {
+      alert('Voice input is not supported in this browser. Please use Chrome.');
+      return;
+    }
+
+    if (isListeningVoice && recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+      setIsListeningVoice(false);
+      setLiveVoiceText('');
+      return;
+    }
+
+    const locale = lang === 'mr' ? 'mr-IN' : lang === 'hi' ? 'hi-IN' : 'en-IN';
+    const rec = initSpeechRecognition(
+      (finalText) => {
+        setIsListeningVoice(false);
+        setLiveVoiceText('');
+        if (finalText && finalText.trim()) {
+          setInputValue(finalText.trim());
+          handleSend(finalText.trim());
+        }
+      },
+      (err) => {
+        console.warn('Chat voice error:', err);
+        setIsListeningVoice(false);
+        setLiveVoiceText('');
+      },
+      () => {
+        setIsListeningVoice(false);
+        setLiveVoiceText('');
+      },
+      locale,
+      (interim) => {
+        setLiveVoiceText(interim);
+      }
+    );
+
+    if (rec) {
+      recognitionRef.current = rec;
+      try {
+        rec.start();
+        setIsListeningVoice(true);
+      } catch (err) {
+        setIsListeningVoice(false);
+      }
+    }
+  };
 
   const getWelcomeMessage = () => {
     if (lang === 'mr') {
@@ -685,6 +742,27 @@ Please ask a clear business or banking question, such as:
 
           {/* Input Area */}
           <div className="p-3 bg-white border-t border-slate-200">
+            {/* Live Voice Input Banner inside Chatbot */}
+            {isListeningVoice && (
+              <div className="mb-2 p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center justify-between text-xs animate-fadeIn">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
+                  <span className="font-bold text-rose-800">
+                    {liveVoiceText 
+                      ? `"${liveVoiceText}"` 
+                      : (lang === 'mr' ? 'ऐकत आहोत... बोला' : lang === 'hi' ? 'सुन रहे हैं... बोलिए' : 'Listening... speak now')}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={startChatVoiceInput}
+                  className="text-[11px] font-bold text-rose-700 bg-white px-2 py-0.5 rounded border border-rose-300"
+                >
+                  {lang === 'mr' ? 'थांबवा' : lang === 'hi' ? 'रोकें' : 'Stop'}
+                </button>
+              </div>
+            )}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -706,10 +784,24 @@ Please ask a clear business or banking question, such as:
                 className="flex-grow px-3.5 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all text-slate-900"
               />
 
+              {/* Voice Speaking Option for Chatbot */}
+              <button
+                type="button"
+                onClick={startChatVoiceInput}
+                className={`p-2.5 rounded-xl transition-all shadow-xs cursor-pointer ${
+                  isListeningVoice
+                    ? 'bg-rose-600 text-white animate-pulse ring-2 ring-rose-300'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                }`}
+                title={lang === 'mr' ? 'माईकवर बोलून प्रश्न विचारा' : lang === 'hi' ? 'माइक पर बोलकर प्रश्न पूछें' : 'Speak your question'}
+              >
+                <Mic className="w-4 h-4" />
+              </button>
+
               <button
                 type="submit"
                 disabled={!inputValue.trim() || isTyping}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-all shadow-xs disabled:opacity-40"
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition-all shadow-xs disabled:opacity-40 cursor-pointer"
               >
                 <Send className="w-4 h-4" />
               </button>

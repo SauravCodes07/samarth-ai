@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import SpotlightCard from '../components/ui/SpotlightCard';
+import ShineButton from '../components/ui/ShineButton';
+import BackgroundBeams from '../components/ui/BackgroundBeams';
 import { 
   Calculator, 
   Sparkles, 
@@ -35,6 +38,13 @@ const Home = () => {
   const { lang } = useLanguage();
   const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
+
+  // If user is already authenticated, take them directly into the main website
+  useEffect(() => {
+    if (user) {
+      navigate('/schemes', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleFeatureAccess = (path = '/advisory') => {
     if (!user) {
@@ -93,10 +103,13 @@ const Home = () => {
           style={{ backgroundImage: `url('/hero-bg.jpg')` }}
         />
         {/* Sleek directional gradient so left text has crisp contrast while the right photo remains vibrant */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/85 to-slate-950/40 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/40 z-0" />
+        
+        {/* Vengence UI Ambient Floating Beams */}
+        <BackgroundBeams />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* Left Column: Heading & Value Proposition */}
@@ -108,8 +121,8 @@ const Home = () => {
                   <Award className="w-3.5 h-3.5 text-amber-400" />
                   {lang === 'mr' ? 'शासकीय सवलतीचे कर्ज व आर्थिक सल्लागार' : lang === 'hi' ? 'सरकारी रियायती लोन व वित्तीय सलाहकार' : 'National Concessional MSME Advisory'}
                 </span>
-                <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                <span className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-radar"></span>
                   {lang === 'mr' ? '१०% भांडवल • ९०% सरकारी कर्ज' : lang === 'hi' ? '10% मार्जिन • 90% सरकारी लोन' : '10% Margin • 90% Govt Loan'}
                 </span>
               </div>
@@ -118,21 +131,21 @@ const Home = () => {
                 {lang === 'mr' ? (
                   <>
                     आपल्या ग्रामीण उद्योगासाठी <br className="hidden sm:inline" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">
+                    <span className="text-shimmer-gold">
                       सरकारी कर्ज व बँक DPR
                     </span>
                   </>
                 ) : lang === 'hi' ? (
                   <>
                     अपने ग्रामीण व्यवसाय हेतु <br className="hidden sm:inline" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">
+                    <span className="text-shimmer-gold">
                       सरकारी लोन व बैंक DPR
                     </span>
                   </>
                 ) : (
                   <>
                     Empowering Rural MSMEs with <br className="hidden sm:inline" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">
+                    <span className="text-shimmer-gold">
                       Concessional Credit & DPR
                     </span>
                   </>
@@ -151,23 +164,23 @@ const Home = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-                <button
-                  type="button"
+                <ShineButton
                   onClick={() => handleFeatureAccess('/advisory')}
-                  className="inline-flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition-all duration-200 shadow-lg hover:shadow-blue-500/25 hover:scale-102"
+                  className="space-x-2 px-6 py-3.5 text-sm"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   <span>{lang === 'mr' ? 'व्यवसाय अहवाल तयार करा' : lang === 'hi' ? 'व्यवहार्यता रिपोर्ट बनाएं' : 'Get AI Feasibility Study'}</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
+                </ShineButton>
 
-                <Link
-                  to="/schemes"
-                  className="inline-flex items-center justify-center space-x-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold px-5 py-3.5 rounded-xl text-sm transition-all"
+                <button
+                  type="button"
+                  onClick={() => handleFeatureAccess('/schemes')}
+                  className="inline-flex items-center justify-center space-x-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold px-5 py-3.5 rounded-xl text-sm transition-all cursor-pointer hover:border-slate-500"
                 >
                   <span>{lang === 'mr' ? 'सर्व सरकारी योजना पहा' : lang === 'hi' ? 'सरकारी योजनाएं देखें' : 'Explore All Schemes'}</span>
                   <ChevronRight className="w-4 h-4 text-slate-400" />
-                </Link>
+                </button>
               </div>
 
               {/* Ministry & Source Tag */}
@@ -190,9 +203,7 @@ const Home = () => {
 
             {/* Right Column: Interactive 30-Second Quick Estimator Card */}
             <div className="lg:col-span-5">
-              <div className="bg-white text-slate-900 rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-100 relative overflow-hidden animate-fadeIn">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-2xl -mr-10 -mt-10" />
-
+              <SpotlightCard className="bg-white/95 backdrop-blur-md text-slate-900 p-6 sm:p-7 shadow-2xl border border-slate-200 card-glow-interactive animate-fadeIn">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">
@@ -202,7 +213,7 @@ const Home = () => {
                       {lang === 'mr' ? '१०% भांडवलावर कर्ज तपासा' : lang === 'hi' ? '10% मार्जिन पर लोन देखें' : 'See What 10% Margin Unlocks'}
                     </h3>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-xs">
                     <Calculator className="w-5 h-5" />
                   </div>
                 </div>
@@ -301,16 +312,16 @@ const Home = () => {
                 </div>
 
                 {/* Direct CTA */}
-                <button
-                  type="button"
+                <ShineButton
                   onClick={() => handleFeatureAccess('/advisory')}
-                  className="mt-4 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
+                  variant="dark"
+                  className="mt-4 w-full py-2.5 text-xs flex items-center justify-center gap-2"
                 >
                   <span>{lang === 'mr' ? 'संपूर्ण बँक अहवाल (DPR) काढा' : lang === 'hi' ? 'पूरी बैंक रिपोर्ट (DPR) निकालें' : 'Generate Full Bank DPR'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                </ShineButton>
 
-              </div>
+              </SpotlightCard>
             </div>
 
           </div>
@@ -318,7 +329,7 @@ const Home = () => {
       </section>
 
       {/* NEW USER ONBOARDING ROADMAP: "How It Works in 3 Simple Steps" */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-black uppercase tracking-wider text-blue-600 bg-blue-50 border border-blue-200/80 px-3 py-1 rounded-full">
             {lang === 'mr' ? 'नवीन वापरकर्त्यांसाठी सोपे मार्गदर्शक' : lang === 'hi' ? 'नए उपयोगकर्ताओं हेतु सरल मार्गदर्शक' : 'New to Samarth AI? Start Here'}
@@ -338,7 +349,7 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
           
           {/* Step 1 */}
-          <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 relative group flex flex-col justify-between">
+          <SpotlightCard className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-300 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
@@ -363,10 +374,10 @@ const Home = () => {
               <span>{lang === 'mr' ? 'आवाजाने किंवा १-क्लिकमध्ये' : lang === 'hi' ? 'बोलकर या 1-क्लिक में' : 'Voice-enabled or 1-click'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </div>
+          </SpotlightCard>
 
           {/* Step 2 */}
-          <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-300 transition-all duration-300 relative group flex flex-col justify-between">
+          <SpotlightCard className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-amber-300 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
@@ -391,10 +402,10 @@ const Home = () => {
               <span>{lang === 'mr' ? '६ महिने हप्ता सवलत समाविष्ट' : lang === 'hi' ? '6 माह मोरेटोरियम शामिल' : 'Includes 6-month moratorium'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </div>
+          </SpotlightCard>
 
           {/* Step 3 */}
-          <div className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 relative group flex flex-col justify-between">
+          <SpotlightCard className="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-emerald-300 transition-all duration-300 relative group flex flex-col justify-between card-glow-interactive">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white font-black text-lg flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
@@ -419,15 +430,16 @@ const Home = () => {
               <span>{lang === 'mr' ? '१००% मोफत व प्रमाणित' : lang === 'hi' ? '100% निःशुल्क व सत्यापित' : '100% Free & Verified'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
-          </div>
+          </SpotlightCard>
 
         </div>
       </section>
 
       {/* Verified Govt Schemes Showcase Strip */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
+        <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-8 sm:p-10 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+          <BackgroundBeams />
+          <div className="space-y-2 text-center md:text-left relative z-10">
             <div className="flex items-center justify-center md:justify-start gap-2">
               <span className="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
                 {lang === 'mr' ? 'थेट अधिकृत डेटा' : lang === 'hi' ? 'सीधे आधिकारिक डेटा' : 'Official Portal Sync'}
@@ -446,13 +458,14 @@ const Home = () => {
             </p>
           </div>
 
-          <Link
-            to="/schemes"
-            className="shrink-0 px-6 py-3.5 bg-white text-slate-900 hover:bg-slate-100 font-bold rounded-xl text-xs sm:text-sm transition-all shadow-md flex items-center gap-2"
+          <ShineButton
+            onClick={() => handleFeatureAccess('/schemes')}
+            variant="gold"
+            className="shrink-0 px-6 py-3.5 text-xs sm:text-sm flex items-center gap-2 relative z-10"
           >
             <span>{lang === 'mr' ? 'योजना निर्देशिका उघडा' : lang === 'hi' ? 'योजना डायरेक्टरी खोलें' : 'Browse Schemes Directory'}</span>
             <ArrowRight className="w-4 h-4" />
-          </Link>
+          </ShineButton>
         </div>
       </section>
 

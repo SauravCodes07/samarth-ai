@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -17,8 +17,10 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  Globe
+  Globe,
+  Settings
 } from 'lucide-react';
+import UserProfileModal from './UserProfileModal';
 
 const Navbar = () => {
   const { lang, setLang } = useLanguage();
@@ -35,12 +37,14 @@ const Navbar = () => {
     setAuthMode 
   } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -58,6 +62,10 @@ const Navbar = () => {
       setShowAuthModal(false);
       setEmail('');
       setPassword('');
+      // Route user into the main portal immediately upon login
+      if (location.pathname === '/') {
+        navigate('/schemes');
+      }
     } catch (err) {
       setAuthError(err.message || 'Authentication failed');
     } finally {
@@ -74,6 +82,9 @@ const Navbar = () => {
         throw res.error;
       }
       setShowAuthModal(false);
+      if (location.pathname === '/') {
+        navigate('/schemes');
+      }
     } catch (err) {
       setAuthError(err.message || 'Google sign-in failed');
     } finally {
@@ -104,6 +115,13 @@ const Navbar = () => {
       icon: Sparkles,
       highlight: true
     },
+    ...(user ? [{ 
+      path: '/profile', 
+      labelEn: 'Profile & Entitlements', 
+      labelHi: 'प्रोफाइल व पात्रता', 
+      labelMr: 'माझे प्रोफाइल',
+      icon: User 
+    }] : []),
   ];
 
   const getNavLabel = (link) => {
@@ -149,10 +167,18 @@ const Navbar = () => {
                 const Icon = link.icon;
                 const isActive = location.pathname === link.path;
                 return (
-                  <Link
+                  <button
                     key={link.path}
-                    to={link.path}
-                    className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    type="button"
+                    onClick={() => {
+                      if (!user) {
+                        setAuthMode('login');
+                        setShowAuthModal(true);
+                      } else {
+                        navigate(link.path);
+                      }
+                    }}
+                    className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
                       isActive
                         ? 'text-blue-700 bg-blue-50/80 border border-blue-200/80'
                         : link.highlight
@@ -162,7 +188,13 @@ const Navbar = () => {
                   >
                     <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
                     <span>{getNavLabel(link)}</span>
-                  </Link>
+                    {link.highlight && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-radar"></span>
+                    )}
+                    {!user && (
+                      <Lock className="w-3 h-3 text-amber-500/80 ml-0.5" />
+                    )}
+                  </button>
                 );
               })}
             </nav>
@@ -200,18 +232,26 @@ const Navbar = () => {
                 </button>
               </div>
 
-              {/* Authentication Button */}
+              {/* Authentication Button & Profile Trigger */}
               {user ? (
                 <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2 bg-slate-100/90 border border-slate-200 py-1 px-2.5 rounded-lg text-xs font-medium text-slate-800">
-                    <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/profile')}
+                    className="shine-button flex items-center space-x-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 py-1.5 px-3 rounded-xl text-xs font-bold text-blue-900 transition-all cursor-pointer shadow-2xs group"
+                    title={lang === 'mr' ? 'माझे प्रोफाइल पहा' : lang === 'hi' ? 'मेरा प्रोफाइल देखें' : 'View Beneficiary Profile'}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black group-hover:scale-105 transition-transform">
                       {user.email?.[0]?.toUpperCase() || 'U'}
                     </div>
                     <span className="max-w-[110px] truncate">{user.email?.split('@')[0]}</span>
-                  </div>
+                    <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">
+                      {lang === 'mr' ? 'प्रोफाइल' : lang === 'hi' ? 'प्रोफाइल' : 'Profile'}
+                    </span>
+                  </button>
                   <button
                     onClick={logout}
-                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                     title="Sign Out"
                   >
                     <LogOut className="w-4 h-4" />
@@ -223,7 +263,7 @@ const Navbar = () => {
                     setAuthMode('login');
                     setShowAuthModal(true);
                   }}
-                  className="inline-flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-xs"
+                  className="shine-button inline-flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>{lang === 'mr' ? 'लॉगिन' : lang === 'hi' ? 'लॉगिन' : 'Sign In'}</span>
@@ -256,24 +296,52 @@ const Navbar = () => {
               const Icon = link.icon;
               const isActive = location.pathname === link.path;
               return (
-                <Link
+                <button
                   key={link.path}
-                  to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium ${
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    if (!user) {
+                      setAuthMode('login');
+                      setShowAuthModal(true);
+                    } else {
+                      navigate(link.path);
+                    }
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium ${
                     isActive ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <Icon className="w-4 h-4 text-slate-500" />
-                  <span>{getNavLabel(link)}</span>
-                </Link>
+                  <div className="flex items-center space-x-3">
+                    <Icon className="w-4 h-4 text-slate-500" />
+                    <span>{getNavLabel(link)}</span>
+                  </div>
+                  {!user && (
+                    <Lock className="w-3.5 h-3.5 text-amber-500" />
+                  )}
+                </button>
               );
             })}
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
               {user ? (
                 <div className="flex items-center justify-between w-full">
-                  <span className="text-xs text-slate-600 truncate">{user.email}</span>
-                  <button onClick={logout} className="text-xs text-rose-600 font-medium">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate('/profile');
+                    }}
+                    className="flex items-center space-x-2 text-left cursor-pointer"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                      {user.email?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-800 truncate max-w-[140px]">{user.email?.split('@')[0]}</span>
+                      <span className="text-[10px] text-blue-600 font-semibold">{lang === 'mr' ? 'प्रोफाइल उघडा' : lang === 'hi' ? 'प्रोफाइल खोलें' : 'Open Profile'}</span>
+                    </div>
+                  </button>
+                  <button onClick={logout} className="text-xs text-rose-600 font-medium px-2 py-1 rounded hover:bg-rose-50 cursor-pointer">
                     {lang === 'mr' ? 'लॉगआउट' : lang === 'hi' ? 'लॉगआउट' : 'Log out'}
                   </button>
                 </div>
@@ -420,6 +488,9 @@ const Navbar = () => {
                 onClick={async () => {
                   await login('beneficiary@samarth.gov.in', 'Demo123!');
                   setShowAuthModal(false);
+                  if (location.pathname === '/') {
+                    navigate('/schemes');
+                  }
                 }}
                 className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-lg text-xs transition-all border border-slate-200 cursor-pointer"
               >
@@ -453,6 +524,11 @@ const Navbar = () => {
           </div>
         </div>
       )}
+      {/* Beneficiary Profile Modal */}
+      <UserProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+      />
     </>
   );
 };

@@ -17,6 +17,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyTranscript }) => {
   const { lang } = useLanguage();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [liveTranscript, setLiveTranscript] = useState('');
   const [errorMsg, setErrorMsg] = useState(null);
   const recognitionRef = useRef(null);
 
@@ -94,10 +95,12 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyTranscript }) => {
     const recognition = initSpeechRecognition(
       (text) => {
         setTranscript(text);
+        setLiveTranscript('');
         setIsListening(false);
       },
       (err) => {
         setIsListening(false);
+        setLiveTranscript('');
         setErrorMsg(
           typeof err === 'string'
             ? err
@@ -106,8 +109,12 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyTranscript }) => {
       },
       () => {
         setIsListening(false);
+        setLiveTranscript('');
       },
-      locale
+      locale,
+      (interim) => {
+        setLiveTranscript(interim);
+      }
     );
 
     if (recognition) {
@@ -198,7 +205,20 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyTranscript }) => {
             </p>
           </div>
 
-          {/* Transcript Display */}
+          {/* Real-time Streaming Speech Box (Shows live words as you speak) */}
+          {isListening && liveTranscript && (
+            <div className="p-3.5 bg-blue-50 border-2 border-blue-300 rounded-2xl text-left animate-fadeIn shadow-xs">
+              <div className="flex items-center space-x-2 mb-1 text-blue-700">
+                <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
+                <span className="text-[10px] uppercase font-black tracking-wider">
+                  {lang === 'mr' ? 'थेट आवाज ओळखत आहे (बोलत राहा...):' : lang === 'hi' ? 'लाइव वॉइस इनपुट (बोलते रहें...):' : 'Live Speech-to-Text (Keep speaking...):'}
+                </span>
+              </div>
+              <p className="text-sm font-bold text-blue-950 italic">"{liveTranscript}"</p>
+            </div>
+          )}
+
+          {/* Final Transcript Display */}
           {transcript && (
             <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-left animate-fadeIn">
               <div className="flex items-center justify-between mb-1">

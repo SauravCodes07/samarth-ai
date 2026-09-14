@@ -1,7 +1,60 @@
 /**
  * Web Speech API Utility for Voice Input
- * Provides speech-to-text functionality for rural & MSME users.
+ * Provides speech-to-text functionality, audio cues (start chime), and live word streaming.
  */
+
+// Synthesize a pleasant dual-frequency "start listening" chime using Web Audio API (no external file needed)
+export const playListeningChime = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    // Two-tone rising chime (Google Assistant style 440Hz -> 880Hz)
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+    osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.12); // G5
+
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+  } catch (e) {
+    console.debug('Audio chime notice:', e);
+  }
+};
+
+export const playStopChime = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    // Soft descending tone
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.15); // A4
+
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.22);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.22);
+  } catch (e) {
+    console.debug('Audio chime notice:', e);
+  }
+};
 
 export const isSpeechRecognitionSupported = () => {
   return typeof window !== 'undefined' && Boolean(
@@ -12,7 +65,7 @@ export const isSpeechRecognitionSupported = () => {
   );
 };
 
-export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN') => {
+export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN', onInterim = null) => {
   const SpeechRecognition = 
     window.SpeechRecognition || 
     window.webkitSpeechRecognition || 
@@ -28,13 +81,33 @@ export const initSpeechRecognition = (onResult, onError, onEnd, lang = 'hi-IN') 
     const recognition = new SpeechRecognition();
     recognition.lang = lang || 'hi-IN';
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true; // Enable live real-time interim speech-to-text
     recognition.maxAlternatives = 1;
 
+    recognition.onstart = () => {
+      playListeningChime();
+    };
+
     recognition.onresult = (event) => {
-      if (event.results && event.results[0] && event.results[0][0]) {
-        const transcript = event.results[0][0].transcript;
-        onResult && onResult(transcript);
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcriptText = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcriptText;
+        } else {
+          interimTranscript += transcriptText;
+        }
+      }
+
+      if (interimTranscript && onInterim) {
+        onInterim(interimTranscript);
+      }
+
+      if (finalTranscript) {
+        playStopChime();
+        onResult && onResult(finalTranscript);
       }
     };
 

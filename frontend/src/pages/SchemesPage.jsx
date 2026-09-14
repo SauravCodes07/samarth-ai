@@ -3,6 +3,9 @@ import { useLanguage } from '../context/LanguageContext';
 import { fetchSchemes, fetchSchemeFilters } from '../services/api';
 import { FALLBACK_SCHEMES } from '../data/fallbackSchemes';
 import { useNavigate } from 'react-router-dom';
+import SpotlightCard from '../components/ui/SpotlightCard';
+import ShineButton from '../components/ui/ShineButton';
+import BackgroundBeams from '../components/ui/BackgroundBeams';
 import {
   Landmark,
   Loader2,
@@ -32,7 +35,8 @@ import {
 const VerificationBadge = ({ status }) => {
   if (status === 'officially_verified' || status === 'auto_verified') {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-radar"></span>
         <BadgeCheck className="w-3 h-3 text-emerald-600" /> Verified
       </span>
     );
@@ -256,7 +260,7 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
 // Compact Scheme Card Component with Enhanced Visual Hierarchy
 const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-blue-300 transition-all duration-200 flex flex-col justify-between group space-y-3">
+    <SpotlightCard className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs hover:shadow-xl hover:border-blue-300 transition-all duration-300 flex flex-col justify-between group space-y-3.5 card-glow-interactive animate-fade-in-up">
       
       {/* Header Row */}
       <div className="space-y-2">
@@ -302,7 +306,7 @@ const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
         </p>
 
         {/* Financial Metrics Box */}
-        <div className="grid grid-cols-3 gap-1 bg-[#F8FAFC] border border-slate-100 p-2.5 rounded-lg text-center">
+        <div className="grid grid-cols-3 gap-1 bg-[#F8FAFC] border border-slate-100 p-2.5 rounded-xl text-center">
           <div>
             <span className="text-[9px] text-slate-500 block font-bold uppercase tracking-wider">{lang === 'mr' ? 'कमाल मर्यादा' : lang === 'hi' ? 'अधिकतम सीमा' : 'Max Limit'}</span>
             <span className="text-xs font-black text-slate-800">
@@ -322,22 +326,22 @@ const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+      <div className="pt-2.5 border-t border-slate-100 flex items-center gap-2">
         <button
           onClick={() => onOpenModal(s)}
-          className="flex-1 py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer"
+          className="flex-1 py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer"
         >
           <Info className="w-3.5 h-3.5 text-slate-500" />
           <span>{lang === 'mr' ? 'तपशील पहा' : lang === 'hi' ? 'विवरण देखें' : 'View Details'}</span>
         </button>
 
-        <button
+        <ShineButton
           onClick={() => onSelectForLoan(s)}
-          className="py-2 px-3 bg-[#0B3D91] hover:bg-[#1e5bb8] text-white font-bold rounded-lg text-xs flex items-center justify-center gap-1 transition-colors shadow-sm cursor-pointer"
+          className="py-2 px-3.5 text-xs flex items-center justify-center gap-1.5 shadow-xs"
         >
           <span>{lang === 'mr' ? 'कर्ज मिळवा' : lang === 'hi' ? 'लोन बनाएं' : 'Apply'}</span>
           <ArrowRight className="w-3 h-3" />
-        </button>
+        </ShineButton>
 
         {s.official_source_url && (
           <a
@@ -345,13 +349,13 @@ const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
             target="_blank"
             rel="noopener noreferrer"
             title="Official portal"
-            className="p-2 border border-slate-200 hover:border-[#0B3D91] text-slate-400 hover:text-[#0B3D91] rounded-lg transition-colors"
+            className="p-2 border border-slate-200 hover:border-[#0B3D91] text-slate-400 hover:text-[#0B3D91] rounded-xl transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         )}
       </div>
-    </div>
+    </SpotlightCard>
   );
 };
 
@@ -510,15 +514,19 @@ const SchemesPage = () => {
     <div className="max-w-7xl mx-auto py-6 sm:py-8 px-4 sm:px-6 space-y-6">
 
       {/* Hero Header */}
-      <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xs">
-        <div className="max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold text-blue-700 border border-blue-200/80">
+      <div className="bg-white/90 backdrop-blur-md border border-slate-200/90 p-6 sm:p-8 rounded-3xl shadow-sm relative overflow-hidden card-glow-interactive">
+        <BackgroundBeams />
+        <div className="max-w-3xl space-y-3 relative z-10">
+          <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold text-blue-700 border border-blue-200/80 shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-blue-600 animate-radar"></span>
             <img src="/logo.png" alt="Samarth AI" className="w-4 h-4 object-contain" />
             <span>{lang === 'mr' ? 'केंद्र व राज्य शासन सवलत कर्ज निर्देशिका' : lang === 'hi' ? 'केंद्रीय एवं राज्य रियायती ऋण डायरेक्टरी' : 'Central & State Concessional Lending Directory'}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-            {lang === 'mr' ? 'शासकीय योजना निर्देशिका' : lang === 'hi' ? 'सरकारी योजना डायरेक्टरी' : 'Government Schemes Directory'}
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <span className="text-shimmer-blue">
+              {lang === 'mr' ? 'शासकीय योजना निर्देशिका' : lang === 'hi' ? 'सरकारी योजना डायरेक्टरी' : 'Government Schemes Directory'}
+            </span>
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
@@ -530,13 +538,13 @@ const SchemesPage = () => {
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-semibold">
-            <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-700 border border-slate-200/80">
+            <span className="bg-slate-100/80 backdrop-blur-xs px-3 py-1 rounded-xl text-slate-700 border border-slate-200/80">
               🏢 {(filterOptions.total_active_schemes || 11).toLocaleString()} {lang === 'mr' ? 'एकूण योजना' : lang === 'hi' ? 'कुल योजनाएं' : 'Total Schemes'}
             </span>
-            <span className="bg-slate-100 px-3 py-1 rounded-lg text-slate-700 border border-slate-200/80">
+            <span className="bg-slate-100/80 backdrop-blur-xs px-3 py-1 rounded-xl text-slate-700 border border-slate-200/80">
               🗺️ {lang === 'mr' ? 'संपूर्ण भारत व राज्यस्तरीय' : lang === 'hi' ? 'अखिल भारतीय व राज्य विशिष्ट' : 'All India & State Specific'}
             </span>
-            <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg border border-emerald-200">
+            <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-xl border border-emerald-200">
               💰 4% – 8.5% {lang === 'mr' ? 'सवलतीचे व्याजदर' : lang === 'hi' ? 'रियायती ब्याज दर' : 'Subsidized Interest Rates'}
             </span>
           </div>

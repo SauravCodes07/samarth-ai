@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import FormPage from './pages/FormPage';
 import SchemesPage from './pages/SchemesPage';
 import CalculatorPage from './pages/CalculatorPage';
+import ProfilePage from './pages/ProfilePage';
 
 import AIChatbot from './components/AIChatbot';
 
@@ -24,6 +25,7 @@ function App() {
                 <Route path="/advisory" element={<FormPage />} />
                 <Route path="/schemes" element={<SchemesPage />} />
                 <Route path="/calculator" element={<CalculatorPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
               </Routes>
             </main>
             <Footer />

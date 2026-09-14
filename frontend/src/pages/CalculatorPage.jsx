@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import SpotlightCard from '../components/ui/SpotlightCard';
+import ShineButton from '../components/ui/ShineButton';
+import BackgroundBeams from '../components/ui/BackgroundBeams';
 import { 
   Calculator, 
   IndianRupee, 
@@ -401,15 +404,17 @@ const CalculatorPage = () => {
         <div className="lg:col-span-5 space-y-6">
           
           {/* Main Card */}
-          <div className="bg-gradient-to-br from-[#0B3D91] via-[#072a66] to-[#041a3d] text-white p-6 sm:p-7 rounded-3xl shadow-xl border border-blue-500/20 space-y-4">
-            <div className="flex items-center justify-between text-blue-200 text-xs font-bold uppercase tracking-wider">
+          <SpotlightCard className="bg-gradient-to-br from-[#0B3D91] via-[#072a66] to-[#041a3d] text-white p-6 sm:p-7 rounded-3xl shadow-xl border border-blue-500/30 space-y-4 card-glow-interactive relative overflow-hidden">
+            <BackgroundBeams />
+            <div className="flex items-center justify-between text-blue-200 text-xs font-bold uppercase tracking-wider relative z-10">
               <span>{lang === 'mr' ? 'अंदाजे मासिक हप्ता (EMI)' : lang === 'hi' ? 'अनुमानित मासिक किश्त (EMI)' : 'Monthly Equated Installment'}</span>
-              <span className="bg-[#138808] text-white text-[10px] px-2 py-0.5 rounded-full font-black">
+              <span className="bg-[#138808] text-white text-[10px] px-2.5 py-0.5 rounded-full font-black flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-radar"></span>
                 100% MATH
               </span>
             </div>
 
-            <div>
+            <div className="relative z-10">
               <div className="text-4xl sm:text-5xl font-black text-white tracking-tight flex items-baseline space-x-1">
                 <span>₹{monthlyEMI.toLocaleString('en-IN')}</span>
                 <span className="text-xs text-blue-200 font-normal">/{lang === 'mr' ? 'महिना' : lang === 'hi' ? 'माह' : 'mo'}</span>
@@ -424,7 +429,7 @@ const CalculatorPage = () => {
             </div>
 
             {/* Visual Ratio Bar */}
-            <div className="space-y-1.5 pt-2">
+            <div className="space-y-1.5 pt-2 relative z-10">
               <div className="flex justify-between text-xs text-blue-200 font-semibold">
                 <span>{lang === 'mr' ? '१०% स्वभांडवल' : lang === 'hi' ? '10% मार्जिन' : '10% Margin'}: ₹{marginMoney.toLocaleString('en-IN')}</span>
                 <span>{lang === 'mr' ? '९०% शासकीय कर्ज' : lang === 'hi' ? '90% लोन' : '90% Loan'}: ₹{loanAmount.toLocaleString('en-IN')}</span>
@@ -436,7 +441,7 @@ const CalculatorPage = () => {
             </div>
 
             {/* 3 Metrics */}
-            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 relative z-10">
               <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
                 <span className="text-[11px] text-blue-200 block font-medium">
                   {lang === 'mr' ? 'मंजूर ९०% शासकीय कर्ज' : lang === 'hi' ? 'स्वीकृत 90% लोन' : '90% Loan Disbursed'}
@@ -456,7 +461,8 @@ const CalculatorPage = () => {
               </div>
             </div>
 
-            <button
+            <ShineButton
+              variant="gold"
               onClick={() => {
                 navigate('/advisory', {
                   state: {
@@ -467,12 +473,12 @@ const CalculatorPage = () => {
                   }
                 });
               }}
-              className="w-full py-3.5 bg-gradient-to-r from-[#FF9933] to-amber-500 hover:from-amber-500 hover:to-orange-500 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg mt-4 cursor-pointer"
+              className="w-full py-3.5 text-slate-950 font-black text-sm rounded-xl flex items-center justify-center space-x-2 mt-4 relative z-10"
             >
               <span>{lang === 'mr' ? 'संपूर्ण व्यवसाय अहवाल तयार करा' : lang === 'hi' ? 'पूर्ण व्यवहार्यता रिपोर्ट तैयार करें' : 'Generate Full Feasibility Report'}</span>
               <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+            </ShineButton>
+          </SpotlightCard>
 
         </div>
 
