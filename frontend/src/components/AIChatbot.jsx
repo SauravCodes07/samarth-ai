@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
   MessageSquare,
@@ -262,36 +263,16 @@ For women and backward class founders, margin money requirement is kept at only 
 
 const AIChatbot = () => {
   const { lang } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [voiceSpeechEnabled, setVoiceSpeechEnabled] = useState(false);
   const [speakingMessageId, setSpeakingMessageId] = useState(null);
   const [isListeningVoice, setIsListeningVoice] = useState(false);
   const [liveVoiceText, setLiveVoiceText] = useState('');
   const recognitionRef = useRef(null);
   const messagesEndRef = useRef(null);
-
-  const toggleVoiceSpeech = () => {
-    if (!voiceSpeechEnabled) {
-      setVoiceSpeechEnabled(true);
-      const announcement = lang === 'mr'
-        ? 'आवाज सुरू केला आहे. मी उत्तरे वाचून दाखवेन.'
-        : lang === 'hi'
-        ? 'आवाज़ शुरू कर दी गई है। मैं उत्तर पढ़कर सुनाऊंगा।'
-        : 'Voice narration activated. I will read responses aloud.';
-      
-      const lastBotMsg = [...messages].reverse().find(m => m.sender === 'bot');
-      const textToSpeak = lastBotMsg ? `${announcement} ${lastBotMsg.text}` : announcement;
-      setSpeakingMessageId(lastBotMsg?.id || 'active');
-      speakTextWithVoice(textToSpeak, lang, () => setSpeakingMessageId(null));
-    } else {
-      setVoiceSpeechEnabled(false);
-      setSpeakingMessageId(null);
-      stopSpeaking();
-    }
-  };
 
   const startChatVoiceInput = () => {
     if (!isSpeechRecognitionSupported()) {
@@ -688,9 +669,6 @@ Please ask a question related to loans, schemes, or enterprise feasibility!`,
       };
       setMessages(prev => [...prev, botMsg]);
       setIsTyping(false);
-      if (voiceSpeechEnabled) {
-        speakText(response.text, newBotMsgId);
-      }
     }, 450);
   };
 
@@ -721,6 +699,11 @@ Please ask a question related to loans, schemes, or enterprise feasibility!`,
       mr: 'कर्ज अर्जासाठी कोणती कागदपत्रे लागतात?'
     }
   ];
+
+  // Only render AI chatbot inside the platform for authenticated users (not outside the website)
+  if (!user) {
+    return null;
+  }
 
   return (
     <>
@@ -778,28 +761,6 @@ Please ask a question related to loans, schemes, or enterprise feasibility!`,
             <div className="flex items-center space-x-1 text-slate-300">
               <button
                 type="button"
-                onClick={toggleVoiceSpeech}
-                className={`p-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
-                  voiceSpeechEnabled
-                    ? 'text-amber-300 bg-blue-900/80 ring-1 ring-amber-400/60 shadow-xs'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
-                }`}
-                title={
-                  voiceSpeechEnabled 
-                    ? (lang === 'mr' ? 'आवाज बंद करा' : lang === 'hi' ? 'आवाज़ बंद करें' : 'Mute voice read-aloud') 
-                    : (lang === 'mr' ? 'आवाज चालू करा (उत्तरे ऐका)' : lang === 'hi' ? 'आवाज़ चालू करें (उत्तर सुनें)' : 'Enable voice read-aloud')
-                }
-              >
-                {voiceSpeechEnabled ? (
-                  <>
-                    <Volume2 className="w-4 h-4 text-amber-300 animate-pulse" />
-                    <span className="text-[10px] font-bold text-amber-300 pr-0.5">ON</span>
-                  </>
-                ) : (
-                  <VolumeX className="w-4 h-4" />
-                )}
-              </button>
-              <button
                 onClick={() => setMessages([{ id: 'welcome', sender: 'bot', text: getWelcomeMessage(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }])}
                 className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Reset conversation"
