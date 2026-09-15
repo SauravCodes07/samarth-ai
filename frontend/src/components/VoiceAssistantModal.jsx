@@ -128,16 +128,29 @@ const generateIntelligentVoiceResponse = (userSpeech, history = []) => {
   // 3. Intelligent Conversational Dialogue Reasoning
   let reply = '';
 
-  // Case A: User doesn't know what business to start / seeking consulting guidance
+  // Case A1: User is undecided, exploring, or asking for guidance/help
   if (
-    /(don't know|not sure|confused|what to start|which business|suggest|kya shuru|samajh nahi|batao|kaun sa business|काय सुरू करू|कोणता उद्योग|सल्ला द्या)/i.test(lower)
+    /(not decided|haven't decided|undecided|don't know|not sure|confused|what to start|which business|suggest|help me|guide me|kya shuru|samajh nahi|batao|kaun sa business|काय सुरू करू|कोणता उद्योग|सल्ला द्या|काही ठरवले नाही|मदत करा)/i.test(lower)
   ) {
     if (detectedLang === 'mr') {
-      reply = "जर तुम्ही नवीन सुरुवात करत असाल, तर ग्रामीण आणि निमशहरी भागात डेअरी फार्म, किराणा दुकान किंवा ई-रिक्षा वाहतूक हे सर्वात सुरक्षित आणि फायदेशीर पर्याय आहेत. डेअरीत रोजचे रोख उत्पन्न मिळते, तर किराण्यात सतत मागणी असते. तुमच्याकडे अंदाजे किती स्वतःचे भांडवल उपलब्ध आहे?";
+      reply = "नक्कीच, मी तुम्हाला संपूर्ण मदत करतो! जर तुमचे अजून काही ठरले नसेल, तर आपण एकत्र निवड करूया. तुम्हाला रोजचे रोख उत्पन्न देणारा डेअरी व्यवसाय, किराणा दुकान, की आधुनिक तांत्रिक सेवा जसे की मोबाईल रिपेअरिंग किंवा सोलर एजन्सी सुरू करायला आवडेल? आपल्याकडे अंदाजे किती बचत किंवा भांडवल आहे?";
     } else if (detectedLang === 'hi') {
-      reply = "यदि आप पहली बार शुरुआत कर रहे हैं, तो डेयरी फार्मिंग, किराना जनरल स्टोर, या ई-रिक्शा ट्रांसपोर्ट सबसे सुरक्षित और तेजी से चलने वाले व्यापार हैं। डेयरी में प्रतिदिन नकद आमदनी होती है, जबकि किराना में रोजाना ग्राहक आते हैं। आपके पास निवेश के लिए लगभग कितनी बचत या मार्जिन पूंजी है?";
+      reply = "बिल्कुल, मैं आपकी पूरी मदद करूँगा! यदि आपने अभी तय नहीं किया है, तो हम मिलकर सही विकल्प चुनते हैं। क्या आप प्रतिदिन नकद आमदनी देने वाली डेयरी, किराना जनरल स्टोर, या कोई आधुनिक टेक्निकल व्यवसाय जैसे मोबाइल रिपेयरिंग या सोलर एजेंसी में रुचि रखते हैं? आपके पास लगभग कितना बजट उपलब्ध है?";
     } else {
-      reply = "If you are starting fresh, the most reliable micro-enterprises are Dairy Farming for daily cash flow, a Kirana grocery store for fast inventory turnover, or an E-Rickshaw transport service with low maintenance. How much initial savings or margin money do you have to invest?";
+      reply = "I am glad to help you decide! We have high-earning government supported options: daily cash-flow Dairy Farming, high-turnover Kirana Grocery store, or high-margin Technical services like Mobile Repair and Solar installation. Do any of these match your interest, or what is your approximate budget?";
+    }
+    return { reply, extracted, detectedLang };
+  }
+
+  // Case A2: User is interested in Technical / Electronics / Engineering businesses
+  if (/(technical|technology|tech|electronic|electrical|computer|repair|software|hardware|solar|garage|welding|mobile|cyber|टेक्निकल|इलेक्ट्रॉनिक|तांत्रिक)/i.test(lower)) {
+    extracted.business_type = extracted.business_type || 'Mobile & Electronics Repair';
+    if (detectedLang === 'mr') {
+      reply = "तांत्रिक व्यवसायांमध्ये खूप चांगला नफा असतो! ९०% सरकारी सवलतीच्या कर्जाखाली तुम्ही १) स्मार्टफोन व इलेक्ट्रॉनिक्स रिपेअरिंग हब, २) सोलर रूफटॉप व ऊर्जा एजन्सी, ३) ऑटो डायग्नोस्टिक सेंटर, किंवा ४) डिजिटल कॉम्प्युटर सेवा केंद्र सुरू करू शकता. यापैकी तुम्हाला कशाची आवड आहे आणि तुमचे भांडवल किती आहे?";
+    } else if (detectedLang === 'hi') {
+      reply = "टेक्निकल व्यवसायों में सबसे बेहतरीन लाभ मार्जिन मिलता है! 90% सरकारी रियायती लोन के तहत आप 1) स्मार्टफोन व इलेक्ट्रॉनिक्स रिपेयरिंग हब, 2) सोलर रूफटॉप व ऊर्जा एजेंसी, 3) ऑटोमोबाइल गैराज, या 4) डिजिटल कंप्यूटर सेवा केंद्र स्थापित कर सकते हैं। आप इनमें से किसमें रुचि रखते हैं और आपका बजट कितना है?";
+    } else {
+      reply = "Technical enterprises are among the most profitable micro-ventures today! Under government 90% concessional financing, top choices include: 1) Smartphone & Electronics Repair Hub, 2) Solar Rooftop Installation & Maintenance, 3) Auto Diagnostic Centre, or 4) Digital IT & Computer Service Centre. Which technical field interests you, and how much margin capital can you invest?";
     }
     return { reply, extracted, detectedLang };
   }
@@ -337,6 +350,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
 
   const recognitionRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const isSpeakingRef = useRef(false);
 
   // Auto scroll conversation to bottom
   useEffect(() => {
@@ -347,6 +361,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
   useEffect(() => {
     if (isOpen) {
       setErrorMsg(null);
+      isSpeakingRef.current = false;
 
       // Natural, welcoming greeting in comfortable English as primary
       const greeting = "Hello! I am your Samarth AI Voice Assistant. Ask me anything—or tell me what business you are planning and your budget, and I will structure your full plan.";
@@ -355,17 +370,25 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
         { role: 'assistant', text: greeting, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
       ]);
 
-      // Speak greeting aloud
+      // Speak greeting aloud with acoustic isolation
       setTimeout(() => {
+        stopListening();
+        isSpeakingRef.current = true;
         setIsSpeaking(true);
         speakTextWithVoice(greeting, 'en', () => {
           setIsSpeaking(false);
-          // After greeting ends, automatically start listening for seamless conversation
-          startListening();
+          isSpeakingRef.current = false;
+          // Clear room reverb before enabling microphone
+          setTimeout(() => {
+            if (isOpen && !isSpeakingRef.current) {
+              startListening();
+            }
+          }, 450);
         });
       }, 300);
 
     } else {
+      isSpeakingRef.current = false;
       stopSpeaking();
       stopListening();
       setIsSpeaking(false);
@@ -374,6 +397,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     }
 
     return () => {
+      isSpeakingRef.current = false;
       stopSpeaking();
       stopListening();
     };
@@ -382,14 +406,21 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
   const stopListening = () => {
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
-      } catch (e) {}
+        recognitionRef.current.abort();
+      } catch (e) {
+        try { recognitionRef.current.stop(); } catch (e2) {}
+      }
       recognitionRef.current = null;
     }
     setIsListening(false);
   };
 
   const startListening = () => {
+    // PREVENT SELF-ECHO: Never turn mic on if assistant is speaking
+    if (isSpeakingRef.current || window.__SAMARTH_AI_SPEAKING__) {
+      return;
+    }
+
     stopSpeaking();
     setIsSpeaking(false);
     setErrorMsg(null);
@@ -495,16 +526,19 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     setMessages(prev => [...prev, aiMsg]);
     setIsThinking(false);
 
-    // Speak aloud in the matching natural language
+    // Strictly isolate microphone before speaking to prevent recording own speaker voice
+    stopListening();
+    isSpeakingRef.current = true;
     setIsSpeaking(true);
     speakTextWithVoice(replyText, languageToSpeak || 'en', () => {
       setIsSpeaking(false);
-      // Automatically resume listening for continuous conversation
+      isSpeakingRef.current = false;
+      // Allow 450ms for room reverberation to settle before unmuting mic
       setTimeout(() => {
-        if (isOpen) {
+        if (isOpen && !isSpeakingRef.current) {
           startListening();
         }
-      }, 500);
+      }, 450);
     });
   };
 

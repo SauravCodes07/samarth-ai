@@ -153,27 +153,38 @@ export const speakTextWithVoice = (text, lang = 'en', onDone = null) => {
     utter.rate = 0.95;
     utter.pitch = 1.0;
 
+    // Set global acoustic echo suppressor flag
+    window.__SAMARTH_AI_SPEAKING__ = true;
+
     const voices = window.speechSynthesis.getVoices() || [];
     const matchedVoice = voices.find(v => v.lang === locale || v.lang.startsWith(locale.split('-')[0]));
     if (matchedVoice) {
       utter.voice = matchedVoice;
     }
 
-    if (onDone) {
-      utter.onend = () => onDone();
-      utter.onerror = () => onDone();
-    }
+    const handleSpeechComplete = () => {
+      // Allow 400ms acoustic drain time for room reverberation to settle before re-arming mic
+      setTimeout(() => {
+        window.__SAMARTH_AI_SPEAKING__ = false;
+        if (onDone) onDone();
+      }, 350);
+    };
+
+    utter.onend = handleSpeechComplete;
+    utter.onerror = handleSpeechComplete;
 
     window.speechSynthesis.speak(utter);
     return utter;
   } catch (err) {
     console.debug('TTS error:', err);
+    window.__SAMARTH_AI_SPEAKING__ = false;
     if (onDone) onDone();
     return null;
   }
 };
 
 export const stopSpeaking = () => {
+  window.__SAMARTH_AI_SPEAKING__ = false;
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
@@ -240,6 +251,12 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'en-I
     };
 
     recognition.onresult = (event) => {
+      // STRICT ACOUSTIC ECHO SUPPRESSION:
+      // If the assistant is currently speaking aloud, discard audio picked up from the computer speakers!
+      if (window.__SAMARTH_AI_SPEAKING__) {
+        return;
+      }
+
       let currentEventFinal = '';
       let currentEventInterim = '';
 
