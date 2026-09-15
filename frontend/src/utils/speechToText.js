@@ -182,9 +182,10 @@ export const stopSpeaking = () => {
 };
 
 /**
- * Initialize Speech Recognition with high accuracy, interim aggregation and locale compliance
+ * Initialize Speech Recognition with high accuracy, interim streaming,
+ * continuous microphone capture, and automatic silence detection.
  */
-export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-IN', onInterim = null) => {
+export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'en-IN', onInterim = null) => {
   const SpeechRecognition = 
     window.SpeechRecognition || 
     window.webkitSpeechRecognition || 
@@ -198,19 +199,43 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-I
 
   try {
     const recognition = new SpeechRecognition();
-    recognition.lang = langCode || 'hi-IN';
-    recognition.continuous = false;
+    // Default to en-IN for universal Indian English & Hinglish comfort, or specific requested locale
+    recognition.lang = langCode || 'en-IN';
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 3;
 
     let hasDeliveredFinal = false;
     let accumulatedFinal = '';
     let latestInterim = '';
+    let silenceTimer = null;
+
+    const clearTimer = () => {
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        silenceTimer = null;
+      }
+    };
+
+    const triggerFinalDelivery = () => {
+      clearTimer();
+      const combined = (accumulatedFinal + ' ' + latestInterim).trim();
+      const candidate = cleanVoiceTranscript(combined);
+      if (candidate && !hasDeliveredFinal) {
+        hasDeliveredFinal = true;
+        playStopChime();
+        try {
+          recognition.stop();
+        } catch (e) {}
+        onResult && onResult(candidate);
+      }
+    };
 
     recognition.onstart = () => {
       hasDeliveredFinal = false;
       accumulatedFinal = '';
       latestInterim = '';
+      clearTimer();
       playListeningChime();
     };
 
@@ -238,44 +263,32 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-I
         onInterim(liveDisplay);
       }
 
-      // If we have definitive final text and no ongoing interim, deliver immediately
-      if (accumulatedFinal && !latestInterim && !hasDeliveredFinal) {
-        const candidate = cleanVoiceTranscript(accumulatedFinal);
-        if (candidate) {
-          hasDeliveredFinal = true;
-          playStopChime();
-          onResult && onResult(candidate);
-        }
+      // Reset silence timer on every spoken word: if user pauses for 1.3s after speaking, finalize turn
+      clearTimer();
+      if (liveDisplay.length > 2) {
+        silenceTimer = setTimeout(() => {
+          triggerFinalDelivery();
+        }, 1350);
       }
     };
 
     recognition.onerror = (event) => {
-      console.warn('Speech recognition status:', event.error);
+      console.warn('Speech recognition notice:', event.error);
+      clearTimer();
       if (event.error === 'not-allowed') {
-        onError && onError(
-          langCode.startsWith('mr')
-            ? 'मायक्रोफोन परवानगी नाकारली गेली आहे. कृपया ब्राउझरमध्ये मायक्रोफोन चालू करा.'
-            : langCode.startsWith('hi')
-            ? 'माइक्रोफोन अनुमति अस्वीकृत है। कृपया ब्राउज़र सेटिंग्स में माइक ऑन करें।'
-            : 'Microphone permission denied. Please allow microphone access in your browser bar.'
-        );
+        onError && onError('Microphone access denied. Please allow microphone permission in your browser URL bar.');
       } else if (event.error === 'no-speech') {
-        onError && onError(
-          langCode.startsWith('mr')
-            ? 'कोणताही आवाज ऐकू आला नाही. कृपया माईक जवळ बोलण्याचा प्रयत्न करा.'
-            : langCode.startsWith('hi')
-            ? 'कोई आवाज नहीं सुनाई दी। कृपया माइक के पास बोलें।'
-            : 'No speech detected. Please speak closer to your microphone.'
-        );
+        // Silent ignore for continuous mode
       } else if (event.error !== 'aborted') {
-        onError && onError(`Voice notice: ${event.error}`);
+        onError && onError(`Microphone status: ${event.error}`);
       }
     };
 
     recognition.onend = () => {
-      // If recognition ended before a final event fired, deliver accumulated or interim text
+      clearTimer();
       if (!hasDeliveredFinal) {
-        const fallbackCandidate = cleanVoiceTranscript((accumulatedFinal + ' ' + latestInterim).trim());
+        const combined = (accumulatedFinal + ' ' + latestInterim).trim();
+        const fallbackCandidate = cleanVoiceTranscript(combined);
         if (fallbackCandidate) {
           hasDeliveredFinal = true;
           playStopChime();
@@ -292,3 +305,4 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'hi-I
     return null;
   }
 };
+
