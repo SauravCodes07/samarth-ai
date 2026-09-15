@@ -11,6 +11,7 @@ import SchemesPage from './pages/SchemesPage';
 import CalculatorPage from './pages/CalculatorPage';
 import ProfilePage from './pages/ProfilePage';
 
+import ProtectedRoute from './components/ProtectedRoute';
 import AIChatbot from './components/AIChatbot';
 
 function App() {
@@ -24,10 +25,10 @@ function App() {
               <main className="flex-grow">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/advisory" element={<FormPage />} />
-                  <Route path="/schemes" element={<SchemesPage />} />
-                  <Route path="/calculator" element={<CalculatorPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/advisory" element={<ProtectedRoute><FormPage /></ProtectedRoute>} />
+                  <Route path="/schemes" element={<ProtectedRoute><SchemesPage /></ProtectedRoute>} />
+                  <Route path="/calculator" element={<ProtectedRoute><CalculatorPage /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                 </Routes>
               </main>
               <Footer />

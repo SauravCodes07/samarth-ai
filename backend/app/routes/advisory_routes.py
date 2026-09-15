@@ -8,11 +8,18 @@ from app.schemas.user_schema import (
     SchemeResponse, 
     LoanStructure,
     QuarterlyRepaymentSchedule,
-    HyperLocalFeasibility
+    HyperLocalFeasibility,
+    VoiceChatRequest,
+    VoiceChatResponse
 )
 from app.services.scheme_matcher import match_schemes
 from app.services.loan_calculator import structure_loan, calculate_project_cost_from_margin
-from app.services.ai_advisory import compute_business_viability, compute_hyper_local_feasibility, generate_advisory_narrative
+from app.services.ai_advisory import (
+    compute_business_viability, 
+    compute_hyper_local_feasibility, 
+    generate_advisory_narrative,
+    generate_voice_chat_response
+)
 
 router = APIRouter(prefix="/advisory", tags=["Advisory & Financial Structuring"])
 
@@ -212,3 +219,34 @@ def generate_advisory(request: AdvisoryRequest, db: Session = Depends(get_db)):
             status_code=500,
             detail=f"Unable to process advisory request: {str(e)}"
         )
+
+
+@router.post("/voice-chat", response_model=VoiceChatResponse)
+def voice_chat(payload: VoiceChatRequest):
+    """
+    Live AI Conversational Voice Assistant Endpoint.
+    Powers real-time spoken interactions (Hindi, Marathi, English),
+    answering queries about MSME schemes, feasibility, and margins,
+    while auto-extracting parameters to pre-fill the form.
+    """
+    try:
+        result = generate_voice_chat_response(
+            message=payload.message,
+            lang=payload.lang or "hi",
+            history=payload.conversation_history or []
+        )
+        return VoiceChatResponse(
+            voice_response=result.get("voice_response", ""),
+            display_response=result.get("display_response", ""),
+            extracted_data=result.get("extracted_data", {}),
+            suggested_action=result.get("suggested_action", "update_form")
+        )
+    except Exception as e:
+        print(f"Voice chat endpoint error: {e}")
+        return VoiceChatResponse(
+            voice_response="I heard your request. Let us continue setting up your business application.",
+            display_response="I heard your request. Let us continue setting up your business application.",
+            extracted_data={},
+            suggested_action="continue"
+        )
+

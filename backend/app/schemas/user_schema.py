@@ -141,12 +141,23 @@ class AdvisoryResponse(BaseModel):
     business_viability: BusinessViability
     hyper_local_feasibility: HyperLocalFeasibility
     ai_advisory_text: str
-    ai_advisory_text_hi: str
-    business_action_plan: List[str]
-    business_action_plan_hi: List[str]
-    application_steps: List[str]
-    application_steps_hi: List[str]
-    disclaimer: str
+    ai_advisory_text_hi: Optional[str] = None
+    business_action_plan: Optional[List[str]] = []
+    business_action_plan_hi: Optional[List[str]] = []
+    application_steps: Optional[List[str]] = []
+    application_steps_hi: Optional[List[str]] = []
+    disclaimer: Optional[str] = None
+
+class VoiceChatRequest(BaseModel):
+    message: str
+    lang: Optional[str] = "hi"
+    conversation_history: Optional[List[Dict[str, str]]] = []
+
+class VoiceChatResponse(BaseModel):
+    voice_response: str
+    display_response: Optional[str] = None
+    extracted_data: Dict[str, Any] = {}
+    suggested_action: Optional[str] = None
 
 class SchemeReportCreate(BaseModel):
     scheme_id: int

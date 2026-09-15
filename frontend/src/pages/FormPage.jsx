@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import { submitAdvisoryRequest } from '../services/api';
 import { logInquiryToSupabase } from '../services/supabaseClient';
 import ResultCard from '../components/ResultCard';
-import MicButton from '../components/MicButton';
 import VoiceAssistantModal from '../components/VoiceAssistantModal';
 import { 
   Store, 
@@ -114,6 +113,54 @@ const FormPage = () => {
   ];
 
   const [voiceFeedback, setVoiceFeedback] = useState(null);
+
+  const handleApplyExtractedData = (data) => {
+    if (!data) return;
+    const detected = [];
+
+    setFormData(prev => {
+      const next = { ...prev };
+      if (data.business_type) {
+        next.business_type = data.business_type;
+        detected.push(lang === 'mr' ? `व्यवसाय: ${data.business_type}` : lang === 'hi' ? `व्यवसाय: ${data.business_type}` : `Trade: ${data.business_type}`);
+      }
+      if (data.margin_capital) {
+        const m = Number(data.margin_capital);
+        next.margin_capital = m;
+        next.investment_amount = m * 10;
+        detected.push(lang === 'mr' ? `भांडवल: ₹${m.toLocaleString('en-IN')}` : lang === 'hi' ? `मार्जिन पूंजी: ₹${m.toLocaleString('en-IN')}` : `Margin: ₹${m.toLocaleString('en-IN')}`);
+      } else if (data.investment_amount) {
+        const c = Number(data.investment_amount);
+        next.investment_amount = c;
+        next.margin_capital = Math.round(c * 0.10);
+        detected.push(lang === 'mr' ? `प्रकल्प: ₹${c.toLocaleString('en-IN')}` : lang === 'hi' ? `प्रोजेक्ट: ₹${c.toLocaleString('en-IN')}` : `Project: ₹${c.toLocaleString('en-IN')}`);
+      }
+      if (data.state) {
+        next.state = data.state;
+        detected.push(lang === 'mr' ? `राज्य: ${data.state}` : lang === 'hi' ? `राज्य: ${data.state}` : `State: ${data.state}`);
+      }
+      if (data.district) {
+        next.district = data.district;
+        detected.push(lang === 'mr' ? `जिल्हा: ${data.district}` : lang === 'hi' ? `जिला: ${data.district}` : `District: ${data.district}`);
+      }
+      if (data.gender) {
+        next.gender = data.gender;
+        detected.push(lang === 'mr' ? `प्रवर्ग: ${data.gender}` : lang === 'hi' ? `प्रवर्ग: ${data.gender}` : `Category: ${data.gender}`);
+      }
+      if (data.experience_level) {
+        next.experience_level = data.experience_level;
+        detected.push(lang === 'mr' ? `अनुभव: ${data.experience_level}` : lang === 'hi' ? `अनुभव: ${data.experience_level}` : `Exp: ${data.experience_level}`);
+      }
+      return next;
+    });
+
+    if (detected.length > 0) {
+      setVoiceFeedback({
+        transcript: lang === 'mr' ? 'थेट व्हॉईस संभाषणातून अर्ज भरला गेला' : lang === 'hi' ? 'लाइव वॉइस बातचीत से फॉर्म स्वतः भर दिया गया' : 'Live Voice Conversation Auto-Filled Your Form',
+        detected
+      });
+    }
+  };
 
   const handleVoiceTranscript = (text) => {
     if (!text || !text.trim()) return;
@@ -432,28 +479,37 @@ const FormPage = () => {
           </div>
           <div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-white">
-              {lang === 'mr' ? 'आवाजाने किंवा १-क्लिक नमुन्याने फॉर्म भरा (Voice Assistant)' : lang === 'hi' ? 'आवाज से बोलकर फॉर्म भरें (Voice Assistant)' : 'Voice-Enabled Form Input (Web Speech API)'}
+              {lang === 'mr' ? 'समर्थ थेट एआय व्हॉईस असिस्टंट (लाईव्ह चर्चा व अर्ज भरणे)' : lang === 'hi' ? 'समर्थ लाइव एआई वॉइस असिस्टेंट (बोलकर बात करें व फॉर्म भरें)' : 'Samarth Live Conversational AI Voice Assistant'}
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {lang === 'mr'
-                ? 'उदा: "माझ्याकडे १ लाख रुपये आहेत, मला डेअरी फार्म सुरू करायचा आहे"'
+                ? 'थेट बोला — एआय आवाजात सविस्तर उत्तर देईल आणि तुमच्या उत्तरांनुसार संपूर्ण अर्ज आपोआप भरेल.'
                 : lang === 'hi'
-                ? 'उदा: "मेरे पास 1 लाख रुपये हैं, मुझे डेयरी फार्म शुरू करना है"'
-                : 'e.g. "I have 1 Lakh margin money, want to start a Dairy Farm"'}
+                ? 'माइक से सीधे बात करें — एआई बोलकर जवाब देगा और आपकी बातचीत के आधार पर फॉर्म भर देगा।'
+                : 'Talk directly in voice — AI speaks answers aloud & auto-fills form as per conversation.'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div>
           <button
             type="button"
             onClick={() => setIsVoiceModalOpen(true)}
-            className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all hover:scale-102"
+            className="shine-button px-5 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-3 shadow-lg shadow-blue-500/25 transition-all hover:scale-103 cursor-pointer shrink-0"
           >
-            <Mic className="w-3.5 h-3.5" />
-            <span>{lang === 'mr' ? 'आवाज सहाय्यक उघडा' : lang === 'hi' ? 'वॉइस असिस्टेंट खोलें' : 'Open Voice Assistant'}</span>
+            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+              <Mic className="w-4 h-4 text-white animate-pulse" />
+            </div>
+            <div className="text-left">
+              <span className="block font-extrabold leading-tight">
+                {lang === 'mr' ? 'थेट AI व्हॉईस असिस्टंटशी बोला' : lang === 'hi' ? 'लाइव AI वॉइस असिस्टेंट से बात करें' : 'Talk with Live AI Voice Assistant'}
+              </span>
+              <span className="text-[10px] text-blue-200 block font-medium">
+                {lang === 'mr' ? 'बोलून चर्चा करा व फॉर्म भरा' : lang === 'hi' ? 'बोलकर पूछें व फॉर्म भरवाएं' : 'Two-way voice talk & auto-fill form'}
+              </span>
+            </div>
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping ml-1 shrink-0"></span>
           </button>
-          <MicButton onTranscript={handleVoiceTranscript} />
         </div>
       </div>
 
@@ -894,6 +950,7 @@ const FormPage = () => {
       <VoiceAssistantModal
         isOpen={isVoiceModalOpen}
         onClose={() => setIsVoiceModalOpen(false)}
+        onApplyExtractedData={handleApplyExtractedData}
         onApplyTranscript={handleVoiceTranscript}
       />
     </div>

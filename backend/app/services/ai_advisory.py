@@ -645,3 +645,189 @@ def generate_advisory_narrative(
         "application_steps": steps_en,
         "application_steps_hi": steps_hi
     }
+
+
+def generate_voice_chat_response(message: str, lang: str = "hi", history: list = None) -> dict:
+    """
+    Generates a natural, conversational voice response for live two-way AI voice interaction.
+    Designed for Text-to-Speech (warm, direct, spoken style without markdown clutter),
+    and automatically extracts structured MSME form parameters to auto-fill the application.
+    """
+    import re
+    msg = message.strip()
+    lower = msg.lower()
+
+    # Default extracted data container
+    extracted = {}
+
+    # 1. Detect Business Category
+    if any(k in lower for k in ['dairy', 'milk', 'doodh', 'dudh', 'दूध', 'दुग्ध', 'डेअरी', 'डेयरी', 'गाय', 'भैंस', 'म्हैस', 'गोठा', 'cow', 'buffalo']):
+        extracted['business_type'] = 'Dairy Farm'
+    elif any(k in lower for k in ['kirana', 'grocery', 'किराना', 'किराणा', 'general store', 'दुकान', 'shop', 'provision']):
+        extracted['business_type'] = 'Grocery / Kirana Store'
+    elif any(k in lower for k in ['tailor', 'tailoring', 'boutique', 'सिलाई', 'बुटीक', 'शिलाई', 'कपड़े', 'dress', 'garment']):
+        extracted['business_type'] = 'Tailoring & Boutique'
+    elif any(k in lower for k in ['rickshaw', 'e-rickshaw', 'रिक्शा', 'रिक्षा', 'auto', 'transport', 'वाहन', 'गाड़ी', 'driver']):
+        extracted['business_type'] = 'E-Rickshaw / Transport'
+    elif any(k in lower for k in ['solar', 'सोलर', 'सौर', 'renewable', 'ऊर्जा', 'panel']):
+        extracted['business_type'] = 'Solar & Renewable Energy'
+    elif any(k in lower for k in ['flour', 'mill', 'oil', 'चक्की', 'गिरणी', 'तेल', 'आटा', 'processing', 'dal']):
+        extracted['business_type'] = 'Agri Processing / Mill'
+    elif any(k in lower for k in ['artisan', 'handicraft', 'हस्तशिल्प', 'हस्तकला', 'pottery', 'मूर्ति', 'weaving', 'हथकरघा']):
+        extracted['business_type'] = 'Handicrafts / Artisan'
+
+    # 2. Detect Margin / Project Money
+    # Match patterns like 1 lakh, 50000, 25k, etc.
+    amount_found = None
+    lakh_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:lakh|lac|लाख)', lower)
+    if lakh_match:
+        amount_found = float(lakh_match.group(1)) * 100000
+    else:
+        num_match = re.search(r'(?:₹|rs\.?|inr)?\s*(\d{4,7})', lower)
+        if num_match:
+            amount_found = float(num_match.group(1))
+        elif 'हज़ार' in lower or 'hazar' in lower or 'thousand' in lower or 'हजार' in lower:
+            th_match = re.search(r'(\d+)\s*(?:thousand|hazar|हज़ार|हजार)', lower)
+            if th_match:
+                amount_found = float(th_match.group(1)) * 1000
+
+    if amount_found:
+        # If amount <= 1000000 and user mentions margin/saving, treat as margin capital
+        if any(k in lower for k in ['margin', 'मार्जिन', 'बचत', 'भांडवल', 'पूंजी', 'खिशात', 'saving', 'pocket']):
+            extracted['margin_capital'] = int(amount_found)
+            extracted['investment_amount'] = int(amount_found * 10)
+        elif amount_found <= 500000:
+            extracted['margin_capital'] = int(amount_found)
+            extracted['investment_amount'] = int(amount_found * 10)
+        else:
+            extracted['investment_amount'] = int(amount_found)
+            extracted['margin_capital'] = int(amount_found * 0.10)
+
+    # 3. Detect State
+    states_map = {
+        'maharashtra': 'Maharashtra', 'महाराष्ट्र': 'Maharashtra',
+        'rajasthan': 'Rajasthan', 'राजस्थान': 'Rajasthan',
+        'uttar pradesh': 'Uttar Pradesh', 'उत्तर प्रदेश': 'Uttar Pradesh', 'up': 'Uttar Pradesh',
+        'madhya pradesh': 'Madhya Pradesh', 'मध्य प्रदेश': 'Madhya Pradesh', 'mp': 'Madhya Pradesh',
+        'bihar': 'Bihar', 'बिहार': 'Bihar',
+        'gujarat': 'Gujarat', 'गुजरात': 'Gujarat',
+        'karnataka': 'Karnataka', 'कर्नाटक': 'Karnataka',
+        'tamil nadu': 'Tamil Nadu', 'तमिलनाडु': 'Tamil Nadu'
+    }
+    for k, s_val in states_map.items():
+        if k in lower:
+            extracted['state'] = s_val
+            break
+
+    # 4. Detect Gender
+    if any(k in lower for k in ['woman', 'women', 'female', 'mahila', 'महिला', 'स्त्री', 'lady', 'girl']):
+        extracted['gender'] = 'Female'
+    elif any(k in lower for k in ['man', 'male', 'पुरुष', 'purush', 'gentleman']):
+        extracted['gender'] = 'Male'
+
+    # 5. Detect Experience
+    if any(k in lower for k in ['new', 'fresher', 'नया', 'नवीन', 'पहिला', 'first time']):
+        extracted['experience_level'] = 'Fresher'
+    elif any(k in lower for k in ['1 साल', '2 साल', '1 year', '2 year', 'वर्ष', 'वर्षांचा', 'experience', 'अनुभव']):
+        extracted['experience_level'] = '1-3 years'
+    elif any(k in lower for k in ['3 साल', '4 साल', '5 साल', '5 year', '3 year', 'पुराना']):
+        extracted['experience_level'] = '3-5 years'
+
+    # Try Gemini if API Key is configured
+    if settings.GEMINI_API_KEY:
+        try:
+            from google import genai
+            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            prompt = f"""You are Samarth AI, an empathetic, highly knowledgeable voice assistant for rural and small business entrepreneurs in India.
+User's language preference: {lang} (mr = Marathi, hi = Hindi, en = English).
+User voice message: "{msg}"
+
+Respond in a warm, lively conversational style as if you are speaking aloud directly on a phone or voice call.
+Rules for voice response:
+1. Speak in the chosen language ({lang}). If Hindi, use natural spoken Hindi. If Marathi, use natural spoken Marathi. If English, use friendly Indian English.
+2. Keep it concise (2 to 3 sentences max) so it can be spoken via Text-to-Speech smoothly.
+3. NEVER use markdown (no asterisks, bullet points, headers, or emojis).
+4. Answer the user's question directly (about schemes, loans, 10% margin money, moratorium, profitability, documents) and prompt them for whatever detail is missing (business type, budget/margin, location, or experience).
+5. Extract key structured parameters: business_type, margin_capital, investment_amount, state, district, gender, experience_level.
+
+Output strict JSON:
+{{
+  "voice_response": "...",
+  "extracted": {{
+     "business_type": "...",
+     "margin_capital": 100000,
+     "investment_amount": 1000000,
+     "state": "...",
+     "gender": "...",
+     "experience_level": "..."
+  }}
+}}"""
+            res = client.models.generate_content(
+                model=settings.GEMINI_MODEL,
+                contents=prompt,
+                config={"response_mime_type": "application/json"}
+            )
+            if res and res.text:
+                data = json.loads(res.text)
+                v_resp = data.get("voice_response", "")
+                if v_resp:
+                    gem_extracted = data.get("extracted", {})
+                    # Clean None/empty from gemini
+                    cleaned_gem = {k: v for k, v in gem_extracted.items() if v}
+                    extracted.update(cleaned_gem)
+                    return {
+                        "voice_response": v_resp,
+                        "display_response": v_resp,
+                        "extracted_data": extracted,
+                        "suggested_action": "update_form"
+                    }
+        except Exception as e:
+            print(f"Voice chat Gemini error: {e}")
+
+    # High-quality dynamic conversational response fallback
+    b_type = extracted.get('business_type')
+    margin = extracted.get('margin_capital')
+    gender = extracted.get('gender')
+    state = extracted.get('state')
+
+    if lang == 'mr':
+        if b_type and margin:
+            voice_txt = f"उत्तम! {b_type} व्यवसायासाठी तुमचे ₹{margin:,} चे भांडवल पुरेसे आहे. सरकार तुम्हाला ९०% सवलतीचे कर्ज ६.५% व्याजाने देईल. तुमचा जिल्हा कोणता आहे?"
+        elif b_type:
+            voice_txt = f"छान! {b_type} हा अत्यंत फायदेशीर व्यवसाय आहे. हा उद्योग सुरू करण्यासाठी तुमच्याकडे स्वतःचे किती भांडवल किंवा बचत उपलब्ध आहे?"
+        elif margin:
+            voice_txt = f"समजले! ₹{margin:,} च्या भांडवलावर आपण ₹{margin*10:,} पर्यंतचा प्रकल्प सुरू करू शकता. आपण कोणता व्यवसाय सुरू करण्याचा विचार करत आहात?"
+        elif any(k in lower for k in ['हप्ता', 'व्याज', 'मोरेटोरियम', 'नियम', 'कागदपत्रे']):
+            voice_txt = "सरकारी योजनांमध्ये पहिल्या ६ महिन्यांत कोणताही मुद्दल हप्ता भरावा लागत नाही. तसेच महिलांसाठी व्याजदर केवळ ४% आहे. आपल्याला कोणत्या व्यवसायासाठी अर्ज करायचा आहे?"
+        else:
+            voice_txt = "नमस्कार! मी समर्थ एआय व्हॉईस असिस्टंट आहे. आपण कोणता व्यवसाय सुरू करू इच्छिता आणि आपल्याकडे किती भांडवल आहे? मी संपूर्ण फॉर्म त्वरित भरून देईन."
+    elif lang == 'hi':
+        if b_type and margin:
+            voice_txt = f"बहुत बढ़िया! {b_type} के लिए आपकी ₹{margin:,} की मार्जिन पूंजी पर्याप्त है। इस पर सरकार 90% रियायती लोन स्वीकृत करेगी जिसमें पहले 6 महीने किश्त की छूट मिलेगी। आपका जिला कौन सा है?"
+        elif b_type:
+            voice_txt = f"शानदार! {b_type} एक उच्च मांग वाला व्यवसाय है। इसे शुरू करने के लिए आपके पास अपनी जेब से लगाने के लिए कितनी पूंजी या बचत राशि है?"
+        elif margin:
+            voice_txt = f"जी हाँ! ₹{margin:,} की मार्जिन राशि से आप ₹{margin*10:,} तक का संपूर्ण प्रोजेक्ट 90% सरकारी लोन के साथ शुरू कर सकते हैं। आप कौन सा व्यवसाय खोलना चाहते हैं?"
+        elif any(k in lower for k in ['किश्त', 'ब्याज', 'मोरेटोरियम', 'छूट', 'दस्तावेज', 'सब्सिडी']):
+            voice_txt = "सरकारी योजना में 90% तक लोन मिलता है और महिला उद्यमियों को 4% की रियायती ब्याज दर मिलती है। आपको किस काम के लिए लोन की आवश्यकता है?"
+        else:
+            voice_txt = "नमस्ते! मैं समर्थ एआई लाइव वॉइस असिस्टेंट हूँ। आप कौन सा व्यवसाय शुरू करना चाहते हैं और आपका बजट कितना है? बेझिझक बताइए, मैं आपका फॉर्म लाइव भर दूँगा।"
+    else:
+        if b_type and margin:
+            voice_txt = f"Great! For a {b_type} venture, your margin capital of ₹{margin:,} can secure a project worth ₹{margin*10:,} with a 90% government subsidized loan. Which district are you located in?"
+        elif b_type:
+            voice_txt = f"Excellent! {b_type} is an eligible high-demand trade. How much margin savings or capital do you have available to invest?"
+        elif margin:
+            voice_txt = f"Got it! With ₹{margin:,} in margin money, you can unlock a total project up to ₹{margin*10:,} with concessional bank funding. What business do you plan to establish?"
+        elif any(k in lower for k in ['moratorium', 'interest', 'documents', 'subsidy', 'margin']):
+            voice_txt = "Under government concessional credit, you get a 6-month moratorium grace period and up to 90% bank funding. What trade or enterprise are you planning to start?"
+        else:
+            voice_txt = "Hello! I am Samarth AI Voice Assistant. What business would you like to start, and what is your available investment or margin budget?"
+
+    return {
+        "voice_response": voice_txt,
+        "display_response": voice_txt,
+        "extracted_data": extracted,
+        "suggested_action": "update_form"
+    }
+
