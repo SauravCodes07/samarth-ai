@@ -29,8 +29,10 @@ import {
   Calculator,
   Compass,
   Lock,
-  Mic
+  Mic,
+  ChevronDown
 } from 'lucide-react';
+import { stateDistrictsData } from '../data/districtDirectory';
 
 const FormPage = () => {
   const { lang } = useLanguage();
@@ -55,19 +57,39 @@ const FormPage = () => {
     investment_amount: 1000000, // Total Feasible Project Cost (Margin / 10%)
     gender: 'General',
     state: prefilled?.state && prefilled.state !== 'Central / All India' ? prefilled.state : 'Maharashtra',
-    district: '',
+    district: 'Pune',
     experience_level: '1-3 years'
   });
+
+  // Dynamic State-to-District Cascade Resolution
+  const currentStateObj = stateDistrictsData.find(
+    s => s.state.toLowerCase() === (formData.state || '').toLowerCase()
+  ) || stateDistrictsData.find(s => s.state === 'Maharashtra') || stateDistrictsData[0];
+
+  const currentDistricts = currentStateObj ? currentStateObj.districts : [];
+
+  const handleStateChange = (selectedState) => {
+    const targetState = stateDistrictsData.find(s => s.state === selectedState) || stateDistrictsData[0];
+    const firstDistrict = targetState?.districts[0]?.name || '';
+    setFormData(prev => ({
+      ...prev,
+      state: selectedState,
+      district: firstDistrict
+    }));
+  };
 
   useEffect(() => {
     if (prefilled) {
       const maxC = prefilled.max_cost || 1000000;
+      const targetStateName = prefilled.state && prefilled.state !== 'Central / All India' ? prefilled.state : formData.state;
+      const targetStateObj = stateDistrictsData.find(s => s.state.toLowerCase() === targetStateName.toLowerCase()) || stateDistrictsData[0];
       setFormData(prev => ({
         ...prev,
         business_title: prefilled.scheme_name,
         investment_amount: maxC,
         margin_capital: Math.round(maxC * 0.10),
-        state: prefilled.state && prefilled.state !== 'Central / All India' ? prefilled.state : prev.state
+        state: targetStateObj.state,
+        district: targetStateObj.districts[0]?.name || prev.district
       }));
     }
   }, [prefilled]);
@@ -137,6 +159,12 @@ const FormPage = () => {
       }
       if (data.state) {
         next.state = data.state;
+        const targetState = stateDistrictsData.find(s => s.state.toLowerCase() === data.state.toLowerCase());
+        if (targetState && targetState.districts.length > 0) {
+          if (!data.district || !targetState.districts.some(d => d.name.toLowerCase() === (data.district || '').toLowerCase())) {
+            next.district = targetState.districts[0].name;
+          }
+        }
         detected.push(lang === 'mr' ? `राज्य: ${data.state}` : lang === 'hi' ? `राज्य: ${data.state}` : `State: ${data.state}`);
       }
       if (data.district) {
@@ -883,34 +911,60 @@ const FormPage = () => {
               </div>
             </div>
 
-            {/* Geographic Location: State & District/Block */}
+            {/* Geographic Location: Dynamic State & District Cascading Dropdowns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  {lang === 'mr' ? 'राज्य (State):' : lang === 'hi' ? 'राज्य (State):' : 'State:'}
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                  <span>{lang === 'mr' ? 'राज्य निवडा (Select State):' : lang === 'hi' ? 'राज्य चुनें (Select State):' : 'Select State:'}</span>
+                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                    {stateDistrictsData.length} States / UTs
+                  </span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  placeholder={lang === 'mr' ? 'महाराष्ट्र, गुजरात, उत्तर प्रदेश, मध्यप्रदेश...' : 'Maharashtra, Gujarat, Uttar Pradesh, MP...'}
-                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
-                />
+                <div className="relative">
+                  <select
+                    id="state-select-dropdown"
+                    required
+                    value={formData.state}
+                    onChange={(e) => handleStateChange(e.target.value)}
+                    className="w-full p-3 pr-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 cursor-pointer shadow-sm transition-colors appearance-none"
+                  >
+                    {stateDistrictsData.map((st) => (
+                      <option key={st.state} value={st.state}>
+                        {lang === 'mr' ? (st.stateHi || st.state) : lang === 'hi' ? (st.stateHi || st.state) : st.state}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  {lang === 'mr' ? 'गाव / तालुका / जिल्हा (Village / Taluka / District):' : lang === 'hi' ? 'जिला / ब्लॉक / ग्राम पंचायत (Village / Block):' : 'Village / Block / District:'}
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                  <span>{lang === 'mr' ? 'जिल्हा निवडा (Select District):' : lang === 'hi' ? 'जिला चुनें (Select District):' : 'Select District:'}</span>
+                  <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full">
+                    {currentDistricts.length} Districts Available
+                  </span>
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.district}
-                  onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                  placeholder={lang === 'mr' ? 'उदा: पुणे (बारामती तालुका) किंवा कोल्हापूर' : lang === 'hi' ? 'उदा: वाराणसी (चिरईगांव ब्लॉक)' : 'e.g. Pune (Baramati Taluka) / Varanasi'}
-                  className="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
-                />
+                <div className="relative">
+                  <select
+                    id="district-select-dropdown"
+                    required
+                    value={formData.district}
+                    onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                    className="w-full p-3 pr-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 cursor-pointer shadow-sm transition-colors appearance-none"
+                  >
+                    {currentDistricts.map((dst) => (
+                      <option key={dst.name} value={dst.name}>
+                        {lang === 'mr' ? (dst.nameHi || dst.name) : lang === 'hi' ? (dst.nameHi || dst.name) : dst.name}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                    <ChevronDown className="w-4 h-4" />
+                  </div>
+                </div>
               </div>
             </div>
 

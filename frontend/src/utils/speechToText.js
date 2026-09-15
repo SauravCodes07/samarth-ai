@@ -263,12 +263,31 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'en-I
         onInterim(liveDisplay);
       }
 
-      // Reset silence timer on every spoken word: if user pauses for 1.3s after speaking, finalize turn
+      // Intelligent pause & sentence completion detection:
       clearTimer();
       if (liveDisplay.length > 2) {
+        const words = liveDisplay.trim().split(/\s+/);
+        const lastWord = words[words.length - 1].toLowerCase().replace(/[^a-z0-9\u0900-\u097F]/g, '');
+        
+        // Connective, prepositional, auxiliary or trailing markers indicating speaker is mid-sentence
+        const trailingMarkers = [
+          'of', 'to', 'in', 'for', 'with', 'about', 'at', 'by', 'from', 'as', 'into', 'like',
+          'and', 'or', 'but', 'because', 'if', 'so', 'that', 'the', 'a', 'an', 'my', 'our',
+          'i', 'am', 'is', 'are', 'was', 'were', 'have', 'has', 'had', 'want', 'planning',
+          'actually', 'just', 'thinking', 'business', 'start',
+          'की', 'के', 'का', 'को', 'में', 'से', 'पर', 'और', 'या', 'तो', 'कि', 'मैं', 'हम', 'है', 'था',
+          'चे', 'च्या', 'चा', 'ची', 'ला', 'मध्ये', 'आणि', 'किंवा', 'मी', 'आम्ही', 'आहे'
+        ];
+        
+        const isTrailing = trailingMarkers.includes(lastWord) || words.length <= 3;
+        
+        // If trailing/short incomplete thought, allow 3200ms grace window so user can finish speaking.
+        // If user finished a complete thought (4+ words and not trailing), pause for 1800ms (natural Siri/Google Assistant pause) then finalize turn.
+        const pauseDelay = isTrailing ? 3200 : 1800;
+
         silenceTimer = setTimeout(() => {
           triggerFinalDelivery();
-        }, 1350);
+        }, pauseDelay);
       }
     };
 

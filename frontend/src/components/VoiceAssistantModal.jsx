@@ -19,6 +19,7 @@ import {
   speakTextWithVoice, 
   stopSpeaking
 } from '../utils/speechToText';
+import { sendVoiceChatMessage } from '../services/api';
 
 /**
  * Omnilingual Intelligent Conversational AI Core
@@ -199,8 +200,48 @@ const generateIntelligentVoiceResponse = (userSpeech, history = []) => {
     return { reply, extracted, detectedLang };
   }
 
-  // Case E: Interest Rates & Women Rebate inquiry
-  if (/(interest|rate|rebate|women|व्याज|दर|महिला|ब्याज)/i.test(lower)) {
+  // Case E: Trailing or Incomplete Utterance Check (e.g. "actually i am", "interested to start a business of", etc.)
+  const trailingRegex = /(actually i am|interested to start a business of|i want to start|i am thinking of|planning to|thinking about|business of|want to open|actually|interested in)$/i;
+  const isTrailingWord = /(of|to|in|for|am|is|a|the|की|के|का|च्या|ची|चे)$/i.test(text.trim());
+  const wordsCount = text.trim().split(/\s+/).length;
+
+  if (trailingRegex.test(lower) || (wordsCount <= 4 && isTrailingWord)) {
+    if (detectedLang === 'mr') {
+      reply = "मी तुमचे लक्षपूर्वक ऐकत आहे! कृपया सांगा, आपण कोणता व्यवसाय किंवा दुकान सुरू करू इच्छिता आणि आपल्याकडे स्वतःचे किती भांडवल आहे?";
+    } else if (detectedLang === 'hi') {
+      reply = "मैं ध्यानपूर्वक सुन रहा हूँ! कृपया बताइए, आप किस प्रकार की दुकान या व्यवसाय शुरू करना चाहते हैं और आपका बजट कितना है?";
+    } else {
+      reply = "I am listening closely! Please tell me what kind of business or enterprise you want to establish, and what initial budget or margin money you have.";
+    }
+    return { reply, extracted, detectedLang };
+  }
+
+  // Case F: Conversational Greetings & Small Talk
+  if (/^(hi|hello|hey|namaste|pranam|good morning|good afternoon|good evening|नमस्कार|नमस्ते|हॅलो)\b/i.test(lower) && wordsCount <= 5) {
+    if (detectedLang === 'mr') {
+      reply = "नमस्कार! मी समर्थ एआय आहे. मी तुम्हाला फायदेशीर व्यवसाय निवडण्यात, १०% भांडवलावर ९०% सरकारी कर्ज मिळवण्यात आणि अर्ज भरण्यात मदत करू शकतो. आपण काय सुरू करण्याचा विचार करत आहात?";
+    } else if (detectedLang === 'hi') {
+      reply = "नमस्ते! मैं समर्थ एआई हूँ। मैं आपको सबसे अधिक मुनाफे वाला व्यापार चुनने, 10% मार्जिन पर 90% सरकारी लोन दिलाने और फॉर्म भरने में पूरी मदद करूँगा। आप कौन सा काम शुरू करना चाहते हैं?";
+    } else {
+      reply = "Hello! I am Samarth AI, your government business advisory assistant. I help you identify high-margin enterprises, secure 90% concessional loans with 10% margin money, and auto-fill your application. What venture are you planning?";
+    }
+    return { reply, extracted, detectedLang };
+  }
+
+  // Case G: Identity & Capabilities
+  if (/(who are you|what can you do|what is samarth|kaun ho|kaun hai|कोण आहात|काय करू शकता)/i.test(lower)) {
+    if (detectedLang === 'mr') {
+      reply = "मी समर्थ एआय आहे—शासकीय सवलतीच्या योजना व सूक्ष्म व्यवसायांसाठी डिझाइन केलेला बुद्धिमान सल्लागार. मी तुमच्या १०% भांडवलावर ९०% कर्ज मिळवून देतो आणि तुमचा संपूर्ण अर्ज आवाजाद्वारे भरून देतो.";
+    } else if (detectedLang === 'hi') {
+      reply = "मैं समर्थ एआई हूँ—सरकारी रियायती लोन योजनाओं और सूक्ष्म उद्योगों के लिए तैयार किया गया इंटेलिजेंट एडवाइजर। मैं आपके 10% मार्जिन पर 90% लोन दिलवाने, स्थानीय फिजिबिलिटी रिपोर्ट बनाने और फॉर्म भरने में मदद करता हूँ।";
+    } else {
+      reply = "I am Samarth AI, an intelligent government credit advisory assistant. I structure your business financing with 10% margin capital and 90% concessional loans, assess local market feasibility, and auto-fill your application.";
+    }
+    return { reply, extracted, detectedLang };
+  }
+
+  // Case H: Interest Rates & Women Rebate inquiry (Strict Word Boundary - Never fires on "interested")
+  if (/\b(interest rate|rate of interest|interest rates|byaj dar|vyaj dar|ब्याज दर|व्याज दर)\b/i.test(lower) || (/\b(interest|byaj|vyaj|ब्याज|व्याज)\b/i.test(lower) && !/\b(interested)\b/i.test(lower))) {
     if (detectedLang === 'mr') {
       reply = "मायक्रो फायनान्ससाठी वार्षिक व्याजदर ६.५% आणि मुदत कर्जासाठी ८% आहे. महिला उद्योजकांसाठी महिला समृद्धी योजनेखाली व्याजदर केवळ ४% इतका सवलतीचा आहे!";
     } else if (detectedLang === 'hi') {
@@ -211,7 +252,7 @@ const generateIntelligentVoiceResponse = (userSpeech, history = []) => {
     return { reply, extracted, detectedLang };
   }
 
-  // Case F: Documents & Process inquiry
+  // Case I: Documents & Process inquiry
   if (/(document|process|apply|paper|kaise milega|दस्तावेज|कागदपत्रे|अर्ज|कागद)/i.test(lower)) {
     if (detectedLang === 'mr') {
       reply = "यासाठी आधार कार्ड, पॅन कार्ड, रहिवासी दाखला, मशिनरी/जनावरांचे कोटेशन आणि बँक खाते पासबुक एवढीच कागदपत्रे लागतात. कोणत्याही मोठ्या तारण किंवा गॅरंटीची गरज भासत नाही.";
@@ -223,7 +264,7 @@ const generateIntelligentVoiceResponse = (userSpeech, history = []) => {
     return { reply, extracted, detectedLang };
   }
 
-  // Case G: Specific Business / Budget mentioned by user
+  // Case J: Specific Business / Budget mentioned by user
   if (extracted.business_type && extracted.margin_capital) {
     const pCost = extracted.margin_capital * 10;
     const lAmt = extracted.margin_capital * 9;
@@ -260,13 +301,13 @@ const generateIntelligentVoiceResponse = (userSpeech, history = []) => {
     return { reply, extracted, detectedLang };
   }
 
-  // Fallback: Natural, mature general response
+  // Fallback: Thoughtful, context-aware prompt (Never repeat robotic text)
   if (detectedLang === 'mr') {
-    reply = "मी समर्थ एआय आहे—आपला वैयक्तिक व्यवसाय व वित्तीय सल्लागार. आपण कोणताही प्रश्न थेट विचारू शकता—जसे की कोणता उद्योग करावा, किती नफा होईल, किंवा १०% भांडवलावर ९०% सरकारी कर्ज कसे मिळवावे. आपण काय विचार करत आहात?";
+    reply = "मी तुमचे म्हणणे समजून घेत आहे. आपल्या मनात कोणता व्यवसाय सुरू करण्याचा विचार आहे—जसे की डेअरी, किराणा किंवा वाहतूक? आपली बचत रक्कम सांगा, मी संपूर्ण योजना आखून देतो.";
   } else if (detectedLang === 'hi') {
-    reply = "मैं समर्थ एआई हूँ—आपका व्यावसायिक वित्तीय सलाहकार। आप बेझिझक कोई भी सवाल पूछ सकते हैं—जैसे कौन सा व्यापार चुनें, कितना मुनाफा होगा, या 10% मार्जिन पर 90% लोन कैसे मिलेगा। बताइए मैं क्या मदद करूँ?";
+    reply = "मैं आपकी बात समझ रहा हूँ। आपके मन में कौन सा व्यापार शुरू करने का विचार है—जैसे डेयरी, किराना या ट्रांसपोर्ट? अपनी बचत राशि बताइए, मैं तुरंत आपका पूरा प्लान तैयार कर दूँगा।";
   } else {
-    reply = "I am Samarth AI, your dedicated financial and business advisory assistant. Feel free to ask me anything—such as which business to choose, expected profitability, or how to secure a 90% government loan with 10% margin money. What is on your mind?";
+    reply = "I understand what you have in mind. What type of venture are you exploring—such as dairy, grocery, transport, or manufacturing? Tell me your available budget and I will structure your full feasibility plan.";
   }
 
   return { reply, extracted, detectedLang };
@@ -408,43 +449,63 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     setMessages(prev => [...prev, userMsg]);
     setIsThinking(true);
 
-    // Run high-level intelligent response generation
-    setTimeout(() => {
-      const historyPayload = messages.map(m => ({ role: m.role, content: m.text }));
-      const { reply, extracted, detectedLang } = generateIntelligentVoiceResponse(userText, historyPayload);
+    const historyPayload = messages.map(m => ({ role: m.role, content: m.text }));
 
-      // Merge extracted parameters
-      setExtractedData(prev => {
-        const updated = { ...prev };
-        Object.entries(extracted).forEach(([k, v]) => {
-          if (v !== null && v !== undefined && v !== '') {
-            updated[k] = v;
-          }
-        });
-        return updated;
+    let replyText = '';
+    let extractedParams = {};
+    let languageToSpeak = 'en';
+
+    // 1. Try Backend AI Service (Gemini on FastAPI) with 2.4s timeout race
+    try {
+      const apiPromise = sendVoiceChatMessage(userText, 'en', historyPayload);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2400));
+      const res = await Promise.race([apiPromise, timeoutPromise]);
+      if (res && res.voice_response) {
+        replyText = res.voice_response;
+        extractedParams = res.extracted_data || {};
+      }
+    } catch (apiErr) {
+      // Backend unavailable or slow; proceed to intelligent conversational engine
+    }
+
+    // 2. Intelligent Real-Time Conversational Engine Fallback
+    if (!replyText) {
+      const localResult = generateIntelligentVoiceResponse(userText, historyPayload);
+      replyText = localResult.reply;
+      extractedParams = localResult.extracted;
+      languageToSpeak = localResult.detectedLang || 'en';
+    }
+
+    // Merge extracted parameters into form staging
+    setExtractedData(prev => {
+      const updated = { ...prev };
+      Object.entries(extractedParams).forEach(([k, v]) => {
+        if (v !== null && v !== undefined && v !== '') {
+          updated[k] = v;
+        }
       });
+      return updated;
+    });
 
-      const aiMsg = {
-        role: 'assistant',
-        text: reply,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, aiMsg]);
-      setIsThinking(false);
+    const aiMsg = {
+      role: 'assistant',
+      text: replyText,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages(prev => [...prev, aiMsg]);
+    setIsThinking(false);
 
-      // Speak aloud in the matching natural language
-      setIsSpeaking(true);
-      speakTextWithVoice(reply, detectedLang || 'en', () => {
-        setIsSpeaking(false);
-        // Automatically resume listening for continuous conversation
-        setTimeout(() => {
-          if (isOpen) {
-            startListening();
-          }
-        }, 500);
-      });
-
-    }, 350);
+    // Speak aloud in the matching natural language
+    setIsSpeaking(true);
+    speakTextWithVoice(replyText, languageToSpeak || 'en', () => {
+      setIsSpeaking(false);
+      // Automatically resume listening for continuous conversation
+      setTimeout(() => {
+        if (isOpen) {
+          startListening();
+        }
+      }, 500);
+    });
   };
 
   // Final apply: applies all extracted structured parameters + full transcript to the form
