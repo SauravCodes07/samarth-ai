@@ -9,6 +9,47 @@ from app.schemas.user_schema import SchemeResponse, SchemesPageResponse
 router = APIRouter(prefix="/schemes", tags=["Government Schemes"])
 
 
+ALL_INDIAN_STATES = [
+    "Central / All India",
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "Andaman and Nicobar Islands",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi (NCT)",
+    "Jammu and Kashmir",
+    "Ladakh",
+    "Lakshadweep",
+    "Puducherry",
+]
+
+
 @router.get("", response_model=SchemesPageResponse)
 def get_all_schemes(
     db: Session = Depends(get_db),
@@ -43,7 +84,15 @@ def get_all_schemes(
         query = query.filter(Scheme.category.ilike(f"%{category.strip()}%"))
 
     if state and state.strip() and state != "All":
-        query = query.filter(Scheme.state.ilike(f"%{state.strip()}%"))
+        if state == "Central / All India":
+            query = query.filter(Scheme.state.ilike("%Central%"))
+        else:
+            query = query.filter(
+                or_(
+                    Scheme.state.ilike(f"%{state.strip()}%"),
+                    Scheme.state.ilike("%Central / All India%")
+                )
+            )
 
     if min_cost is not None:
         query = query.filter(Scheme.max_cost >= min_cost)
@@ -79,9 +128,10 @@ def get_all_schemes(
 def get_scheme_filters(db: Session = Depends(get_db)):
     """Fetch unique states and top categories for UI filter dropdowns."""
     raw_states = [s[0] for s in db.query(Scheme.state).distinct().all() if s[0]]
-    # Ensure 'Central / All India' is first, then rest sorted
-    clean_states = sorted([st for st in set(raw_states) if st != "Central / All India"])
-    sorted_states = ["Central / All India"] + clean_states
+    # Merge predefined full list of Indian States + UTs with any states found in DB
+    extra_states = [st for st in raw_states if st not in ALL_INDIAN_STATES and st != "Central / All India"]
+    
+    sorted_states = ["Central / All India"] + [st for st in ALL_INDIAN_STATES if st != "Central / All India"] + sorted(extra_states)
 
     top_categories = [
         "Business & Entrepreneurship",

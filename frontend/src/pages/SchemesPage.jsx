@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchSchemes, fetchSchemeFilters } from '../services/api';
+import { fetchSchemes, fetchSchemeFilters, ALL_INDIAN_STATES } from '../services/api';
 import { FALLBACK_SCHEMES } from '../data/fallbackSchemes';
 import { useNavigate } from 'react-router-dom';
 import SpotlightCard from '../components/ui/SpotlightCard';
@@ -387,7 +387,7 @@ const SchemesPage = () => {
 
   // Available filter lists
   const [filterOptions, setFilterOptions] = useState({
-    states: ['Central / All India'],
+    states: ALL_INDIAN_STATES,
     categories: [],
     total_active_schemes: 2705,
   });
@@ -405,7 +405,7 @@ const SchemesPage = () => {
         const filters = await fetchSchemeFilters();
         if (isMounted && filters) {
           setFilterOptions({
-            states: Array.isArray(filters.states) ? filters.states : ['Central / All India'],
+            states: Array.isArray(filters.states) && filters.states.length > 2 ? filters.states : ALL_INDIAN_STATES,
             categories: Array.isArray(filters.categories) ? filters.categories : [],
             total_active_schemes: filters.total_active_schemes || 2705,
           });
@@ -592,14 +592,23 @@ const SchemesPage = () => {
                 setSelectedState(e.target.value);
                 setPage(1);
               }}
-              className="w-full py-2.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all"
+              className="w-full py-2.5 px-3 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800 transition-all cursor-pointer"
             >
-              <option value="All">{lang === 'mr' ? '📍 सर्व राज्ये / संपूर्ण भारत' : lang === 'hi' ? '📍 सभी राज्य / ऑल इंडिया' : '📍 All States / All India'}</option>
-              {(filterOptions.states || []).map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
+              <option value="All">
+                {lang === 'mr' ? '📍 सर्व राज्ये / संपूर्ण भारत (All India)' : lang === 'hi' ? '📍 सभी राज्य / ऑल इंडिया (All India)' : '📍 All States / All India'}
+              </option>
+              <option value="Central / All India">
+                {lang === 'mr' ? '🇮🇳 केंद्र सरकार योजना (Central Schemes)' : lang === 'hi' ? '🇮🇳 केंद्र सरकार योजनाएं (Central Schemes)' : '🇮🇳 Central / All India Schemes'}
+              </option>
+              <optgroup label={lang === 'mr' ? '── भारतीय राज्ये व केंद्रशासित प्रदेश ──' : lang === 'hi' ? '── भारतीय राज्य एवं केंद्र शासित प्रदेश ──' : '── Indian States & Union Territories ──'}>
+                {(filterOptions.states || ALL_INDIAN_STATES)
+                  .filter((st) => st !== 'Central / All India' && st !== 'All')
+                  .map((st) => (
+                    <option key={st} value={st}>
+                      🏛️ {st}
+                    </option>
+                  ))}
+              </optgroup>
             </select>
           </div>
 

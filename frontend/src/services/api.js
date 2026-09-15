@@ -36,7 +36,23 @@ const filterSchemesLocally = (schemesList, { page = 1, limit = 12, search = '', 
   }
 
   if (state && state !== 'All') {
-    filtered = filtered.filter(s => s.state === state || s.state === 'Central / All India');
+    if (state === 'Central / All India') {
+      filtered = filtered.filter(s => s.state === 'Central / All India' || !s.state);
+    } else {
+      // When a user selects their state (e.g. Gujarat, Maharashtra), show:
+      // 1. Schemes specifically launched by that State Govt
+      // 2. Central / All India schemes valid nationwide across their state
+      filtered = filtered.filter(s => 
+        (s.state && s.state.toLowerCase() === state.toLowerCase()) || 
+        s.state === 'Central / All India'
+      );
+      // Sort state-specific schemes first so local citizen sees their state benefits immediately
+      filtered.sort((a, b) => {
+        const aIsLocal = (a.state && a.state.toLowerCase() === state.toLowerCase()) ? 1 : 0;
+        const bIsLocal = (b.state && b.state.toLowerCase() === state.toLowerCase()) ? 1 : 0;
+        return bIsLocal - aIsLocal;
+      });
+    }
   }
 
   if (min_cost !== null && min_cost !== undefined) {
@@ -112,20 +128,64 @@ export const fetchSchemes = async (params = {}) => {
   return filterSchemesLocally(FALLBACK_SCHEMES, params);
 };
 
+export const ALL_INDIAN_STATES = [
+  'Central / All India',
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi (NCT)',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry'
+];
+
 export const fetchSchemeFilters = async () => {
   // Tier 1: Backend
   try {
     const response = await api.get('/schemes/filters');
-    if (response.data?.categories?.length > 0) {
+    if (response.data?.categories?.length > 0 && response.data?.states?.length > 2) {
       return response.data;
     }
   } catch (e) {
     // Fallback
   }
 
-  // Tier 2: Local derived filters
-  const allStates = Array.from(new Set(FALLBACK_SCHEMES.map(s => s.state).filter(Boolean)));
-  const sortedStates = ['Central / All India', ...allStates.filter(s => s !== 'Central / All India').sort()];
+  // Tier 2: Comprehensive master states + fallback schemes states
+  const schemeStates = Array.from(new Set(FALLBACK_SCHEMES.map(s => s.state).filter(Boolean)));
+  const combinedStates = [
+    'Central / All India',
+    ...ALL_INDIAN_STATES.filter(s => s !== 'Central / All India'),
+    ...schemeStates.filter(s => !ALL_INDIAN_STATES.includes(s) && s !== 'Central / All India')
+  ];
   
   const categories = [
     'Business & Entrepreneurship',
@@ -137,7 +197,7 @@ export const fetchSchemeFilters = async () => {
   ];
 
   return {
-    states: sortedStates,
+    states: combinedStates,
     categories,
     total_active_schemes: FALLBACK_SCHEMES.length
   };
