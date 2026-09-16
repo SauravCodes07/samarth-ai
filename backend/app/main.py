@@ -19,10 +19,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Enable CORS for React frontend
+# Enable robust CORS for Vercel production frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://samarth-ai-blue.vercel.app",
+        "https://samarth-fte8420xu-saurav-dev.vercel.app",
+        settings.FRONTEND_URL,
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

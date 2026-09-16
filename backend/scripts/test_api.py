@@ -1,8 +1,12 @@
 import urllib.request
 import json
 
+import os
+
+BASE_API = os.getenv("API_URL", "https://samarth-ai-backend-5wve.onrender.com/api")
+
 # Test 1: paginated list
-url = 'http://127.0.0.1:8000/api/schemes?page=1&limit=3'
+url = f'{BASE_API}/schemes?page=1&limit=3'
 r = urllib.request.urlopen(url)
 data = json.loads(r.read())
 print(f"=== Paginated API Test ===")
@@ -15,7 +19,7 @@ print(f"Ministry: {data['schemes'][0].get('ministry', 'N/A')}")
 print()
 
 # Test 2: search
-url2 = 'http://127.0.0.1:8000/api/schemes?page=1&limit=3&search=mudra'
+url2 = f'{BASE_API}/schemes?page=1&limit=3&search=mudra'
 r2 = urllib.request.urlopen(url2)
 data2 = json.loads(r2.read())
 print(f"=== Search 'mudra' ===")
