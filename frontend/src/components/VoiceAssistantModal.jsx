@@ -19,7 +19,10 @@ import {
   speakTextWithVoice, 
   stopSpeaking,
   startMicrophoneRecording,
-  stopMicrophoneRecording
+  stopMicrophoneRecording,
+  getCurrentAudioBlob,
+  startVoiceActivityDetection,
+  stopVoiceActivityDetection
 } from '../utils/speechToText';
 import { generateGroqVoiceResponse, transcribeAudioWithGroqWhisper } from '../services/groqService';
 
@@ -335,6 +338,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
   const [isThinking, setIsThinking] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [errorMsg, setErrorMsg] = useState(null);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   
   // Conversation messages [{ role: 'assistant' | 'user', text: string, time: string }]
   const [messages, setMessages] = useState([]);
@@ -353,6 +358,9 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
   const recognitionRef = useRef(null);
   const messagesEndRef = useRef(null);
   const isSpeakingRef = useRef(false);
+  const vadCleanupRef = useRef(null);
+  const interimIntervalRef = useRef(null);
+  const isProcessingTurnRef = useRef(false);
 
   // Auto scroll conversation to bottom
   useEffect(() => {
@@ -364,6 +372,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     if (isOpen) {
       setErrorMsg(null);
       isSpeakingRef.current = false;
+      isProcessingTurnRef.current = false;
 
       // Natural, welcoming greeting in comfortable English as primary
       const greeting = "Hello! I am your Samarth AI Voice Assistant. Ask me anything—or tell me what business you are planning and your budget, and I will structure your full plan.";
@@ -391,21 +400,34 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
 
     } else {
       isSpeakingRef.current = false;
+      isProcessingTurnRef.current = false;
       stopSpeaking();
       stopListening();
       setIsSpeaking(false);
       setIsListening(false);
       setIsThinking(false);
+      setIsUserSpeaking(false);
+      setAudioLevel(0);
     }
 
     return () => {
       isSpeakingRef.current = false;
+      isProcessingTurnRef.current = false;
       stopSpeaking();
       stopListening();
     };
   }, [isOpen]);
 
   const stopListening = async () => {
+    if (interimIntervalRef.current) {
+      clearInterval(interimIntervalRef.current);
+      interimIntervalRef.current = null;
+    }
+    if (vadCleanupRef.current) {
+      try { vadCleanupRef.current(); } catch (e) {}
+      vadCleanupRef.current = null;
+    }
+    stopVoiceActivityDetection();
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -416,6 +438,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     }
     await stopMicrophoneRecording();
     setIsListening(false);
+    setIsUserSpeaking(false);
+    setAudioLevel(0);
   };
 
   const startListening = async () => {
@@ -428,6 +452,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     setIsSpeaking(false);
     setErrorMsg(null);
     setLiveTranscript('');
+    setIsUserSpeaking(false);
+    isProcessingTurnRef.current = false;
 
     if (!isSpeechRecognitionSupported()) {
       setErrorMsg('Microphone is not supported in this browser. Please use Chrome, Edge, or Android Browser.');
@@ -437,27 +463,61 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     // Start raw audio recording in parallel for Groq Whisper
     await startMicrophoneRecording();
 
-    // Default to en-IN for universal English, Hinglish and Indian accent comfort
+    // Start Real-Time Web Audio Voice Activity Detection (Universal across Marathi, Hindi, English)
+    vadCleanupRef.current = startVoiceActivityDetection(
+      () => {
+        // onSpeechStart: Human speech began
+        setIsUserSpeaking(true);
+
+        // Start live periodic Groq Whisper transcription every 1200ms while user is speaking
+        if (!interimIntervalRef.current) {
+          interimIntervalRef.current = setInterval(async () => {
+            if (isProcessingTurnRef.current) return;
+            const liveBlob = getCurrentAudioBlob();
+            if (liveBlob && liveBlob.size > 2000) {
+              try {
+                const liveText = await transcribeAudioWithGroqWhisper(liveBlob);
+                if (liveText && liveText.trim().length > 1) {
+                  setLiveTranscript(liveText.trim());
+                }
+              } catch (e) {}
+            }
+          }, 1200);
+        }
+      },
+      () => {
+        // onSpeechEnd: Natural pause detected by VAD (after 1.7s of silence)
+        setIsUserSpeaking(false);
+        if (interimIntervalRef.current) {
+          clearInterval(interimIntervalRef.current);
+          interimIntervalRef.current = null;
+        }
+        handleFinalSpeechTurn();
+      },
+      (level) => {
+        // onAudioLevel: live energy level (0-100)
+        setAudioLevel(level);
+      }
+    );
+
+    // Also run browser speech recognition for instant live interim preview
     const recognition = initSpeechRecognition(
       async (finalSpokenText) => {
-        setIsListening(false);
-        setLiveTranscript('');
         await handleFinalSpeechTurn(finalSpokenText);
       },
       (err) => {
-        setIsListening(false);
-        setLiveTranscript('');
-        if (typeof err === 'string' && !err.includes('no-speech')) {
+        if (typeof err === 'string' && !err.includes('no-speech') && !err.includes('aborted')) {
           setErrorMsg(err);
         }
       },
       () => {
-        setIsListening(false);
-        setLiveTranscript('');
+        // onEnd
       },
       'en-IN',
       (interim) => {
-        setLiveTranscript(interim);
+        if (interim && interim.trim()) {
+          setLiveTranscript(interim.trim());
+        }
       }
     );
 
@@ -469,6 +529,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       } catch (err) {
         setIsListening(false);
       }
+    } else {
+      setIsListening(true);
     }
   };
 
@@ -478,11 +540,26 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
    * with seamless fallback to Web Speech.
    */
   const handleFinalSpeechTurn = async (fallbackText = '') => {
+    if (isProcessingTurnRef.current) return;
+    isProcessingTurnRef.current = true;
+
+    if (interimIntervalRef.current) {
+      clearInterval(interimIntervalRef.current);
+      interimIntervalRef.current = null;
+    }
+    if (vadCleanupRef.current) {
+      try { vadCleanupRef.current(); } catch (e) {}
+      vadCleanupRef.current = null;
+    }
+    stopVoiceActivityDetection();
+
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch (e) {}
       recognitionRef.current = null;
     }
     setIsListening(false);
+    setIsUserSpeaking(false);
+    setAudioLevel(0);
     setIsThinking(true);
 
     let finalSpokenText = (fallbackText || liveTranscript || '').trim();
@@ -490,10 +567,11 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     // Transcribe with Groq Whisper Large V3 Turbo
     try {
       const audioBlob = await stopMicrophoneRecording();
-      if (audioBlob && audioBlob.size > 2000) {
+      if (audioBlob && audioBlob.size > 1200) {
         const whisperResult = await transcribeAudioWithGroqWhisper(audioBlob);
         if (whisperResult && whisperResult.trim().length > 1) {
           finalSpokenText = whisperResult.trim();
+          setLiveTranscript(finalSpokenText);
         }
       }
     } catch (whisperErr) {
@@ -502,6 +580,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
 
     if (!finalSpokenText || finalSpokenText.length < 2) {
       setIsThinking(false);
+      isProcessingTurnRef.current = false;
       if (isOpen && !isSpeakingRef.current) {
         setTimeout(() => startListening(), 400);
       }
@@ -509,6 +588,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     }
 
     await processUserVoiceTurn(finalSpokenText);
+    isProcessingTurnRef.current = false;
   };
 
   const handleOrbClick = async () => {
@@ -692,11 +772,16 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
             <button
               type="button"
               onClick={handleOrbClick}
-              className={`relative z-10 w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl cursor-pointer ${
+              style={{
+                transform: isListening && isUserSpeaking ? `scale(${1 + Math.min(0.25, audioLevel / 180)})` : undefined
+              }}
+              className={`relative z-10 w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-300 shadow-2xl cursor-pointer ${
                 isSpeaking
                   ? 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 ring-8 ring-blue-500/30 scale-105 shadow-blue-500/40'
                   : isListening
-                  ? 'bg-gradient-to-tr from-rose-600 to-rose-500 ring-8 ring-rose-500/30 scale-105 shadow-rose-500/40'
+                  ? isUserSpeaking
+                    ? 'bg-gradient-to-tr from-rose-600 via-pink-600 to-amber-500 ring-8 ring-rose-500/50 shadow-rose-500/50'
+                    : 'bg-gradient-to-tr from-rose-600 to-rose-500 ring-8 ring-rose-500/30 shadow-rose-500/40'
                   : isThinking
                   ? 'bg-gradient-to-tr from-amber-600 to-yellow-500 ring-8 ring-amber-500/30 animate-pulse shadow-amber-500/40'
                   : 'bg-gradient-to-tr from-blue-600 via-indigo-700 to-blue-800 hover:scale-105 shadow-indigo-500/30'
@@ -731,12 +816,14 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
               ) : isListening ? (
                 <>
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                  <span className="text-rose-400">Listening... Speak Naturally</span>
+                  <span className="text-rose-400">
+                    {isUserSpeaking ? 'Hearing your voice...' : 'Listening... Speak in Marathi, Hindi, or English'}
+                  </span>
                 </>
               ) : isThinking ? (
                 <>
                   <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" />
-                  <span className="text-amber-300">Thinking & Analyzing...</span>
+                  <span className="text-amber-300">Analyzing with Groq AI...</span>
                 </>
               ) : (
                 <>
@@ -746,11 +833,32 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
               )}
             </div>
 
-            {/* Live Streaming Speech Preview */}
-            {isListening && liveTranscript && (
-              <p className="text-xs text-blue-300 italic font-medium max-w-md truncate animate-fadeIn pt-1">
-                "{liveTranscript}"
-              </p>
+            {/* Live Streaming Speech Preview (Marathi / Hindi / English) */}
+            {isListening && (
+              <div className="pt-2 px-3 max-w-lg mx-auto min-h-[40px] flex items-center justify-center">
+                {liveTranscript ? (
+                  <div className="bg-slate-950/90 border border-cyan-500/50 rounded-xl px-4 py-2 shadow-lg shadow-cyan-950/40 animate-fadeIn flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                    <p className="text-xs sm:text-sm text-cyan-200 font-bold text-center break-words">
+                      "{liveTranscript}"
+                    </p>
+                  </div>
+                ) : isUserSpeaking ? (
+                  <div className="bg-slate-900/90 border border-amber-500/40 rounded-xl px-3.5 py-1.5 shadow-md flex items-center gap-2 text-xs text-amber-300 font-medium animate-fadeIn">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                    <span>Hearing your speech in real-time...</span>
+                    <div className="flex items-center gap-0.5 ml-1">
+                      <span className="w-1 h-2 bg-amber-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                      <span className="w-1 h-3.5 bg-amber-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                      <span className="w-1 h-2 bg-amber-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 italic">
+                    Listening for your voice in Marathi, Hindi, or English...
+                  </p>
+                )}
+              </div>
             )}
           </div>
         </div>

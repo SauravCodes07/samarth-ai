@@ -391,7 +391,127 @@ export const startMicrophoneRecording = async () => {
   }
 };
 
+/**
+ * Get snapshot of currently recorded audio for live interim Whisper transcription
+ */
+export const getCurrentAudioBlob = () => {
+  if (!recordedAudioChunks || recordedAudioChunks.length === 0) return null;
+  try {
+    const mimeType = activeMediaRecorder?.mimeType || 'audio/webm';
+    return new Blob([...recordedAudioChunks], { type: mimeType });
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
+ * Web Audio Voice Activity Detection (VAD)
+ * Analyzes audio energy in real-time. Works universally across all languages (Marathi, Hindi, English).
+ * Never gets stuck, detects exact start and stop of human speech.
+ */
+let audioCtx = null;
+let analyser = null;
+let microphoneSource = null;
+let vadAnimationFrameId = null;
+
+export const startVoiceActivityDetection = (onSpeechStart, onSpeechEnd, onAudioLevel) => {
+  if (!activeMediaStream) return null;
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return null;
+
+    audioCtx = new AudioContext();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.3;
+
+    microphoneSource = audioCtx.createMediaStreamSource(activeMediaStream);
+    microphoneSource.connect(analyser);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+    let isSpeaking = false;
+    let silenceStart = null;
+    let speechStart = null;
+    const SPEECH_THRESHOLD = 12;
+
+    const checkAudioLevel = () => {
+      if (!analyser) return;
+      analyser.getByteFrequencyData(dataArray);
+
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const avg = sum / dataArray.length;
+      const level = Math.min(100, Math.round((avg / 128) * 100));
+
+      if (onAudioLevel) {
+        onAudioLevel(level);
+      }
+
+      const now = Date.now();
+
+      if (level >= SPEECH_THRESHOLD) {
+        silenceStart = null;
+        if (!isSpeaking) {
+          if (!speechStart) speechStart = now;
+          // Require 160ms of continuous sound to qualify as speech start
+          if (now - speechStart > 160) {
+            isSpeaking = true;
+            if (onSpeechStart) onSpeechStart();
+          }
+        }
+      } else {
+        speechStart = null;
+        if (isSpeaking) {
+          if (!silenceStart) silenceStart = now;
+          // Natural, comfortable conversational pause: 1700ms of silence after speaking
+          if (now - silenceStart > 1700) {
+            isSpeaking = false;
+            silenceStart = null;
+            if (onSpeechEnd) onSpeechEnd();
+          }
+        }
+      }
+
+      vadAnimationFrameId = requestAnimationFrame(checkAudioLevel);
+    };
+
+    vadAnimationFrameId = requestAnimationFrame(checkAudioLevel);
+
+    return () => {
+      stopVoiceActivityDetection();
+    };
+  } catch (err) {
+    console.warn('VAD init notice:', err);
+    return null;
+  }
+};
+
+export const stopVoiceActivityDetection = () => {
+  if (vadAnimationFrameId) {
+    cancelAnimationFrame(vadAnimationFrameId);
+    vadAnimationFrameId = null;
+  }
+  if (microphoneSource) {
+    try { microphoneSource.disconnect(); } catch (e) {}
+    microphoneSource = null;
+  }
+  if (analyser) {
+    try { analyser.disconnect(); } catch (e) {}
+    analyser = null;
+  }
+  if (audioCtx && audioCtx.state !== 'closed') {
+    try { audioCtx.close(); } catch (e) {}
+    audioCtx = null;
+  }
+};
+
 export const stopMicrophoneRecording = async () => {
+  stopVoiceActivityDetection();
   return new Promise((resolve) => {
     if (!activeMediaRecorder || activeMediaRecorder.state === 'inactive') {
       if (activeMediaStream) {
