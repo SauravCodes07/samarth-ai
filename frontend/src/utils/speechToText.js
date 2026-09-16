@@ -121,6 +121,8 @@ export const speakConfirmation = (lang = 'en') => {
   }
 };
 
+let currentActiveUtterance = null;
+
 /**
  * Speaks arbitrary text in the specified language (mr, hi, en) with audio cleanup
  */
@@ -130,7 +132,7 @@ export const speakTextWithVoice = (text, lang = 'en', onDone = null) => {
     return null;
   }
   try {
-    window.speechSynthesis.cancel();
+    stopSpeaking(); // Immediately cancel any existing utterance & clear listeners
 
     // Clean text of markdown, emojis, asterisks, headers, bullets, and URLs
     let clean = text
@@ -153,6 +155,8 @@ export const speakTextWithVoice = (text, lang = 'en', onDone = null) => {
     utter.rate = 0.95;
     utter.pitch = 1.0;
 
+    currentActiveUtterance = utter;
+
     // Set global acoustic echo suppressor flag
     window.__SAMARTH_AI_SPEAKING__ = true;
 
@@ -162,12 +166,25 @@ export const speakTextWithVoice = (text, lang = 'en', onDone = null) => {
       utter.voice = matchedVoice;
     }
 
-    const handleSpeechComplete = () => {
-      // Allow 400ms acoustic drain time for room reverberation to settle before re-arming mic
+    let isFinished = false;
+    const handleSpeechComplete = (e) => {
+      if (isFinished) return;
+      isFinished = true;
+      if (currentActiveUtterance === utter) {
+        currentActiveUtterance = null;
+      }
+
+      // If speech was cancelled or interrupted, do NOT trigger onDone
+      if (e && (e.error === 'canceled' || e.error === 'interrupted')) {
+        window.__SAMARTH_AI_SPEAKING__ = false;
+        return;
+      }
+
+      // Allow 300ms acoustic drain time for room reverberation to settle before re-arming mic
       setTimeout(() => {
         window.__SAMARTH_AI_SPEAKING__ = false;
         if (onDone) onDone();
-      }, 350);
+      }, 300);
     };
 
     utter.onend = handleSpeechComplete;
@@ -178,6 +195,7 @@ export const speakTextWithVoice = (text, lang = 'en', onDone = null) => {
   } catch (err) {
     console.debug('TTS error:', err);
     window.__SAMARTH_AI_SPEAKING__ = false;
+    currentActiveUtterance = null;
     if (onDone) onDone();
     return null;
   }
@@ -185,8 +203,16 @@ export const speakTextWithVoice = (text, lang = 'en', onDone = null) => {
 
 export const stopSpeaking = () => {
   window.__SAMARTH_AI_SPEAKING__ = false;
+  if (currentActiveUtterance) {
+    currentActiveUtterance.onend = null;
+    currentActiveUtterance.onerror = null;
+    currentActiveUtterance = null;
+  }
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
       window.speechSynthesis.cancel();
     } catch (e) {}
   }
@@ -296,10 +322,10 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'en-I
           'चे', 'च्या', 'चा', 'ची', 'ला', 'मध्ये', 'आणि', 'किंवा', 'मी', 'आम्ही', 'आहे'
         ];
         
-        const isTrailing = trailingMarkers.includes(lastWord) || words.length <= 3;
+        const isTrailing = trailingMarkers.includes(lastWord) || words.length <= 2;
         
-        // Generous, natural pause window (2.6s - 3.5s) so the user is never cut off mid-thought
-        const pauseDelay = isTrailing ? 3500 : 2600;
+        // Snappy, natural conversational turn-taking: 950ms normal pause, 1400ms if ending with trailing conjunction
+        const pauseDelay = isTrailing ? 1400 : 950;
 
         silenceTimer = setTimeout(() => {
           triggerFinalDelivery();
@@ -435,7 +461,8 @@ export const startVoiceActivityDetection = (onSpeechStart, onSpeechEnd, onAudioL
     let isSpeaking = false;
     let silenceStart = null;
     let speechStart = null;
-    const SPEECH_THRESHOLD = 12;
+    const SPEECH_START_THRESHOLD = 14;
+    const SILENCE_THRESHOLD = 11;
 
     const checkAudioLevel = () => {
       if (!analyser) return;
@@ -454,22 +481,22 @@ export const startVoiceActivityDetection = (onSpeechStart, onSpeechEnd, onAudioL
 
       const now = Date.now();
 
-      if (level >= SPEECH_THRESHOLD) {
+      if (level >= SPEECH_START_THRESHOLD) {
         silenceStart = null;
         if (!isSpeaking) {
           if (!speechStart) speechStart = now;
-          // Require 160ms of continuous sound to qualify as speech start
-          if (now - speechStart > 160) {
+          // Require 130ms of continuous sound to qualify as speech start
+          if (now - speechStart > 130) {
             isSpeaking = true;
             if (onSpeechStart) onSpeechStart();
           }
         }
-      } else {
+      } else if (level <= SILENCE_THRESHOLD) {
         speechStart = null;
         if (isSpeaking) {
           if (!silenceStart) silenceStart = now;
-          // Natural, comfortable conversational pause: 1700ms of silence after speaking
-          if (now - silenceStart > 1700) {
+          // Natural, crisp conversational pause: 950ms of silence after speaking completes turn
+          if (now - silenceStart > 950) {
             isSpeaking = false;
             silenceStart = null;
             if (onSpeechEnd) onSpeechEnd();

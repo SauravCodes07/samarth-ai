@@ -361,14 +361,56 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
   const vadCleanupRef = useRef(null);
   const interimIntervalRef = useRef(null);
   const isProcessingTurnRef = useRef(false);
+  const isOpenRef = useRef(isOpen);
+  const greetingTimeoutRef = useRef(null);
+  const reverbTimeoutRef = useRef(null);
 
   // Auto scroll conversation to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, liveTranscript, isSpeaking, isThinking]);
 
+  const handleModalShutdown = () => {
+    isOpenRef.current = false;
+    if (greetingTimeoutRef.current) {
+      clearTimeout(greetingTimeoutRef.current);
+      greetingTimeoutRef.current = null;
+    }
+    if (reverbTimeoutRef.current) {
+      clearTimeout(reverbTimeoutRef.current);
+      reverbTimeoutRef.current = null;
+    }
+    if (interimIntervalRef.current) {
+      clearInterval(interimIntervalRef.current);
+      interimIntervalRef.current = null;
+    }
+    isSpeakingRef.current = false;
+    isProcessingTurnRef.current = false;
+    stopSpeaking();
+    stopListening();
+    setIsSpeaking(false);
+    setIsListening(false);
+    setIsThinking(false);
+    setIsUserSpeaking(false);
+    setAudioLevel(0);
+  };
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpenRef.current) {
+        handleModalShutdown();
+        onClose && onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   // Handle modal open/close lifecycle
   useEffect(() => {
+    isOpenRef.current = isOpen;
+
     if (isOpen) {
       setErrorMsg(null);
       isSpeakingRef.current = false;
@@ -382,39 +424,32 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       ]);
 
       // Speak greeting aloud with acoustic isolation
-      setTimeout(() => {
+      if (greetingTimeoutRef.current) clearTimeout(greetingTimeoutRef.current);
+      greetingTimeoutRef.current = setTimeout(() => {
+        if (!isOpenRef.current) return;
         stopListening();
         isSpeakingRef.current = true;
         setIsSpeaking(true);
         speakTextWithVoice(greeting, 'en', () => {
+          if (!isOpenRef.current) return;
           setIsSpeaking(false);
           isSpeakingRef.current = false;
           // Clear room reverb before enabling microphone
-          setTimeout(() => {
-            if (isOpen && !isSpeakingRef.current) {
+          if (reverbTimeoutRef.current) clearTimeout(reverbTimeoutRef.current);
+          reverbTimeoutRef.current = setTimeout(() => {
+            if (isOpenRef.current && !isSpeakingRef.current) {
               startListening();
             }
-          }, 450);
+          }, 350);
         });
-      }, 300);
+      }, 250);
 
     } else {
-      isSpeakingRef.current = false;
-      isProcessingTurnRef.current = false;
-      stopSpeaking();
-      stopListening();
-      setIsSpeaking(false);
-      setIsListening(false);
-      setIsThinking(false);
-      setIsUserSpeaking(false);
-      setAudioLevel(0);
+      handleModalShutdown();
     }
 
     return () => {
-      isSpeakingRef.current = false;
-      isProcessingTurnRef.current = false;
-      stopSpeaking();
-      stopListening();
+      handleModalShutdown();
     };
   }, [isOpen]);
 
@@ -442,7 +477,14 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     setAudioLevel(0);
   };
 
+  const handleClose = () => {
+    handleModalShutdown();
+    if (onClose) onClose();
+  };
+
   const startListening = async () => {
+    if (!isOpenRef.current) return;
+
     // PREVENT SELF-ECHO: Never turn mic on if assistant is speaking
     if (isSpeakingRef.current || window.__SAMARTH_AI_SPEAKING__) {
       return;
@@ -462,22 +504,27 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
 
     // Start raw audio recording in parallel for Groq Whisper
     await startMicrophoneRecording();
+    if (!isOpenRef.current) {
+      stopListening();
+      return;
+    }
 
     // Start Real-Time Web Audio Voice Activity Detection (Universal across Marathi, Hindi, English)
     vadCleanupRef.current = startVoiceActivityDetection(
       () => {
         // onSpeechStart: Human speech began
+        if (!isOpenRef.current) return;
         setIsUserSpeaking(true);
 
         // Start live periodic Groq Whisper transcription every 1200ms while user is speaking
         if (!interimIntervalRef.current) {
           interimIntervalRef.current = setInterval(async () => {
-            if (isProcessingTurnRef.current) return;
+            if (isProcessingTurnRef.current || !isOpenRef.current) return;
             const liveBlob = getCurrentAudioBlob();
             if (liveBlob && liveBlob.size > 2000) {
               try {
                 const liveText = await transcribeAudioWithGroqWhisper(liveBlob);
-                if (liveText && liveText.trim().length > 1) {
+                if (liveText && liveText.trim().length > 1 && isOpenRef.current) {
                   setLiveTranscript(liveText.trim());
                 }
               } catch (e) {}
@@ -486,7 +533,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
         }
       },
       () => {
-        // onSpeechEnd: Natural pause detected by VAD (after 1.7s of silence)
+        // onSpeechEnd: Natural pause detected by VAD (after 950ms of silence)
+        if (!isOpenRef.current) return;
         setIsUserSpeaking(false);
         if (interimIntervalRef.current) {
           clearInterval(interimIntervalRef.current);
@@ -496,16 +544,20 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       },
       (level) => {
         // onAudioLevel: live energy level (0-100)
-        setAudioLevel(level);
+        if (isOpenRef.current) {
+          setAudioLevel(level);
+        }
       }
     );
 
     // Also run browser speech recognition for instant live interim preview
     const recognition = initSpeechRecognition(
       async (finalSpokenText) => {
+        if (!isOpenRef.current) return;
         await handleFinalSpeechTurn(finalSpokenText);
       },
       (err) => {
+        if (!isOpenRef.current) return;
         if (typeof err === 'string' && !err.includes('no-speech') && !err.includes('aborted')) {
           setErrorMsg(err);
         }
@@ -515,13 +567,14 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       },
       'en-IN',
       (interim) => {
+        if (!isOpenRef.current) return;
         if (interim && interim.trim()) {
           setLiveTranscript(interim.trim());
         }
       }
     );
 
-    if (recognition) {
+    if (recognition && isOpenRef.current) {
       recognitionRef.current = recognition;
       try {
         recognition.start();
@@ -530,7 +583,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
         setIsListening(false);
       }
     } else {
-      setIsListening(true);
+      setIsListening(Boolean(isOpenRef.current));
     }
   };
 
@@ -540,6 +593,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
    * with seamless fallback to Web Speech.
    */
   const handleFinalSpeechTurn = async (fallbackText = '') => {
+    if (!isOpenRef.current) return;
     if (isProcessingTurnRef.current) return;
     isProcessingTurnRef.current = true;
 
@@ -567,8 +621,10 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     // Transcribe with Groq Whisper Large V3 Turbo
     try {
       const audioBlob = await stopMicrophoneRecording();
+      if (!isOpenRef.current) return;
       if (audioBlob && audioBlob.size > 1200) {
         const whisperResult = await transcribeAudioWithGroqWhisper(audioBlob);
+        if (!isOpenRef.current) return;
         if (whisperResult && whisperResult.trim().length > 1) {
           finalSpokenText = whisperResult.trim();
           setLiveTranscript(finalSpokenText);
@@ -578,11 +634,17 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       console.warn('Groq Whisper audio error:', whisperErr);
     }
 
+    if (!isOpenRef.current) return;
+
     if (!finalSpokenText || finalSpokenText.length < 2) {
       setIsThinking(false);
       isProcessingTurnRef.current = false;
-      if (isOpen && !isSpeakingRef.current) {
-        setTimeout(() => startListening(), 400);
+      if (isOpenRef.current && !isSpeakingRef.current) {
+        setTimeout(() => {
+          if (isOpenRef.current && !isSpeakingRef.current) {
+            startListening();
+          }
+        }, 300);
       }
       return;
     }
@@ -597,7 +659,9 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       stopSpeaking();
       setIsSpeaking(false);
       isSpeakingRef.current = false;
-      setTimeout(() => startListening(), 150);
+      setTimeout(() => {
+        if (isOpenRef.current) startListening();
+      }, 150);
     } else if (isListening) {
       // User tapped orb while speaking -> finalize speech immediately
       await handleFinalSpeechTurn(liveTranscript);
@@ -611,6 +675,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
    * Process a turn of user speech with the deep conversational brain
    */
   const processUserVoiceTurn = async (userText) => {
+    if (!isOpenRef.current) return;
+
     const userMsg = {
       role: 'user',
       text: userText,
@@ -628,6 +694,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     // 1. Primary AI Brain: Groq LPU Cloud Inference (Sub-300ms real-time conversational reasoning)
     try {
       const groqRes = await generateGroqVoiceResponse(userText, historyPayload);
+      if (!isOpenRef.current) return;
       if (groqRes && groqRes.voice_response) {
         replyText = groqRes.voice_response;
         extractedParams = groqRes.extracted || {};
@@ -637,6 +704,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       console.warn('Groq direct call error:', groqErr);
     }
 
+    if (!isOpenRef.current) return;
+
     // 2. Intelligent Conversational Fallback (Context-aware, zero robotic canned answers)
     if (!replyText) {
       const localResult = generateIntelligentVoiceResponse(userText, historyPayload);
@@ -644,6 +713,8 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       extractedParams = localResult.extracted;
       languageToSpeak = localResult.detectedLang || 'en';
     }
+
+    if (!isOpenRef.current) return;
 
     // Merge extracted parameters into form staging
     setExtractedData(prev => {
@@ -664,26 +735,29 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     setMessages(prev => [...prev, aiMsg]);
     setIsThinking(false);
 
+    if (!isOpenRef.current) return;
+
     // Strictly isolate microphone before speaking to prevent recording own speaker voice
     stopListening();
     isSpeakingRef.current = true;
     setIsSpeaking(true);
     speakTextWithVoice(replyText, languageToSpeak || 'en', () => {
+      if (!isOpenRef.current) return;
       setIsSpeaking(false);
       isSpeakingRef.current = false;
-      // Allow 450ms for room reverberation to settle before unmuting mic
-      setTimeout(() => {
-        if (isOpen && !isSpeakingRef.current) {
+      // Allow 350ms for room reverberation to settle before unmuting mic
+      if (reverbTimeoutRef.current) clearTimeout(reverbTimeoutRef.current);
+      reverbTimeoutRef.current = setTimeout(() => {
+        if (isOpenRef.current && !isSpeakingRef.current) {
           startListening();
         }
-      }, 450);
+      }, 350);
     });
   };
 
   // Final apply: applies all extracted structured parameters + full transcript to the form
   const handleCompleteAndApply = () => {
-    stopSpeaking();
-    stopListening();
+    handleModalShutdown();
 
     if (onApplyExtractedData) {
       onApplyExtractedData(extractedData);
@@ -694,7 +768,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       onApplyTranscript(lastUserMsg.text);
     }
 
-    onClose();
+    if (onClose) onClose();
   };
 
   if (!isOpen) return null;
@@ -702,7 +776,12 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
   const hasAnyExtracted = Object.values(extractedData).some(v => v !== null && v !== undefined);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-3 sm:p-4 animate-fadeIn">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-3 sm:p-4 animate-fadeIn"
+    >
       <div className="bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[92vh] text-white">
         
         {/* Header - Clean, No Language Buttons as requested */}
@@ -733,11 +812,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
 
           <button
             type="button"
-            onClick={() => {
-              stopSpeaking();
-              stopListening();
-              onClose();
-            }}
+            onClick={handleClose}
             className="p-2 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
             title="Close Assistant"
           >
