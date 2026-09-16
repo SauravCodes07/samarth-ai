@@ -174,7 +174,9 @@ const LocationCatchmentPicker = ({
   // Load districts when State changes
   useEffect(() => {
     const loadDistricts = async () => {
-      const stateObj = stateDistrictsData.find(s => s.state.toLowerCase() === (formData.state || '').toLowerCase());
+      const stateObj = stateDistrictsData.find(
+        s => s.state.toLowerCase() === (formData.state || '').toLowerCase()
+      );
       if (stateObj && stateObj.districts?.length > 0) {
         setDistrictsList(stateObj.districts);
       } else {
@@ -190,8 +192,12 @@ const LocationCatchmentPicker = ({
   // Load subdistricts when District changes
   useEffect(() => {
     const loadSubdistricts = async () => {
-      const stateObj = stateDistrictsData.find(s => s.state.toLowerCase() === (formData.state || '').toLowerCase());
-      const distObj = stateObj?.districts?.find(d => d.name.toLowerCase() === (formData.district || '').toLowerCase());
+      const stateObj = stateDistrictsData.find(
+        s => s.state.toLowerCase() === (formData.state || '').toLowerCase()
+      );
+      const distObj = stateObj?.districts?.find(
+        d => d.name.toLowerCase() === (formData.district || '').toLowerCase()
+      );
       
       if (distObj?.subdistricts?.length > 0) {
         setSubdistrictsList(distObj.subdistricts);
@@ -210,13 +216,61 @@ const LocationCatchmentPicker = ({
     try {
       const geoData = await reverseGeocodeCoordinates(lat, lon);
       if (geoData) {
+        // 1. Resolve State
+        const targetState = geoData.state || formData.state || 'Maharashtra';
+        const stateObj = stateDistrictsData.find(
+          s => s.state.toLowerCase() === targetState.toLowerCase() ||
+               targetState.toLowerCase().includes(s.state.toLowerCase()) ||
+               s.state.toLowerCase().includes(targetState.toLowerCase())
+        );
+        const resolvedState = stateObj?.state || targetState;
+
+        // 2. Resolve District
+        let targetDist = geoData.district || '';
+        let matchedDistObj = null;
+        if (stateObj && targetDist) {
+          const cleanTarget = targetDist.toLowerCase().replace(/\b(district|division|taluka|tehsil)\b/gi, '').trim();
+          matchedDistObj = stateObj.districts.find(d => {
+            const dClean = d.name.toLowerCase();
+            return dClean === cleanTarget || dClean.includes(cleanTarget) || cleanTarget.includes(dClean);
+          });
+        }
+
+        const resolvedDistrict = matchedDistObj ? matchedDistObj.name : (targetDist || formData.district || 'Nagpur');
+
+        // Update districts list for state
+        if (stateObj) {
+          setDistrictsList(stateObj.districts);
+        } else if (resolvedDistrict) {
+          setDistrictsList(prev => {
+            if (prev.some(d => d.name.toLowerCase() === resolvedDistrict.toLowerCase())) return prev;
+            return [...prev, { name: resolvedDistrict, nameHi: resolvedDistrict }];
+          });
+        }
+
+        // 3. Resolve Sub-districts (Tehsils)
+        let availableSubs = matchedDistObj?.subdistricts || [];
+        let resolvedSub = geoData.sub_district || (availableSubs.length > 0 ? availableSubs[0] : `${resolvedDistrict} Sadar`);
+        
+        if (availableSubs.length > 0) {
+          const matchSub = availableSubs.find(s => {
+            const sLower = s.toLowerCase();
+            const gLower = (geoData.sub_district || '').toLowerCase();
+            return sLower === gLower || gLower.includes(sLower) || sLower.includes(gLower);
+          });
+          if (matchSub) resolvedSub = matchSub;
+          setSubdistrictsList(availableSubs);
+        } else {
+          setSubdistrictsList([resolvedSub, `${resolvedDistrict} Sadar`, `${resolvedDistrict} North`, `${resolvedDistrict} South`]);
+        }
+
         setFormData(prev => ({
           ...prev,
           latitude: Number(lat.toFixed(5)),
           longitude: Number(lon.toFixed(5)),
-          state: geoData.state || prev.state,
-          district: geoData.district || prev.district,
-          sub_district: geoData.sub_district || prev.sub_district || 'Sadar',
+          state: resolvedState,
+          district: resolvedDistrict,
+          sub_district: resolvedSub,
           village_or_town: geoData.village_or_town || prev.village_or_town || '',
           pincode: geoData.pincode || prev.pincode || ''
         }));
@@ -266,28 +320,52 @@ const LocationCatchmentPicker = ({
   // State selection handler
   const handleStateSelect = (selectedState) => {
     const stateObj = stateDistrictsData.find(s => s.state === selectedState);
-    const firstDist = stateObj?.districts[0]?.name || '';
-    const firstSub = stateObj?.districts[0]?.subdistricts?.[0] || '';
+    const firstDistObj = stateObj?.districts?.[0];
+    const firstDist = firstDistObj?.name || '';
+    const firstSub = firstDistObj?.subdistricts?.[0] || '';
+
+    setDistrictsList(stateObj?.districts || []);
+    setSubdistrictsList(firstDistObj?.subdistricts || []);
 
     setFormData(prev => ({
       ...prev,
       state: selectedState,
       district: firstDist,
-      sub_district: firstSub
+      sub_district: firstSub,
+      latitude: firstDistObj?.lat || prev.latitude,
+      longitude: firstDistObj?.lon || prev.longitude
     }));
+
+    if (firstDistObj?.lat && firstDistObj?.lon && mapInstanceRef.current) {
+      mapInstanceRef.current.setView([firstDistObj.lat, firstDistObj.lon], 11);
+      if (markerRef.current) markerRef.current.setLatLng([firstDistObj.lat, firstDistObj.lon]);
+      if (circleRef.current) circleRef.current.setLatLng([firstDistObj.lat, firstDistObj.lon]);
+    }
   };
 
   // District selection handler
   const handleDistrictSelect = (selectedDistrict) => {
-    const stateObj = stateDistrictsData.find(s => s.state === formData.state);
+    const stateObj = stateDistrictsData.find(
+      s => s.state.toLowerCase() === (formData.state || '').toLowerCase()
+    );
     const distObj = stateObj?.districts?.find(d => d.name === selectedDistrict);
     const firstSub = distObj?.subdistricts?.[0] || `${selectedDistrict} Sadar`;
+
+    setSubdistrictsList(distObj?.subdistricts || [firstSub]);
 
     setFormData(prev => ({
       ...prev,
       district: selectedDistrict,
-      sub_district: firstSub
+      sub_district: firstSub,
+      latitude: distObj?.lat || prev.latitude,
+      longitude: distObj?.lon || prev.longitude
     }));
+
+    if (distObj?.lat && distObj?.lon && mapInstanceRef.current) {
+      mapInstanceRef.current.setView([distObj.lat, distObj.lon], 12);
+      if (markerRef.current) markerRef.current.setLatLng([distObj.lat, distObj.lon]);
+      if (circleRef.current) circleRef.current.setLatLng([distObj.lat, distObj.lon]);
+    }
   };
 
   const estimatedPopulation = Math.round(3.14159 * (currentRadius ** 2) * 260);
@@ -427,6 +505,9 @@ const LocationCatchmentPicker = ({
               onChange={(e) => handleDistrictSelect(e.target.value)}
               className="w-full px-3.5 py-2.5 text-xs font-medium bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none pr-8 text-slate-800 dark:text-slate-100"
             >
+              {formData.district && !districtsList.some(d => d.name.toLowerCase() === formData.district.toLowerCase()) && (
+                <option value={formData.district}>{formData.district}</option>
+              )}
               {districtsList.map((d) => (
                 <option key={d.name} value={d.name}>
                   {lang === 'hi' && d.nameHi ? `${d.nameHi} (${d.name})` : d.name}
@@ -448,6 +529,9 @@ const LocationCatchmentPicker = ({
               onChange={(e) => setFormData(prev => ({ ...prev, sub_district: e.target.value }))}
               className="w-full px-3.5 py-2.5 text-xs font-medium bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none pr-8 text-slate-800 dark:text-slate-100"
             >
+              {formData.sub_district && !subdistrictsList.includes(formData.sub_district) && (
+                <option value={formData.sub_district}>{formData.sub_district}</option>
+              )}
               {subdistrictsList.map((sub, idx) => (
                 <option key={idx} value={sub}>
                   {sub}
@@ -488,15 +572,27 @@ const LocationCatchmentPicker = ({
         </div>
 
         {/* Nodal DIC Office Info preview */}
-        <div className="flex items-center p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
-          <Info className="w-4 h-4 text-[#0B3D91] dark:text-blue-400 flex-shrink-0 mr-2" />
-          <div className="text-[11px] text-slate-600 dark:text-slate-300 leading-tight">
-            <span className="font-bold text-slate-900 dark:text-white block mb-0.5">
-              {lang === 'hi' ? 'जिला उद्योग केंद्र (DIC):' : 'Nodal Agency:'}
-            </span>
-            <span>{formData.district || 'Pune'} DIC Lead Banking Cell</span>
-          </div>
-        </div>
+        {(() => {
+          const dInfo = getDistrictInfo(formData.state, formData.district);
+          return (
+            <div className="flex items-center p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+              <Info className="w-4 h-4 text-[#0B3D91] dark:text-blue-400 flex-shrink-0 mr-2" />
+              <div className="text-[11px] text-slate-600 dark:text-slate-300 leading-tight">
+                <span className="font-bold text-slate-900 dark:text-white block mb-0.5">
+                  {lang === 'hi' ? 'जिला उद्योग केंद्र (DIC):' : 'Nodal Agency:'}
+                </span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  {dInfo?.district?.dicOffice || `${formData.district || 'District'} DIC Office`}
+                </span>
+                {dInfo?.district?.leadBank && (
+                  <span className="block text-[10px] text-blue-700 dark:text-blue-300 mt-0.5 font-medium">
+                    Lead Bank: {dInfo.district.leadBank}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
       </div>
 

@@ -507,7 +507,7 @@ export const fetchGeoSubdistricts = async (stateName, districtName) => {
 export const reverseGeocodeCoordinates = async (lat, lon) => {
   try {
     const res = await api.get('/geo/reverse', { params: { lat, lon } });
-    if (res.data?.success) {
+    if (res.data?.success && res.data.district) {
       return res.data;
     }
   } catch (err) {
@@ -517,18 +517,51 @@ export const reverseGeocodeCoordinates = async (lat, lon) => {
   try {
     const directRes = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1`, {
       headers: { 'Accept-Language': 'en' },
-      timeout: 6000
+      timeout: 7000
     });
     if (directRes.data?.address) {
       const a = directRes.data.address;
+
+      // In OSM India:
+      // 1. a.state_district is often the district (e.g., "Bhandara", "Nagpur") or an administrative division ("Nagpur Division")
+      // 2. a.county is often the Tehsil/Taluka (e.g. "Bhandara Taluka") or sometimes the district
+      // 3. a.district is explicitly the district
+      // 4. a.city is the district headquarters city
+      let detectedDistrict = '';
+      if (a.district) {
+        detectedDistrict = a.district;
+      } else if (a.state_district && !a.state_district.toLowerCase().includes('division')) {
+        detectedDistrict = a.state_district;
+      } else if (a.county) {
+        detectedDistrict = a.county.replace(/\b(taluk|taluka|tehsil|block)\b/gi, '').trim();
+      } else if (a.city) {
+        detectedDistrict = a.city;
+      } else if (a.state_district) {
+        detectedDistrict = a.state_district.replace(/\bdivision\b/gi, '').trim();
+      }
+
+      // Clean "District" suffix
+      detectedDistrict = detectedDistrict.replace(/\bdistrict\b/gi, '').trim();
+
+      // Sub-district (Tehsil / Taluk / Block)
+      let detectedSubDistrict = a.suburb || a.taluk || a.tehsil || a.municipality || '';
+      if (!detectedSubDistrict && a.county) {
+        detectedSubDistrict = a.county.replace(/\b(taluk|taluka|tehsil)\b/gi, '').trim();
+      }
+      if (!detectedSubDistrict && detectedDistrict) {
+        detectedSubDistrict = `${detectedDistrict} Sadar`;
+      }
+
+      const detectedVillage = a.village || a.town || a.city || a.suburb || a.hamlet || a.neighbourhood || '';
+
       return {
         success: true,
         latitude: lat,
         longitude: lon,
         state: a.state || 'Maharashtra',
-        district: a.state_district || a.district || a.county || 'Pune',
-        sub_district: a.suburb || a.taluk || a.tehsil || a.county || 'Sadar',
-        village_or_town: a.village || a.town || a.city || a.hamlet || 'Local Area',
+        district: detectedDistrict || 'Nagpur',
+        sub_district: detectedSubDistrict || 'Sadar',
+        village_or_town: detectedVillage,
         pincode: a.postcode || '',
         display_name: directRes.data.display_name
       };
@@ -542,10 +575,10 @@ export const reverseGeocodeCoordinates = async (lat, lon) => {
     latitude: lat,
     longitude: lon,
     state: 'Maharashtra',
-    district: 'Pune',
-    sub_district: 'Haveli',
-    village_or_town: 'Selected Location',
-    pincode: '411001',
+    district: '',
+    sub_district: '',
+    village_or_town: '',
+    pincode: '',
     display_name: `${lat.toFixed(4)}, ${lon.toFixed(4)}`
   };
 };

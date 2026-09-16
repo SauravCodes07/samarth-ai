@@ -348,8 +348,41 @@ async def reverse_geocode(
                 address = data.get("address", {})
 
                 state = address.get("state", "Maharashtra")
-                district = address.get("state_district") or address.get("district") or address.get("county", "Pune")
-                sub_district = address.get("suburb") or address.get("taluk") or address.get("tehsil") or address.get("county") or address.get("municipality", "Sadar")
+
+                # Extract district intelligently
+                raw_district = ""
+                if address.get("district"):
+                    raw_district = address["district"]
+                elif address.get("state_district") and "division" not in address["state_district"].lower():
+                    raw_district = address["state_district"]
+                elif address.get("county"):
+                    raw_district = address["county"].replace("Taluka", "").replace("taluka", "").replace("Tehsil", "").replace("tehsil", "").strip()
+                elif address.get("city"):
+                    raw_district = address["city"]
+                elif address.get("state_district"):
+                    raw_district = address["state_district"].replace("Division", "").replace("division", "").strip()
+
+                raw_district = raw_district.replace("District", "").replace("district", "").strip()
+
+                # Match with known districts of that state
+                matched_state = next((s for s in STATE_DISTRICTS_MAP.keys() if s.lower() in state.lower() or state.lower() in s.lower()), state)
+                state_districts = STATE_DISTRICTS_MAP.get(matched_state, [])
+                
+                final_district = raw_district
+                if state_districts and raw_district:
+                    clean_raw = raw_district.lower()
+                    for d in state_districts:
+                        d_clean = d.lower()
+                        if d_clean == clean_raw or d_clean in clean_raw or clean_raw in d_clean:
+                            final_district = d
+                            break
+
+                sub_district = address.get("suburb") or address.get("taluk") or address.get("tehsil") or address.get("municipality")
+                if not sub_district and address.get("county"):
+                    sub_district = address["county"].replace("Taluka", "").replace("taluka", "").replace("Tehsil", "").replace("tehsil", "").strip()
+                if not sub_district and final_district:
+                    sub_district = f"{final_district} Sadar"
+
                 village = address.get("village") or address.get("town") or address.get("hamlet") or address.get("neighbourhood") or address.get("city", "Local Village")
                 pincode = address.get("postcode", "")
                 display_name = data.get("display_name", f"{lat:.4f}, {lon:.4f}")
@@ -358,9 +391,9 @@ async def reverse_geocode(
                     "success": True,
                     "latitude": lat,
                     "longitude": lon,
-                    "state": state,
-                    "district": district,
-                    "sub_district": sub_district,
+                    "state": matched_state or state,
+                    "district": final_district or "Nagpur",
+                    "sub_district": sub_district or "Sadar",
                     "village_or_town": village,
                     "pincode": pincode,
                     "display_name": display_name,
@@ -374,10 +407,10 @@ async def reverse_geocode(
         "latitude": lat,
         "longitude": lon,
         "state": "Maharashtra",
-        "district": "Pune",
-        "sub_district": "Haveli",
+        "district": "Nagpur",
+        "sub_district": "Nagpur Urban",
         "village_or_town": "Selected Catchment Location",
-        "pincode": "411001",
+        "pincode": "440001",
         "display_name": f"Coordinates: {lat:.4f}, {lon:.4f}",
         "source": "Estimated Geo Coordinate Resolution"
     }
