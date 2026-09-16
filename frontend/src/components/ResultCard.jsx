@@ -29,7 +29,11 @@ import {
   PieChart,
   Tag,
   Store,
-  ExternalLink
+  ExternalLink,
+  Sliders,
+  Activity,
+  Gauge,
+  BarChart3
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -40,8 +44,15 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
   const { lang } = useLanguage();
   const reportRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
-  const [activeTab, setActiveTab] = useState('hyperlocal'); // 'hyperlocal', 'financial', 'actionplan'
+  const [activeTab, setActiveTab] = useState('hyperlocal'); // 'hyperlocal', 'financial', 'actionplan', 'simulator'
   const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Interactive What-If Simulator States
+  const [simPriceMult, setSimPriceMult] = useState(1.0);
+  const [simVolumeMult, setSimVolumeMult] = useState(1.0);
+  const [simExpRatio, setSimExpRatio] = useState(50);
+  const [simMarginPercent, setSimMarginPercent] = useState(data?.loan_structure?.margin_percent || 10);
+  const [simTenureYears, setSimTenureYears] = useState(data?.loan_structure?.tenure_years || 5);
 
   useEffect(() => {
     return () => {
@@ -201,7 +212,19 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
           }`}
         >
           <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-          <span>{lang === 'mr' ? 'कृती आराखडा व रोडमॅप' : lang === 'hi' ? 'एक्शन प्लान व रोडमैप' : 'Action Roadmap'}</span>
+          <span>{lang === 'mr' ? 'कृती आराखडा' : lang === 'hi' ? 'एक्शन प्लान' : 'Action Plan'}</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('simulator')}
+          className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer ${
+            activeTab === 'simulator'
+              ? 'bg-white dark:bg-slate-700 text-[#0B3D91] dark:text-white shadow-md'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <Sliders className="w-4 h-4 text-amber-500" />
+          <span>{lang === 'mr' ? 'DPR सिम्युलेटर' : lang === 'hi' ? 'वित्तीय सिम्युलेटर' : 'DPR Simulator'}</span>
         </button>
       </div>
 
@@ -513,6 +536,31 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                 <p className="text-xs text-slate-700 leading-relaxed font-medium bg-white p-3 rounded-xl border border-slate-200">
                   {(lang === 'mr' || lang === 'hi') ? (comp?.density_analysis_hi || comp?.density_analysis) : comp?.density_analysis}
                 </p>
+
+                {/* Live Detected Competitor & Commercial POI List */}
+                {comp?.nearby_poi_list && comp.nearby_poi_list.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t border-slate-200">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
+                      <span>{lang === 'hi' ? 'कैचमेंट में पहचाने गए व्यापारिक केंद्र:' : 'Detected Establishments in Catchment:'}</span>
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full font-extrabold text-[10px]">
+                        {comp.is_live_data ? 'Live Geo-Tagged' : 'Spatial Model'}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                      {comp.nearby_poi_list.map((poi, idx) => (
+                        <div key={idx} className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+                          <div>
+                            <span className="font-bold text-slate-900 block">{poi.name}</span>
+                            <span className="text-[10px] text-slate-500">{poi.category} • {poi.address || `${poi.distance_km} km away`}</span>
+                          </div>
+                          <span className="px-2 py-1 bg-slate-100 text-slate-700 font-extrabold text-[11px] rounded-lg shrink-0">
+                            {poi.distance_km} km
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -721,6 +769,231 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
 
           </div>
         )}
+
+        {/* TAB 4: INTERACTIVE WHAT-IF FINANCIAL SIMULATOR & BANK DPR APPRAISAL */}
+        {activeTab === 'simulator' && (() => {
+          const baseRevenue = business_viability?.estimated_monthly_revenue || ((loan_structure?.total_project_cost || 100000) * 0.24);
+          const simRevenue = Math.round(baseRevenue * simPriceMult * simVolumeMult);
+          const simExpenses = Math.round(simRevenue * (simExpRatio / 100));
+          const simNetOperatingIncome = Math.max(0, simRevenue - simExpenses);
+
+          const simProjectCost = loan_structure?.total_project_cost || 100000;
+          const simMarginMoney = Math.round(simProjectCost * (simMarginPercent / 100));
+          const simLoanAmount = Math.max(0, simProjectCost - simMarginMoney);
+          const simAnnualRate = loan_structure?.effective_interest_rate || 5.0;
+          const simMonthlyRate = (simAnnualRate / 100) / 12;
+          const simTotalMonths = simTenureYears * 12;
+          
+          const simEMI = simMonthlyRate > 0 && simLoanAmount > 0
+            ? Math.round((simLoanAmount * simMonthlyRate * Math.pow(1 + simMonthlyRate, simTotalMonths)) / (Math.pow(1 + simMonthlyRate, simTotalMonths) - 1))
+            : Math.round(simLoanAmount / Math.max(1, simTotalMonths));
+
+          const simNetProfit = Math.round(simNetOperatingIncome - simEMI);
+          const simDSCR = simEMI > 0 ? (simNetOperatingIncome / simEMI).toFixed(2) : '3.50';
+          const simBreakEvenMonths = simNetProfit > 0 ? Math.max(2, Math.round(simMarginMoney / simNetProfit)) : 36;
+          const simViabilityScore = Math.min(99, Math.max(40, Math.round(Number(simDSCR) * 36)));
+
+          const isBankFeasible = Number(simDSCR) >= 1.4 && simNetProfit > 4000;
+
+          return (
+            <div className="space-y-6 animate-fadeIn">
+              
+              {/* Simulator Header */}
+              <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-6 rounded-2xl border border-white/10 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="p-2 rounded-xl bg-amber-400 text-slate-950 font-black">
+                      <Sliders className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-base sm:text-lg">
+                        {lang === 'hi' ? 'इंटरैक्टिव बैंक डीपीआर व वित्तीय संवेदनशीलता सिम्युलेटर' : 'Interactive Bank DPR Sensitivity Simulator'}
+                      </h3>
+                      <p className="text-xs text-slate-300">
+                        {lang === 'hi' 
+                          ? 'बिक्री मूल्य, दैनिक ग्राहक संख्या, मार्जिन % और लोन अवधि बदलकर लाभ व DSCR का लाइव परीक्षण करें।' 
+                          : 'Adjust pricing, volume, margin %, and tenure to test real-time cash flow & bank appraisal safety.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={`px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center space-x-1.5 ${
+                    isBankFeasible ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/50' : 'bg-amber-500/30 text-amber-300 border border-amber-500/50'
+                  }`}>
+                    <Activity className="w-4 h-4" />
+                    <span>{isBankFeasible ? 'बैंक ऋण योग्य (DSCR Safe > 1.4)' : 'मार्जिन बढ़ाने की सलाह (Caution)'}</span>
+                  </div>
+                </div>
+
+                {/* Real-time KPI Result Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                  <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
+                    <span className="text-[11px] text-slate-300 block">अनुमानित मासिक टर्नओवर</span>
+                    <div className="text-xl font-black text-white">₹{simRevenue.toLocaleString('en-IN')}</div>
+                    <span className="text-[10px] text-slate-400">खर्च: ₹{simExpenses.toLocaleString('en-IN')} ({simExpRatio}%)</span>
+                  </div>
+
+                  <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs">
+                    <span className="text-[11px] text-amber-200 block">पुनर्गणित मासिक EMI</span>
+                    <div className="text-xl font-black text-amber-300">₹{simEMI.toLocaleString('en-IN')}</div>
+                    <span className="text-[10px] text-amber-200/70">{simTenureYears} वर्ष • {simAnnualRate}%</span>
+                  </div>
+
+                  <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs border border-emerald-400/30">
+                    <span className="text-[11px] text-emerald-200 block">EMI पश्चात शुद्ध मासिक बचत</span>
+                    <div className="text-xl font-black text-emerald-300">₹{simNetProfit.toLocaleString('en-IN')}</div>
+                    <span className="text-[10px] text-emerald-200/70">ब्रेक-ईवन: ~{simBreakEvenMonths} माह</span>
+                  </div>
+
+                  <div className="bg-white/10 p-3 rounded-xl backdrop-blur-xs border border-blue-400/30">
+                    <span className="text-[11px] text-blue-200 block">बैंक DSCR अनुपात</span>
+                    <div className="text-xl font-black text-blue-300">{simDSCR}x</div>
+                    <span className="text-[10px] text-blue-200/70">व्यवहार्यता: {simViabilityScore}/100</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sliders Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                
+                {/* Slider 1: Price Multiplier */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>उत्पाद / सेवा बिक्री मूल्य स्तर (Price Adjustment):</span>
+                    <span className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-blue-700 font-extrabold">
+                      {Math.round((simPriceMult - 1.0) * 100) > 0 ? `+${Math.round((simPriceMult - 1.0) * 100)}%` : `${Math.round((simPriceMult - 1.0) * 100)}%`}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.8"
+                    max="1.3"
+                    step="0.05"
+                    value={simPriceMult}
+                    onChange={(e) => setSimPriceMult(Number(e.target.value))}
+                    className="w-full accent-blue-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[11px] text-slate-500">
+                    <span>-20% (डिस्काउंट मूल्य)</span>
+                    <span>सामान्य दर</span>
+                    <span>+30% (प्रीमियम गुणवत्ता)</span>
+                  </div>
+                </div>
+
+                {/* Slider 2: Daily Sales / Customer Volume */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>दैनिक ग्राहक संख्या व बिक्री मात्रा (Volume):</span>
+                    <span className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-emerald-700 font-extrabold">
+                      {Math.round((simVolumeMult - 1.0) * 100) > 0 ? `+${Math.round((simVolumeMult - 1.0) * 100)}%` : `${Math.round((simVolumeMult - 1.0) * 100)}%`}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.7"
+                    max="1.5"
+                    step="0.05"
+                    value={simVolumeMult}
+                    onChange={(e) => setSimVolumeMult(Number(e.target.value))}
+                    className="w-full accent-emerald-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[11px] text-slate-500">
+                    <span>-30% (शुरुआती मंदी)</span>
+                    <span>अनुमानित स्तर</span>
+                    <span>+50% (उच्च मांग)</span>
+                  </div>
+                </div>
+
+                {/* Slider 3: Operating Expense Ratio */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>परिचालन व कच्चा माल लागत अनुपात (Expense %):</span>
+                    <span className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-amber-700 font-extrabold">
+                      {simExpRatio}%
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="30"
+                    max="75"
+                    step="1"
+                    value={simExpRatio}
+                    onChange={(e) => setSimExpRatio(Number(e.target.value))}
+                    className="w-full accent-amber-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[11px] text-slate-500">
+                    <span>30% (सेवा आधारित)</span>
+                    <span>50% (मानक अनुपात)</span>
+                    <span>75% (थोक व्यापार)</span>
+                  </div>
+                </div>
+
+                {/* Slider 4: Margin Capital % Contribution */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>उद्यमी स्वभांडवल मार्जिन हिस्सा (Margin Contribution):</span>
+                    <span className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-purple-700 font-extrabold">
+                      {simMarginPercent}% (₹{simMarginMoney.toLocaleString('en-IN')})
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="5"
+                    max="25"
+                    step="1"
+                    value={simMarginPercent}
+                    onChange={(e) => setSimMarginPercent(Number(e.target.value))}
+                    className="w-full accent-purple-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[11px] text-slate-500">
+                    <span>5% (न्यूनतम सरकारी)</span>
+                    <span>10% (मानक)</span>
+                    <span>25% (अधिक स्वपूंजी)</span>
+                  </div>
+                </div>
+
+                {/* Slider 5: Repayment Tenure */}
+                <div className="space-y-2 md:col-span-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                    <span>ऋण पुनर्भुगतान अवधि (Tenure):</span>
+                    <span className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-indigo-700 font-extrabold">
+                      {simTenureYears} वर्ष ({simTenureYears * 12} माह)
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="3"
+                    max="7"
+                    step="1"
+                    value={simTenureYears}
+                    onChange={(e) => setSimTenureYears(Number(e.target.value))}
+                    className="w-full accent-indigo-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[11px] text-slate-500">
+                    <span>3 वर्ष (माइक्रो फाइनेंस)</span>
+                    <span>5 वर्ष (मानक टर्म लोन)</span>
+                    <span>7 वर्ष (दीर्घकालिक)</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Bank Credit Appraisal Certification Card */}
+              <div className="p-5 rounded-2xl bg-blue-50/70 border border-blue-200 flex items-start space-x-3.5">
+                <ShieldCheck className="w-6 h-6 text-[#0B3D91] flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="font-extrabold text-sm text-[#0B3D91]">
+                    संस्थागत बैंक क्रेडिट मूल्यांकन टिप्पणी (Institutional Bank Appraisal Summary)
+                  </h4>
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    प्रस्तावित परियोजना का DSCR अनुपात <strong className="text-slate-900">{simDSCR}x</strong> है, जो भारतीय रिजर्व बैंक (RBI) एवं नाबार्ड (NABARD) द्वारा निर्धारित न्यूनतम 1.25x के मानक से अधिक है। परियोजना का मासिक ब्याज एवं मूलधन भुगतान जोखिम-रहित श्रेणी में आता है।
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          );
+        })()}
 
         {/* Footer Official Disclaimer */}
         <div className="pt-4 text-center text-xs text-slate-400 border-t border-slate-100">

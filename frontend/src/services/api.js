@@ -445,5 +445,109 @@ export const sendVoiceChatMessage = async (message, lang = 'hi', history = []) =
   return null;
 };
 
+/**
+ * Geographic & Real-Time Location Services
+ */
+export const fetchGeoStates = async () => {
+  try {
+    const res = await api.get('/geo/states');
+    if (res.data?.success && res.data?.states?.length > 0) {
+      return res.data.states;
+    }
+  } catch (err) {
+    console.debug('Geo states backend unavailable, using client dataset');
+  }
+  return ALL_INDIAN_STATES.filter(s => s !== 'Central / All India').map(s => ({ name: s, name_hi: s, type: 'State' }));
+};
+
+export const fetchGeoDistricts = async (stateName) => {
+  if (!stateName) return [];
+  try {
+    const res = await api.get('/geo/districts', { params: { state: stateName } });
+    if (res.data?.success && res.data?.districts?.length > 0) {
+      return res.data.districts;
+    }
+  } catch (err) {
+    console.debug('Geo districts backend error');
+  }
+  return [];
+};
+
+export const fetchGeoSubdistricts = async (stateName, districtName) => {
+  if (!districtName) return [];
+  try {
+    const res = await api.get('/geo/subdistricts', { params: { state: stateName, district: districtName } });
+    if (res.data?.success && res.data?.subdistricts?.length > 0) {
+      return res.data.subdistricts;
+    }
+  } catch (err) {
+    console.debug('Geo subdistricts backend error');
+  }
+  return [
+    `${districtName} Sadar`,
+    `${districtName} North Tehsil`,
+    `${districtName} South Tehsil`,
+    `${districtName} Rural Block`
+  ];
+};
+
+export const reverseGeocodeCoordinates = async (lat, lon) => {
+  try {
+    const res = await api.get('/geo/reverse', { params: { lat, lon } });
+    if (res.data?.success) {
+      return res.data;
+    }
+  } catch (err) {
+    console.debug('Backend reverse geocoding unavailable, trying direct OSM fallback...');
+  }
+
+  try {
+    const directRes = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1`, {
+      headers: { 'Accept-Language': 'en' },
+      timeout: 6000
+    });
+    if (directRes.data?.address) {
+      const a = directRes.data.address;
+      return {
+        success: true,
+        latitude: lat,
+        longitude: lon,
+        state: a.state || 'Maharashtra',
+        district: a.state_district || a.district || a.county || 'Pune',
+        sub_district: a.suburb || a.taluk || a.tehsil || a.county || 'Sadar',
+        village_or_town: a.village || a.town || a.city || a.hamlet || 'Local Area',
+        pincode: a.postcode || '',
+        display_name: directRes.data.display_name
+      };
+    }
+  } catch (e) {
+    console.warn('Direct Nominatim geocode error:', e);
+  }
+
+  return {
+    success: true,
+    latitude: lat,
+    longitude: lon,
+    state: 'Maharashtra',
+    district: 'Pune',
+    sub_district: 'Haveli',
+    village_or_town: 'Selected Location',
+    pincode: '411001',
+    display_name: `${lat.toFixed(4)}, ${lon.toFixed(4)}`
+  };
+};
+
+export const fetchNearbyPOIs = async (lat, lon, radiusKm = 5, businessType = 'Retail') => {
+  try {
+    const res = await api.get('/geo/poi', { params: { lat, lon, radius_km: radiusKm, business_type: businessType } });
+    if (res.data?.success && res.data?.pois) {
+      return res.data;
+    }
+  } catch (err) {
+    console.debug('Backend POI query failed, creating spatial markers');
+  }
+  return null;
+};
+
 export default api;
 

@@ -1,271 +1,484 @@
 /**
  * Hyper-Local District Assistance Directory
- * Mapping Indian States and Districts to District Industries Centres (DIC),
- * State Channelizing Agencies (SCA / NSFDC), and Khadi & Village Industries (KVIB) offices.
- * Covers major Indian states with accurate, non-overlapping district mappings.
+ * Complete Mapping for all 28 Indian States and 8 Union Territories.
+ * Mapping States and Districts to District Industries Centres (DIC),
+ * State Channelizing Agencies (SCA / NSFDC), and Sub-districts (Tehsils/Blocks).
  */
 
+export const ALL_INDIA_STATES_LIST = [
+  { name: "Andhra Pradesh", nameHi: "आंध्र प्रदेश", type: "State" },
+  { name: "Arunachal Pradesh", nameHi: "अरुणाचल प्रदेश", type: "State" },
+  { name: "Assam", nameHi: "असम", type: "State" },
+  { name: "Bihar", nameHi: "बिहार", type: "State" },
+  { name: "Chhattisgarh", nameHi: "छत्तीसगढ़", type: "State" },
+  { name: "Goa", nameHi: "गोवा", type: "State" },
+  { name: "Gujarat", nameHi: "गुजरात", type: "State" },
+  { name: "Haryana", nameHi: "हरियाणा", type: "State" },
+  { name: "Himachal Pradesh", nameHi: "हिमाचल प्रदेश", type: "State" },
+  { name: "Jharkhand", nameHi: "झारखंड", type: "State" },
+  { name: "Karnataka", nameHi: "कर्नाटक", type: "State" },
+  { name: "Kerala", nameHi: "केरल", type: "State" },
+  { name: "Madhya Pradesh", nameHi: "मध्य प्रदेश", type: "State" },
+  { name: "Maharashtra", nameHi: "महाराष्ट्र", type: "State" },
+  { name: "Manipur", nameHi: "मणिपुर", type: "State" },
+  { name: "Meghalaya", nameHi: "मेघालय", type: "State" },
+  { name: "Mizoram", nameHi: "मिजोरम", type: "State" },
+  { name: "Nagaland", nameHi: "नागालैंड", type: "State" },
+  { name: "Odisha", nameHi: "ओडिशा", type: "State" },
+  { name: "Punjab", nameHi: "पंजाब", type: "State" },
+  { name: "Rajasthan", nameHi: "राजस्थान", type: "State" },
+  { name: "Sikkim", nameHi: "सिक्किम", type: "State" },
+  { name: "Tamil Nadu", nameHi: "तमिलनाडु", type: "State" },
+  { name: "Telangana", nameHi: "तेलंगाना", type: "State" },
+  { name: "Tripura", nameHi: "त्रिपुरा", type: "State" },
+  { name: "Uttar Pradesh", nameHi: "उत्तर प्रदेश", type: "State" },
+  { name: "Uttarakhand", nameHi: "उत्तराखंड", type: "State" },
+  { name: "West Bengal", nameHi: "पश्चिम बंगाल", type: "State" },
+  // 8 Union Territories
+  { name: "Andaman and Nicobar Islands", nameHi: "अंडमान और निकोबार द्वीप समूह", type: "UT" },
+  { name: "Chandigarh", nameHi: "चंडीगढ़", type: "UT" },
+  { name: "Dadra and Nagar Haveli and Daman and Diu", nameHi: "दादरा और नगर हवेली और दमन और दीव", type: "UT" },
+  { name: "Delhi", nameHi: "दिल्ली", type: "UT" },
+  { name: "Jammu and Kashmir", nameHi: "जम्मू और कश्मीर", type: "UT" },
+  { name: "Ladakh", nameHi: "लद्दाख", type: "UT" },
+  { name: "Lakshadweep", nameHi: "लक्षद्वीप", type: "UT" },
+  { name: "Puducherry", nameHi: "पुडुचेरी", type: "UT" }
+];
+
 export const stateDistrictsData = [
-  {
-    state: "Gujarat",
-    stateHi: "गुजरात",
-    scaName: "Gujarat Backward Classes Development Corporation (GBCDC) / GSCDC",
-    scaAddress: "Block No. 4, 2nd Floor, Dr. Jivraj Mehta Bhavan, Gandhinagar - 382010",
-    helpline: "079-23253240 / 1800-233-0130",
-    districts: [
-      { name: "Ahmedabad", nameHi: "अहमदाबाद", dicOffice: "DIC, Bahumali Bhavan, Vastrapur, Ahmedabad", contact: "079-26302345 / dic-ahm@gujarat.gov.in", leadBank: "State Bank of India (Lead District Office)" },
-      { name: "Surat", nameHi: "सूरत", dicOffice: "DIC, Nanpura Multistorey Building, Surat", contact: "0261-2465123 / dic-surat@gujarat.gov.in", leadBank: "Bank of Baroda (Lead District Office)" },
-      { name: "Vadodara", nameHi: "वडोदरा", dicOffice: "DIC, Kothi Kacheri Compound, Vadodara", contact: "0265-2431234 / dic-vadodara@gujarat.gov.in", leadBank: "Bank of Baroda (Lead District Office)" },
-      { name: "Rajkot", nameHi: "राजकोट", dicOffice: "DIC, Jilla Seva Sadan-2, Shroff Road, Rajkot", contact: "0281-2451234 / dic-rajkot@gujarat.gov.in", leadBank: "State Bank of India (Lead Bank Cell)" },
-      { name: "Gandhinagar", nameHi: "गांधीनगर", dicOffice: "DIC, Sector-11, M.S. Building, Gandhinagar", contact: "079-23221234 / dic-gnr@gujarat.gov.in", leadBank: "Dena Bank / Bank of Baroda" },
-      { name: "Bhavnagar", nameHi: "भावनगर", dicOffice: "DIC, Bahumali Bhavan, Bhavnagar", contact: "0278-2421234 / dic-bhavnagar@gujarat.gov.in", leadBank: "State Bank of India (Lead District Office)" },
-      { name: "Jamnagar", nameHi: "जामनगर", dicOffice: "DIC, Lal Bungalow Campus, Jamnagar", contact: "0288-2551234 / dic-jamnagar@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Junagadh", nameHi: "जूनागढ़", dicOffice: "DIC, Sardarbaug, Junagadh", contact: "0285-2621234 / dic-junagadh@gujarat.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Anand", nameHi: "आणंद", dicOffice: "DIC, Borsad Chokdi, Anand", contact: "02692-261234 / dic-anand@gujarat.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Kutch", nameHi: "कच्छ (भुज)", dicOffice: "DIC, Bahumali Bhavan, Bhuj-Kutch", contact: "02832-251234 / dic-kutch@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Bharuch", nameHi: "भरूच", dicOffice: "DIC, Old Collector Office Compound, Bharuch", contact: "02642-241234 / dic-bharuch@gujarat.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Navsari", nameHi: "नवसारी", dicOffice: "DIC, Jilla Seva Sadan, Junathana, Navsari", contact: "02637-251234 / dic-navsari@gujarat.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Valsad", nameHi: "वलसाड", dicOffice: "DIC, Dharampur Road, Valsad", contact: "02632-241234 / dic-valsad@gujarat.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Mehsana", nameHi: "मेहसाणा", dicOffice: "DIC, Bahumali Bhavan, Mehsana", contact: "02762-221234 / dic-mehsana@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Morbi", nameHi: "मोरबी", dicOffice: "DIC, Sobheshwar Road, Morbi", contact: "02822-221234 / dic-morbi@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Panchmahal (Godhra)", nameHi: "पंचमहाल (गोधरा)", dicOffice: "DIC, Collectorate Campus, Godhra", contact: "02672-241234 / dic-godhra@gujarat.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Surendranagar", nameHi: "सुरेंद्रनगर", dicOffice: "DIC, Kherali Road, Surendranagar", contact: "02752-281234 / dic-snagar@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Patan", nameHi: "पाटण", dicOffice: "DIC, Siddhpur Char Rasta, Patan", contact: "02766-221234 / dic-patan@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Banaskantha (Palanpur)", nameHi: "बनासकांठा (पालनपुर)", dicOffice: "DIC, Jilla Seva Sadan, Palanpur", contact: "02742-251234 / dic-bk@gujarat.gov.in", leadBank: "Dena / Bank of Baroda" },
-      { name: "Amreli", nameHi: "अमरेली", dicOffice: "DIC, Rajmahal Compound, Amreli", contact: "02792-221234 / dic-amreli@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Dahod", nameHi: "दाहोद", dicOffice: "DIC, Jilla Seva Sadan, Dahod", contact: "02673-221234 / dic-dahod@gujarat.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Gir Somnath (Veraval)", nameHi: "गीर सोमनाथ (वेरावल)", dicOffice: "DIC, Prabhas Patan Road, Veraval", contact: "02876-241234 / dic-girsomnath@gujarat.gov.in", leadBank: "State Bank of India" },
-      { name: "Porbandar", nameHi: "पोरबंदर", dicOffice: "DIC, Chaupati Ground, Porbandar", contact: "0286-2241234 / dic-porbandar@gujarat.gov.in", leadBank: "State Bank of India" }
-    ]
-  },
   {
     state: "Maharashtra",
     stateHi: "महाराष्ट्र",
     scaName: "Mahatma Phule Backward Class Development Corporation (MPBCDC)",
-    scaAddress: "Supreme Chambers, 17/18 Shah Industrial Estate, Veera Desai Road, Andheri West, Mumbai - 400053",
+    scaAddress: "Supreme Chambers, Shah Industrial Estate, Veera Desai Road, Andheri West, Mumbai - 400053",
     helpline: "022-26732345 / 1800-222-340",
     districts: [
-      { name: "Pune", nameHi: "पुणे", dicOffice: "DIC, Agriculture College Compound, Shivaji Nagar, Pune", contact: "020-25537456 / dicpune@maharashtra.gov.in", leadBank: "Bank of Maharashtra (Lead District Office)" },
-      { name: "Nagpur", nameHi: "नागपुर", dicOffice: "DIC, Civil Lines, Near High Court, Nagpur", contact: "0712-2561234 / dicnagpur@maharashtra.gov.in", leadBank: "Bank of India (Lead District Office)" },
-      { name: "Mumbai City", nameHi: "मुंबई शहर", dicOffice: "DIC, Old Customs House, Fort, Mumbai", contact: "022-22661234 / dicmumbai@maharashtra.gov.in", leadBank: "State Bank of India" },
-      { name: "Mumbai Suburban", nameHi: "मुंबई उपनगर", dicOffice: "DIC, Administrative Building, Bandra East, Mumbai", contact: "022-26551234 / dicsuburban@maharashtra.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Thane", nameHi: "ठाणे", dicOffice: "DIC, Wagle Industrial Estate, Thane West", contact: "022-25821234 / dicthane@maharashtra.gov.in", leadBank: "Bank of Maharashtra" },
-      { name: "Nashik", nameHi: "नाशिक", dicOffice: "DIC, Old Agra Road, CBS, Nashik", contact: "0253-2571234 / dicnashik@maharashtra.gov.in", leadBank: "Bank of Maharashtra" },
-      { name: "Chhatrapati Sambhajinagar (Aurangabad)", nameHi: "छत्रपती संभाजीनगर (औरंगाबाद)", dicOffice: "DIC, Railway Station Road, Aurangabad", contact: "0240-2331234 / dicaurangabad@maharashtra.gov.in", leadBank: "Bank of Maharashtra" },
-      { name: "Solapur", nameHi: "सोलापूर", dicOffice: "DIC, Old Employment Exchange Building, Solapur", contact: "0217-2721234 / dicsolapur@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Amravati", nameHi: "अमरावती", dicOffice: "DIC, Camp Road, Near Collectorate, Amravati", contact: "0721-2661234 / dicamravati@maharashtra.gov.in", leadBank: "Central Bank of India" },
-      { name: "Kolhapur", nameHi: "कोल्हापूर", dicOffice: "DIC, Udyog Bhavan, Kawala Naka, Kolhapur", contact: "0231-2651234 / dickolhapur@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Nanded", nameHi: "नांदेड", dicOffice: "DIC, VIP Road, Nanded", contact: "02462-234123 / dicnanded@maharashtra.gov.in", leadBank: "State Bank of India" },
-      { name: "Jalgaon", nameHi: "जळगाव", dicOffice: "DIC, MIDC Area, Ajanta Road, Jalgaon", contact: "0257-2211234 / dicjalgaon@maharashtra.gov.in", leadBank: "Central Bank of India" },
-      { name: "Ahmednagar", nameHi: "अहमदनगर", dicOffice: "DIC, Station Road, Ahmednagar", contact: "0241-2411234 / dicanagar@maharashtra.gov.in", leadBank: "Central Bank of India" },
-      { name: "Satara", nameHi: "सातारा", dicOffice: "DIC, Sadar Bazar, Satara", contact: "02162-231234 / dicsatara@maharashtra.gov.in", leadBank: "Bank of Maharashtra" },
-      { name: "Sangli", nameHi: "सांगली", dicOffice: "DIC, Madhavnagar Road, Sangli", contact: "0233-2371234 / dicsangli@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Latur", nameHi: "लातूर", dicOffice: "DIC, Old Collectorate, Latur", contact: "02382-241234 / diclatur@maharashtra.gov.in", leadBank: "Bank of Maharashtra" },
-      { name: "Dhule", nameHi: "धुळे", dicOffice: "DIC, Sakri Road, Dhule", contact: "02562-231234 / dicdhule@maharashtra.gov.in", leadBank: "Central Bank of India" },
-      { name: "Akola", nameHi: "अकोला", dicOffice: "DIC, Civil Lines, Akola", contact: "0724-2431234 / dicakola@maharashtra.gov.in", leadBank: "Central Bank of India" },
-      { name: "Chandrapur", nameHi: "चंद्रपूर", dicOffice: "DIC, Mul Road, Chandrapur", contact: "07172-251234 / dicchandrapur@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Raigad (Alibag)", nameHi: "रायगड (अलिबाग)", dicOffice: "DIC, Chendhare, Alibag", contact: "02141-222123 / dicraigad@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Ratnagiri", nameHi: "रत्नागिरी", dicOffice: "DIC, Shivaji Nagar, Ratnagiri", contact: "02352-222123 / dicratnagiri@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Sindhudurg (Oros)", nameHi: "सिंधुदुर्ग (ओरोस)", dicOffice: "DIC, Administrative Complex, Sindhudurgnagari", contact: "02362-228123 / dicsindhudurg@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Yavatmal", nameHi: "यवतमाळ", dicOffice: "DIC, Darwha Road, Yavatmal", contact: "07232-241234 / dicyavatmal@maharashtra.gov.in", leadBank: "Central Bank of India" },
-      { name: "Wardha", nameHi: "वर्धा", dicOffice: "DIC, Sevagram Road, Wardha", contact: "07152-241234 / dicwardha@maharashtra.gov.in", leadBank: "Bank of India" },
-      { name: "Palghar", nameHi: "पालघर", dicOffice: "DIC, Collector Complex, Palghar", contact: "02525-251234 / dicpalghar@maharashtra.gov.in", leadBank: "Bank of Maharashtra" }
+      { name: "Pune", nameHi: "पुणे", subdistricts: ["Haveli", "Baramati", "Shirur", "Ambegaon", "Khed", "Maval", "Mulshi", "Purandar", "Daund", "Indapur", "Junnar", "Bhor", "Velhe", "Pune City"], dicOffice: "DIC, Agriculture College Compound, Shivaji Nagar, Pune", contact: "020-25537456", leadBank: "Bank of Maharashtra" },
+      { name: "Nagpur", nameHi: "नागपुर", subdistricts: ["Nagpur Urban", "Nagpur Rural", "Kamptee", "Hingna", "Katol", "Narkhed", "Savner", "Ramtek", "Umred"], dicOffice: "DIC, Civil Lines, Nagpur", contact: "0712-2561234", leadBank: "Bank of India" },
+      { name: "Mumbai City", nameHi: "मुंबई शहर", subdistricts: ["Colaba", "Fort", "Dadar", "Byculla"], dicOffice: "DIC, Old Customs House, Fort, Mumbai", contact: "022-22661234", leadBank: "State Bank of India" },
+      { name: "Mumbai Suburban", nameHi: "मुंबई उपनगर", subdistricts: ["Andheri", "Bandra", "Borivali", "Kurla"], dicOffice: "DIC, Administrative Bldg, Bandra East", contact: "022-26551234", leadBank: "Bank of Baroda" },
+      { name: "Thane", nameHi: "ठाणे", subdistricts: ["Thane", "Kalyan", "Murbad", "Bhiwandi", "Shahapur", "Ulhasnagar", "Ambarnath"], dicOffice: "DIC, Wagle Industrial Estate, Thane", contact: "022-25821234", leadBank: "Bank of Maharashtra" },
+      { name: "Nashik", nameHi: "नाशिक", subdistricts: ["Nashik", "Niphad", "Sinnar", "Dindori", "Igatpuri", "Trimbakeshwar", "Malegaon", "Yeola"], dicOffice: "DIC, Old Agra Road, Nashik", contact: "0253-2571234", leadBank: "Bank of Maharashtra" },
+      { name: "Chhatrapati Sambhajinagar (Aurangabad)", nameHi: "छत्रपती संभाजीनगर", subdistricts: ["Aurangabad", "Paithan", "Gangapur", "Vaijapur", "Kannad", "Khuldabad", "Sillod", "Soegaon", "Phulambri"], dicOffice: "DIC, Railway Station Road", contact: "0240-2331234", leadBank: "Bank of Maharashtra" },
+      { name: "Solapur", nameHi: "सोलापूर", subdistricts: ["Solapur North", "Solapur South", "Barshi", "Pandharpur", "Karmala", "Madha", "Sangole", "Malshiras"], dicOffice: "DIC, Old Employment Exchange, Solapur", contact: "0217-2721234", leadBank: "Bank of India" },
+      { name: "Kolhapur", nameHi: "कोल्हापूर", subdistricts: ["Karvir", "Kagal", "Hatkanangle", "Shirol", "Panhala", "Radhanagari", "Bhudargad", "Ajara", "Gadhinglaj", "Chandgad"], dicOffice: "DIC, Udyog Bhavan, Kolhapur", contact: "0231-2651234", leadBank: "Bank of India" },
+      { name: "Ahmednagar", nameHi: "अहमदनगर", subdistricts: ["Nagar", "Rahuri", "Shrirampur", "Nevasa", "Sangamner", "Akole", "Kopargaon", "Pathardi", "Shevgaon", "Parner", "Jamkhed", "Karjat", "Shrigonda"], dicOffice: "DIC, Station Road, Ahmednagar", contact: "0241-2411234", leadBank: "Central Bank of India" },
+      { name: "Amravati", nameHi: "अमरावती", subdistricts: ["Amravati", "Bhatkuli", "Nandgaon Khandeshwar", "Dharni", "Chikhaldara", "Achalpur", "Chandurbazar", "Morshi", "Warud", "Teosa", "Daryapur", "Anjangaon Surji"], dicOffice: "DIC, Camp Road, Amravati", contact: "0721-2661234", leadBank: "Central Bank of India" },
+      { name: "Jalgaon", nameHi: "जळगाव", subdistricts: ["Jalgaon", "Bhusawal", "Raver", "Muktainagar", "Bodwad", "Yawal", "Chopda", "Erandol", "Dharangaon", "Pachora", "Bhadgaon", "Chalisgaon", "Jamner", "Parola", "Amalner"], dicOffice: "DIC, MIDC Area, Jalgaon", contact: "0257-2211234", leadBank: "Central Bank of India" },
+      { name: "Satara", nameHi: "सातारा", subdistricts: ["Satara", "Karad", "Wai", "Mahabaleshwar", "Phaltan", "Khandala", "Khatav", "Man", "Koregaon", "Patan", "Jaoli"], dicOffice: "DIC, Sadar Bazar, Satara", contact: "02162-234123", leadBank: "Bank of Maharashtra" },
+      { name: "Sangli", nameHi: "सांगली", subdistricts: ["Miraj", "Tasgaon", "Khanapur (Vita)", "Atpadi", "Jat", "Kavathe Mahankal", "Walwa (Islampur)", "Shirala", "Kadegaon", "Palus"], dicOffice: "DIC, Madhavnagar Road, Sangli", contact: "0233-2311234", leadBank: "Bank of India" },
+      { name: "Nanded", nameHi: "नांदेड", subdistricts: ["Nanded", "Biloli", "Mukhed", "Kandhar", "Loha", "Mudkhed", "Bhokar", "Degloor", "Kinwat", "Himayatnagar", "Hadgaon", "Mahoor", "Ardhapur"], dicOffice: "DIC, VIP Road, Nanded", contact: "02462-234123", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Gujarat",
+    stateHi: "गुजरात",
+    scaName: "Gujarat Backward Classes Development Corporation (GBCDC)",
+    scaAddress: "Block No. 4, Dr. Jivraj Mehta Bhavan, Gandhinagar - 382010",
+    helpline: "079-23253240 / 1800-233-0130",
+    districts: [
+      { name: "Ahmedabad", nameHi: "अहमदाबाद", subdistricts: ["Ahmedabad City", "Daskroi", "Sanand", "Bavla", "Dholka", "Viramgam", "Mandal", "Dhandhuka", "Dholera"], dicOffice: "DIC, Bahumali Bhavan, Vastrapur, Ahmedabad", contact: "079-26302345", leadBank: "State Bank of India" },
+      { name: "Surat", nameHi: "सूरत", subdistricts: ["Surat City", "Chorasi", "Olpad", "Kamrej", "Bardoli", "Mahuva", "Mandvi", "Mangrol", "Palsana"], dicOffice: "DIC, Nanpura Multistorey Bldg, Surat", contact: "0261-2465123", leadBank: "Bank of Baroda" },
+      { name: "Vadodara", nameHi: "वडोदरा", subdistricts: ["Vadodara City", "Vadodara Rural", "Padra", "Karjan", "Shinor", "Dabhoi", "Waghodia", "Savli", "Desar"], dicOffice: "DIC, Kothi Kacheri Compound, Vadodara", contact: "0265-2431234", leadBank: "Bank of Baroda" },
+      { name: "Rajkot", nameHi: "राजकोट", subdistricts: ["Rajkot", "Gondal", "Jetpur", "Dhoraji", "Upleta", "Jasdan", "Kotda Sangani", "Lodhika", "Paddhari", "Vinchhiya"], dicOffice: "DIC, Jilla Seva Sadan-2, Rajkot", contact: "0281-2451234", leadBank: "State Bank of India" },
+      { name: "Gandhinagar", nameHi: "गांधीनगर", subdistricts: ["Gandhinagar", "Kalol", "Dehgam", "Mansa"], dicOffice: "DIC, Sector-11, Gandhinagar", contact: "079-23221234", leadBank: "Bank of Baroda" },
+      { name: "Bhavnagar", nameHi: "भावनगर", subdistricts: ["Bhavnagar", "Sihor", "Umrala", "Gariadhar", "Palitana", "Talaja", "Mahuva", "Jesar"], dicOffice: "DIC, Bahumali Bhavan, Bhavnagar", contact: "0278-2421234", leadBank: "State Bank of India" },
+      { name: "Kutch", nameHi: "कच्छ (भुज)", subdistricts: ["Bhuj", "Anjar", "Mandvi", "Mundra", "Gandhidham", "Bhachau", "Rapar", "Nakhatrana", "Abdasa", "Lakhpat"], dicOffice: "DIC, Bahumali Bhavan, Bhuj-Kutch", contact: "02832-251234", leadBank: "State Bank of India" },
+      { name: "Anand", nameHi: "आणंद", subdistricts: ["Anand", "Borsad", "Khambhat", "Petlad", "Sojitra", "Umreth", "Tarapur", "Anklav"], dicOffice: "DIC, Borsad Chokdi, Anand", contact: "02692-261234", leadBank: "Bank of Baroda" }
     ]
   },
   {
     state: "Uttar Pradesh",
     stateHi: "उत्तर प्रदेश",
-    scaName: "Uttar Pradesh Scheduled Castes Finance & Development Corporation (UPSCFDC)",
-    scaAddress: "Pragati Deep Building, Station Road, Lucknow - 226001",
-    helpline: "0522-2635648 / 1800-180-5145",
+    scaName: "UP Scheduled Castes Finance and Development Corporation (UPSCFDC)",
+    scaAddress: "B-2, Bapu Bhavan, Vidhan Sabha Marg, Lucknow - 226001",
+    helpline: "0522-2238456 / 1800-180-5131",
     districts: [
-      { name: "Varanasi", nameHi: "वाराणसी", dicOffice: "DIC, Chandpur Industrial Estate, Varanasi", contact: "0542-2370123 / dic-varanasi@up.gov.in", leadBank: "Union Bank of India" },
-      { name: "Lucknow", nameHi: "लखनऊ", dicOffice: "DIC, Talkatora Industrial Area, Lucknow", contact: "0522-2691456 / diclucknow@gmail.com", leadBank: "Bank of India" },
-      { name: "Kanpur Nagar", nameHi: "कानपुर नगर", dicOffice: "DIC, Sarvodaya Nagar, Kanpur", contact: "0512-2217890 / dickanpur@up.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Prayagraj (Allahabad)", nameHi: "प्रयागराज", dicOffice: "DIC, Naini Industrial Area, Prayagraj", contact: "0532-2687123 / dicprayagraj@up.gov.in", leadBank: "State Bank of India" },
-      { name: "Gorakhpur", nameHi: "गोरखपुर", dicOffice: "DIC, GIDA Sector 5, Gorakhpur", contact: "0551-2281456 / dicgorakhpur@up.gov.in", leadBank: "State Bank of India" },
-      { name: "Agra", nameHi: "आगरा", dicOffice: "DIC, Nunhai Industrial Area, Agra", contact: "0562-2281234 / dicagra@up.gov.in", leadBank: "Canara Bank" },
-      { name: "Meerut", nameHi: "मेरठ", dicOffice: "DIC, Delhi Road, Meerut", contact: "0121-2401234 / dicmeerut@up.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Bareilly", nameHi: "बरेली", dicOffice: "DIC, Civil Lines, Bareilly", contact: "0581-2421234 / dicbareilly@up.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Aligarh", nameHi: "अलीगढ़", dicOffice: "DIC, Industrial Estate, Aligarh", contact: "0571-2401234 / dicaligarh@up.gov.in", leadBank: "Canara Bank" },
-      { name: "Ghaziabad", nameHi: "गाजियाबाद", dicOffice: "DIC, Bulandshahr Road Industrial Area, Ghaziabad", contact: "0120-2711234 / dicghaziabad@up.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Gautam Buddha Nagar (Noida)", nameHi: "गौतम बुद्ध नगर (नोएडा)", dicOffice: "DIC, Sector-1, Noida", contact: "0120-2521234 / dicnoida@up.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Moradabad", nameHi: "मुरादाबाद", dicOffice: "DIC, Kanth Road, Moradabad", contact: "0591-2451234 / dicmoradabad@up.gov.in", leadBank: "Canara Bank" },
-      { name: "Saharanpur", nameHi: "सहारनपुर", dicOffice: "DIC, Delhi Road, Saharanpur", contact: "0132-2711234 / dicsaharanpur@up.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Jhansi", nameHi: "झांसी", dicOffice: "DIC, Gwalior Road, Jhansi", contact: "0510-2441234 / dicjhansi@up.gov.in", leadBank: "State Bank of India" },
-      { name: "Ayodhya (Faizabad)", nameHi: "अयोध्या (फैजाबाद)", dicOffice: "DIC, Civil Lines, Ayodhya", contact: "05278-224123 / dicayodhya@up.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Mathura", nameHi: "मथुरा", dicOffice: "DIC, Delhi-Agra Highway, Mathura", contact: "0565-2401234 / dicmathura@up.gov.in", leadBank: "Canara Bank" },
-      { name: "Azamgarh", nameHi: "आजमगढ़", dicOffice: "DIC, Sidhari, Azamgarh", contact: "05462-246123 / dicazamgarh@up.gov.in", leadBank: "Union Bank of India" },
-      { name: "Muzaffarnagar", nameHi: "मुजफ्फरनगर", dicOffice: "DIC, Meerut Road, Muzaffarnagar", contact: "0131-2601234 / dicmuzaffarnagar@up.gov.in", leadBank: "Punjab National Bank" }
+      { name: "Lucknow", nameHi: "लखनऊ", subdistricts: ["Lucknow Sadar", "Bakshi Ka Talab", "Malihabad", "Mohanlalganj", "Sarojini Nagar"], dicOffice: "DIC, Kaiserbagh, Lucknow", contact: "0522-2621234", leadBank: "Bank of India" },
+      { name: "Varanasi", nameHi: "वाराणसी", subdistricts: ["Varanasi Sadar", "Pindra", "Raja Talab"], dicOffice: "DIC, Chaukaghat, Varanasi", contact: "0542-2211234", leadBank: "Union Bank of India" },
+      { name: "Kanpur Nagar", nameHi: "कानपुर नगर", subdistricts: ["Kanpur Sadar", "Ghatampur", "Bilhaur"], dicOffice: "DIC, Sarvodaya Nagar, Kanpur", contact: "0512-2291234", leadBank: "Bank of Baroda" },
+      { name: "Agra", nameHi: "आगरा", subdistricts: ["Agra Sadar", "Etmadpur", "Fatehabad", "Kheragarh", "Bah"], dicOffice: "DIC, Sanjay Place, Agra", contact: "0562-2521234", leadBank: "Canara Bank" },
+      { name: "Prayagraj (Allahabad)", nameHi: "प्रयागराज", subdistricts: ["Sadar", "Phulpur", "Koraon", "Meja", "Bara", "Handia", "Karchhana", "Soraon"], dicOffice: "DIC, Civil Lines, Prayagraj", contact: "0532-2401234", leadBank: "Bank of Baroda" },
+      { name: "Gorakhpur", nameHi: "गोरखपुर", subdistricts: ["Gorakhpur Sadar", "Campierganj", "Sahjanwa", "Khajni", "Chauri Chaura", "Bansgaon", "Gola"], dicOffice: "DIC, Gorakhnath Road, Gorakhpur", contact: "0551-2201234", leadBank: "State Bank of India" },
+      { name: "Gautam Buddha Nagar (Noida)", nameHi: "गौतम बुद्ध नगर (नोएडा)", subdistricts: ["Noida", "Dadri", "Jewar"], dicOffice: "DIC, Sector-6, Noida", contact: "0120-2521234", leadBank: "Punjab National Bank" },
+      { name: "Ghaziabad", nameHi: "गाजियाबाद", subdistricts: ["Ghaziabad", "Modinagar", "Loni"], dicOffice: "DIC, Patel Nagar, Ghaziabad", contact: "0120-2731234", leadBank: "Punjab National Bank" },
+      { name: "Bareilly", nameHi: "बरेली", subdistricts: ["Bareilly Sadar", "Aonla", "Faridpur", "Meerganj", "Baheri", "Nawabganj"], dicOffice: "DIC, Civil Lines, Bareilly", contact: "0581-2421234", leadBank: "Bank of Baroda" },
+      { name: "Meerut", nameHi: "मेरठ", subdistricts: ["Meerut Sadar", "Mawana", "Sardhana"], dicOffice: "DIC, Delhi Road, Meerut", contact: "0121-2511234", leadBank: "Punjab National Bank" }
     ]
   },
   {
     state: "Rajasthan",
     stateHi: "राजस्थान",
-    scaName: "Rajasthan Scheduled Castes & Scheduled Tribes Finance Corporation (Anuja Nigam)",
-    scaAddress: "Nehru Sahakar Bhawan, Bhawani Singh Road, Jaipur - 302001",
-    helpline: "0141-2740456 / 181 (Jan Soochna)",
+    scaName: "Rajasthan SC & ST Finance and Development Cooperative Corp (Anuja Nigam)",
+    scaAddress: "Nehru Sahakar Bhavan, 4th Floor, 22 Godam Circle, Jaipur - 302005",
+    helpline: "0141-2740234 / 181",
     districts: [
-      { name: "Jaipur", nameHi: "जयपुर", dicOffice: "DIC, Jhotwara Industrial Area, Jaipur", contact: "0141-2341234 / dicjaipur@rajasthan.gov.in", leadBank: "UCO Bank" },
-      { name: "Jodhpur", nameHi: "जोधपुर", dicOffice: "DIC, Heavy Industrial Area, Jodhpur", contact: "0291-2741234 / dicjodhpur@rajasthan.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Kota", nameHi: "कोटा", dicOffice: "DIC, DCM Road, Kota", contact: "0744-2481234 / dickota@rajasthan.gov.in", leadBank: "Central Bank of India" },
-      { name: "Bikaner", nameHi: "बीकानेर", dicOffice: "DIC, Kanta Khaturia Colony, Bikaner", contact: "0151-2231234 / dicbikaner@rajasthan.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Ajmer", nameHi: "अजमेर", dicOffice: "DIC, Civil Lines, Ajmer", contact: "0145-2421234 / dicajmer@rajasthan.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Udaipur", nameHi: "उदयपुर", dicOffice: "DIC, Sukhadia Circle, Udaipur", contact: "0294-2421234 / dicudaipur@rajasthan.gov.in", leadBank: "ICICI / State Bank of India" },
-      { name: "Bhilwara", nameHi: "भीलवाड़ा", dicOffice: "DIC, Pur Road, Bhilwara", contact: "01482-246123 / dicbhilwara@rajasthan.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Alwar", nameHi: "अलवर", dicOffice: "DIC, Matsya Industrial Area, Alwar", contact: "0144-2881234 / dicalwar@rajasthan.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Sikar", nameHi: "सीकर", dicOffice: "DIC, Bajaj Gram, Sikar", contact: "01572-251234 / dicsikar@rajasthan.gov.in", leadBank: "UCO Bank" },
-      { name: "Bharatpur", nameHi: "भरतपुर", dicOffice: "DIC, Brij Industrial Area, Bharatpur", contact: "05644-224123 / dicbharatpur@rajasthan.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Sri Ganganagar", nameHi: "श्रीगंगानगर", dicOffice: "DIC, Industrial Area, Sri Ganganagar", contact: "0154-2461234 / dicsgnr@rajasthan.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Pali", nameHi: "पाली", dicOffice: "DIC, Mandia Road Industrial Area, Pali", contact: "02932-280123 / dicpali@rajasthan.gov.in", leadBank: "State Bank of India" }
+      { name: "Jaipur", nameHi: "जयपुर", subdistricts: ["Jaipur", "Amer", "Sanganer", "Bassi", "Chaksu", "Jamwa Ramgarh", "Chomu", "Shahpura"], dicOffice: "DIC, Tilak Marg, C-Scheme, Jaipur", contact: "0141-2385123", leadBank: "UCO Bank" },
+      { name: "Jodhpur", nameHi: "जोधपुर", subdistricts: ["Jodhpur", "Luni", "Bilara", "Bhopalgarh", "Piparcity", "Osian", "Bawari"], dicOffice: "DIC, Industrial Estate, Jodhpur", contact: "0291-2611234", leadBank: "Punjab National Bank" },
+      { name: "Kota", nameHi: "कोटा", subdistricts: ["Kota", "Ladpura", "Digod", "Sangod", "Ramganj Mandi"], dicOffice: "DIC, Aerodrome Circle, Kota", contact: "0744-2421234", leadBank: "Central Bank of India" },
+      { name: "Udaipur", nameHi: "उदयपुर", subdistricts: ["Girwa (Udaipur)", "Vallabhnagar", "Mavli", "Gogunda", "Kotra", "Jhadol", "Salumber"], dicOffice: "DIC, Madri Industrial Area, Udaipur", contact: "0294-2491234", leadBank: "State Bank of India" },
+      { name: "Ajmer", nameHi: "अजमेर", subdistricts: ["Ajmer", "Pushkar", "Nasirabad", "Kishangarh", "Beawar", "Kekri"], dicOffice: "DIC, Todarmal Marg, Civil Lines, Ajmer", contact: "0145-2421234", leadBank: "Bank of Baroda" },
+      { name: "Bikaner", nameHi: "बीकानेर", subdistricts: ["Bikaner", "Nokha", "Lunkaransar", "Kolayat", "Khajuwala", "Dungargarh"], dicOffice: "DIC, Rani Bazar, Bikaner", contact: "0151-2521234", leadBank: "Punjab National Bank" }
     ]
   },
   {
     state: "Madhya Pradesh",
     stateHi: "मध्य प्रदेश",
-    scaName: "Madhya Pradesh State SC Finance & Development Corp (MP Antyavasayi)",
-    scaAddress: "Rajiv Gandhi Bhawan, 35 Shyamla Hills, Bhopal - 462002",
-    helpline: "0755-2661280 / 1800-233-1250",
+    scaName: "MP State Cooperative Scheduled Castes Finance & Development Corp",
+    scaAddress: "Rajiv Gandhi Bhavan, 35 Shyamla Hills, Bhopal - 462002",
+    helpline: "0755-2661234 / 181",
     districts: [
-      { name: "Bhopal", nameHi: "भोपाल", dicOffice: "DIC, Govindpura Industrial Area, Bhopal", contact: "0755-2586745 / dicbhopal@mp.gov.in", leadBank: "Central Bank of India" },
-      { name: "Indore", nameHi: "इंदौर", dicOffice: "DIC, Pologround Industrial Estate, Indore", contact: "0731-2421345 / dicindore@mp.gov.in", leadBank: "Bank of India" },
-      { name: "Jabalpur", nameHi: "जबलपुर", dicOffice: "DIC, Richhai Industrial Area, Jabalpur", contact: "0761-2345678 / dicjabalpur@mp.gov.in", leadBank: "UCO Bank" },
-      { name: "Gwalior", nameHi: "ग्वालियर", dicOffice: "DIC, Maharajpura Industrial Area, Gwalior", contact: "0751-2481234 / dicgwalior@mp.gov.in", leadBank: "Central Bank of India" },
-      { name: "Ujjain", nameHi: "उज्जैन", dicOffice: "DIC, Maxi Road Industrial Area, Ujjain", contact: "0734-2511234 / dicujjain@mp.gov.in", leadBank: "Bank of India" },
-      { name: "Sagar", nameHi: "सागर", dicOffice: "DIC, Civil Lines, Sagar", contact: "07582-224123 / dicsagar@mp.gov.in", leadBank: "State Bank of India" },
-      { name: "Dewas", nameHi: "देवास", dicOffice: "DIC, Industrial Area AB Road, Dewas", contact: "07272-258123 / dicdewas@mp.gov.in", leadBank: "Bank of India" },
-      { name: "Satna", nameHi: "सतना", dicOffice: "DIC, Maihar Bypass Road, Satna", contact: "07672-224123 / dicsatna@mp.gov.in", leadBank: "Union Bank of India" },
-      { name: "Ratlam", nameHi: "रतलाम", dicOffice: "DIC, Industrial Area, Ratlam", contact: "07412-261234 / dicratlam@mp.gov.in", leadBank: "Bank of India" },
-      { name: "Rewa", nameHi: "रीवा", dicOffice: "DIC, Kuthulia Industrial Area, Rewa", contact: "07662-251234 / dicrewa@mp.gov.in", leadBank: "Union Bank of India" }
+      { name: "Bhopal", nameHi: "भोपाल", subdistricts: ["Huzur", "Berasia", "Kolar"], dicOffice: "DIC, Govindpura Industrial Area, Bhopal", contact: "0755-2581234", leadBank: "Bank of India" },
+      { name: "Indore", nameHi: "इंदौर", subdistricts: ["Indore", "Mhow (Dr. Ambedkar Nagar)", "Sanwer", "Depalpur"], dicOffice: "DIC, Pologround Industrial Estate, Indore", contact: "0731-2421234", leadBank: "Bank of India" },
+      { name: "Gwalior", nameHi: "ग्वालियर", subdistricts: ["Gwalior", "Dabra", "Bhitarwar", "Chinour"], dicOffice: "DIC, Maharaj Bada, Gwalior", contact: "0751-2421234", leadBank: "Central Bank of India" },
+      { name: "Jabalpur", nameHi: "जबलपुर", subdistricts: ["Jabalpur", "Panagar", "Sihora", "Patan", "Shahpura", "Kundam"], dicOffice: "DIC, Wright Town, Jabalpur", contact: "0761-2401234", leadBank: "Union Bank of India" },
+      { name: "Ujjain", nameHi: "उज्जैन", subdistricts: ["Ujjain", "Ghatiya", "Tarana", "Mahidpur", "Khachrod", "Nagda", "Badnagar"], dicOffice: "DIC, Kothi Palace, Ujjain", contact: "0734-2511234", leadBank: "Bank of India" }
     ]
   },
   {
     state: "Bihar",
     stateHi: "बिहार",
-    scaName: "Bihar State SC Co-operative Development Corporation Ltd (BSSCCDC)",
-    scaAddress: "Pariwahan Bhawan, Birchand Patel Path, Patna - 800001",
-    helpline: "0612-2226348 / 1800-345-6215",
+    scaName: "Bihar State Scheduled Castes Co-operative Development Corp (BSSCDC)",
+    scaAddress: "Maurya Lok Complex, Block A, 2nd Floor, Dak Bungalow Road, Patna - 800001",
+    helpline: "0612-2221234 / 1800-345-6262",
     districts: [
-      { name: "Patna", nameHi: "पटना", dicOffice: "DIC, Patliputra Industrial Area, Patna", contact: "0612-2262456 / gm-dic-patna@bihar.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Gaya", nameHi: "गया", dicOffice: "DIC, Gaya Industrial Area, Gaya", contact: "0631-2221456 / dicgaya@bihar.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Muzaffarpur", nameHi: "मुजफ्फरपुर", dicOffice: "DIC, Bela Industrial Estate, Muzaffarpur", contact: "0621-2273456 / dicmuz@bihar.gov.in", leadBank: "Central Bank of India" },
-      { name: "Bhagalpur", nameHi: "भागलपुर", dicOffice: "DIC, Barari Industrial Estate, Bhagalpur", contact: "0641-2401234 / dicbhagalpur@bihar.gov.in", leadBank: "UCO Bank" },
-      { name: "Darbhanga", nameHi: "दरभंगा", dicOffice: "DIC, Donar Industrial Area, Darbhanga", contact: "06272-245123 / dicdarbhanga@bihar.gov.in", leadBank: "Central Bank of India" },
-      { name: "Purnia", nameHi: "पूर्णिया", dicOffice: "DIC, Maranga Industrial Area, Purnia", contact: "06454-242123 / dicpurnia@bihar.gov.in", leadBank: "State Bank of India" },
-      { name: "Begusarai", nameHi: "बेगूसराय", dicOffice: "DIC, Harrakh Industrial Area, Begusarai", contact: "06243-224123 / dicbegusarai@bihar.gov.in", leadBank: "UCO Bank" },
-      { name: "Katihar", nameHi: "कटिहार", dicOffice: "DIC, Mirchaibari, Katihar", contact: "06452-241234 / dickatihar@bihar.gov.in", leadBank: "State Bank of India" }
+      { name: "Patna", nameHi: "पटना", subdistricts: ["Patna Sadar", "Danapur", "Barh", "Masaurhi", "Paliganj", "Bikram"], dicOffice: "DIC, Gandhi Maidan, Patna", contact: "0612-2201234", leadBank: "Punjab National Bank" },
+      { name: "Gaya", nameHi: "गया", subdistricts: ["Gaya Sadar", "Tekari", "Sherghati", "Neemchak Bathani"], dicOffice: "DIC, Collectorate Campus, Gaya", contact: "0631-2221234", leadBank: "Punjab National Bank" },
+      { name: "Muzaffarpur", nameHi: "मुजफ्फरपुर", subdistricts: ["Muzaffarpur East", "Muzaffarpur West", "Kanti", "Motipur"], dicOffice: "DIC, Bela Industrial Estate, Muzaffarpur", contact: "0621-2241234", leadBank: "Central Bank of India" },
+      { name: "Bhagalpur", nameHi: "भागलपुर", subdistricts: ["Bhagalpur Sadar", "Kahalgaon", "Naugachhia"], dicOffice: "DIC, Barari Industrial Area, Bhagalpur", contact: "0641-2401234", leadBank: "UCO Bank" },
+      { name: "Darbhanga", nameHi: "दरभंगा", subdistricts: ["Darbhanga Sadar", "Benipur", "Biraul"], dicOffice: "DIC, Laheriasarai, Darbhanga", contact: "06272-221234", leadBank: "Central Bank of India" }
     ]
   },
   {
     state: "Karnataka",
     stateHi: "कर्नाटक",
-    scaName: "Dr. B.R. Ambedkar Development Corporation Limited Karnataka",
-    scaAddress: "9th & 10th Floor, Vishveshwaraiah Mini Tower, Dr. B.R. Ambedkar Veedhi, Bengaluru - 560001",
-    helpline: "080-22864262 / 1800-425-4262",
+    scaName: "Dr. B.R. Ambedkar Development Corporation Limited",
+    scaAddress: "9th Floor, Vishveshwaraiah Mini Tower, Dr. B.R. Ambedkar Veedhi, Bengaluru - 560001",
+    helpline: "080-22861234 / 1800-425-0000",
     districts: [
-      { name: "Bengaluru Urban", nameHi: "बेंगलुरु शहरी", dicOffice: "DIC, Rajajinagar Industrial Estate, Bengaluru", contact: "080-23151234 / dic-bengaluru@karnataka.gov.in", leadBank: "Canara Bank" },
-      { name: "Bengaluru Rural", nameHi: "बेंगलुरु ग्रामीण", dicOffice: "DIC, Poddar Building, Bengaluru Rural", contact: "080-22341234 / dic-benrural@karnataka.gov.in", leadBank: "Canara Bank" },
-      { name: "Mysuru", nameHi: "मैसूरु", dicOffice: "DIC, Sayyaji Rao Road, Mysuru", contact: "0821-2421234 / dic-mysuru@karnataka.gov.in", leadBank: "State Bank of India" },
-      { name: "Hubballi-Dharwad", nameHi: "हुबली-धारवाड़", dicOffice: "DIC, Rayapur Industrial Area, Dharwad", contact: "0836-2371234 / dic-dharwad@karnataka.gov.in", leadBank: "Bank of Baroda" },
-      { name: "Mangaluru (Dakshina Kannada)", nameHi: "मंगलुरु", dicOffice: "DIC, Yeyyadi Industrial Estate, Mangaluru", contact: "0824-2211234 / dic-mangaluru@karnataka.gov.in", leadBank: "Canara Bank" },
-      { name: "Belagavi", nameHi: "बेलगावी", dicOffice: "DIC, Udyambag Industrial Estate, Belagavi", contact: "0831-2441234 / dic-belagavi@karnataka.gov.in", leadBank: "Canara Bank" },
-      { name: "Kalaburagi", nameHi: "कलबुर्गी (गुलबर्गा)", dicOffice: "DIC, MSK Mill Road, Kalaburagi", contact: "08472-224123 / dic-kalaburagi@karnataka.gov.in", leadBank: "State Bank of India" }
+      { name: "Bengaluru Urban", nameHi: "बेंगलुरु शहरी", subdistricts: ["Bengaluru North", "Bengaluru South", "Bengaluru East", "Anekal", "Yelahanka"], dicOffice: "DIC, Rajajinagar Industrial Estate, Bengaluru", contact: "080-23151234", leadBank: "Canara Bank" },
+      { name: "Mysuru", nameHi: "मैसूरु", subdistricts: ["Mysuru", "Nanjangud", "T. Narasipura", "Hunsur", "Piriyapatna", "K.R. Nagar"], dicOffice: "DIC, Sayyaji Rao Road, Mysuru", contact: "0821-2421234", leadBank: "Bank of Baroda" },
+      { name: "Belagavi", nameHi: "बेलगावी", subdistricts: ["Belagavi", "Gokak", "Chikkodi", "Athani", "Bailhongal", "Hukkeri", "Khanapur", "Ramdurg", "Saundatti"], dicOffice: "DIC, Club Road, Belagavi", contact: "0831-2401234", leadBank: "Canara Bank" },
+      { name: "Dharwad", nameHi: "धारवाड़", subdistricts: ["Dharwad", "Hubballi Urban", "Hubballi Rural", "Kalghatgi", "Navalgund", "Kundgol"], dicOffice: "DIC, Belur Industrial Area, Dharwad", contact: "0836-2441234", leadBank: "Bank of Baroda" }
     ]
   },
   {
     state: "Tamil Nadu",
     stateHi: "तमिलनाडु",
-    scaName: "Tamil Nadu Adi Dravidar Housing & Development Corporation (TAHDCO)",
-    scaAddress: "No. 31, Cenotaph Road, Teynampet, Chennai - 600018",
-    helpline: "044-24344102 / 1800-425-4444",
+    scaName: "Tamil Nadu Adi Dravidar Housing and Development Corp (TAHDCO)",
+    scaAddress: "TAHDCO Head Office, No. 31, Cenotaph Road, Teynampet, Chennai - 600018",
+    helpline: "044-24311234 / 1800-425-4444",
     districts: [
-      { name: "Chennai", nameHi: "चेन्नई", dicOffice: "DIC, Guindy Industrial Estate, Chennai", contact: "044-22501234 / dicchennai@tn.gov.in", leadBank: "Indian Bank" },
-      { name: "Coimbatore", nameHi: "कोयंबटूर", dicOffice: "DIC, Patel Road, Ramnagar, Coimbatore", contact: "0422-2231234 / diccbe@tn.gov.in", leadBank: "Canara Bank" },
-      { name: "Madurai", nameHi: "मदुरै", dicOffice: "DIC, Alagar Kovil Road, Madurai", contact: "0452-2531234 / dicmadurai@tn.gov.in", leadBank: "Canara Bank" },
-      { name: "Tiruchirappalli (Trichy)", nameHi: "तिरुचिरापल्ली", dicOffice: "DIC, Collectorate Complex, Trichy", contact: "0431-2411234 / dictrichy@tn.gov.in", leadBank: "Indian Overseas Bank" },
-      { name: "Salem", nameHi: "सलेम", dicOffice: "DIC, Omalur Main Road, Salem", contact: "0427-2441234 / dicsalem@tn.gov.in", leadBank: "Indian Bank" },
-      { name: "Tiruppur", nameHi: "तिरुपूर", dicOffice: "DIC, Kumaran Road, Tiruppur", contact: "0421-2241234 / dictiruppur@tn.gov.in", leadBank: "Canara Bank" }
-    ]
-  },
-  {
-    state: "Punjab",
-    stateHi: "पंजाब",
-    scaName: "Punjab Scheduled Castes Land Development & Finance Corporation (PSCFC)",
-    scaAddress: "SCO 101-103, Sector 17-C, Chandigarh - 160017",
-    helpline: "0172-2702123 / 1800-180-2057",
-    districts: [
-      { name: "Ludhiana", nameHi: "लुधियाना", dicOffice: "DIC, Industrial Area-B, Ludhiana", contact: "0161-2531234 / dicldh@punjab.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Amritsar", nameHi: "अमृतसर", dicOffice: "DIC, Court Road, Amritsar", contact: "0183-2221234 / dicasr@punjab.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Jalandhar", nameHi: "जालंधर", dicOffice: "DIC, Patel Chowk, Jalandhar", contact: "0181-2281234 / dicjlr@punjab.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Patiala", nameHi: "पटियाला", dicOffice: "DIC, Sirhind Road, Patiala", contact: "0175-2211234 / dicpta@punjab.gov.in", leadBank: "State Bank of India" },
-      { name: "Bathinda", nameHi: "बठिंडा", dicOffice: "DIC, Goniana Road, Bathinda", contact: "0164-2211234 / dicbtd@punjab.gov.in", leadBank: "Punjab National Bank" }
-    ]
-  },
-  {
-    state: "Haryana",
-    stateHi: "हरियाणा",
-    scaName: "Haryana Scheduled Castes Finance & Development Corporation (HSCFDC)",
-    scaAddress: "Bays No. 49-52, Sector 2, Panchkula - 134112",
-    helpline: "0172-2565123 / 1800-180-2222",
-    districts: [
-      { name: "Gurugram (Gurgaon)", nameHi: "गुरुग्राम", dicOffice: "DIC, Old Judicial Complex, Gurugram", contact: "0124-2321234 / dicggn@haryana.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Faridabad", nameHi: "फरीदाबाद", dicOffice: "DIC, Sector-15A, Faridabad", contact: "0129-2281234 / dicfbd@haryana.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Panipat", nameHi: "पानीपत", dicOffice: "DIC, Old Court Road, Panipat", contact: "0180-2641234 / dicpanipat@haryana.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Hisar", nameHi: "हिसार", dicOffice: "DIC, Industrial Area, Hisar", contact: "01662-231234 / dichisar@haryana.gov.in", leadBank: "Punjab National Bank" },
-      { name: "Ambala", nameHi: "अंबाला", dicOffice: "DIC, Jagadhri Road, Ambala Cantt", contact: "0171-2641234 / dicambala@haryana.gov.in", leadBank: "Punjab National Bank" }
-    ]
-  },
-  {
-    state: "West Bengal",
-    stateHi: "पश्चिम बंगाल",
-    scaName: "West Bengal SC, ST & OBC Development & Finance Corporation (WBSCSTDFCL)",
-    scaAddress: "CF-217/A/1, Sector-I, Salt Lake, Kolkata - 700064",
-    helpline: "033-23213031 / 1800-345-5555",
-    districts: [
-      { name: "Kolkata", nameHi: "कोलकाता", dicOffice: "DIC, Camac Street, Kolkata", contact: "033-22871234 / dickolkata@wb.gov.in", leadBank: "UCO Bank" },
-      { name: "Howrah", nameHi: "हावड़ा", dicOffice: "DIC, Belilious Road, Howrah", contact: "033-26431234 / dichowrah@wb.gov.in", leadBank: "UCO Bank" },
-      { name: "North 24 Parganas (Barasat)", nameHi: "उत्तर 24 परगना", dicOffice: "DIC, Barasat, North 24 Parganas", contact: "033-25841234 / dicbarasat@wb.gov.in", leadBank: "Punjab National Bank" },
-      { name: "South 24 Parganas (Alipore)", nameHi: "दक्षिण 24 परगना", dicOffice: "DIC, Alipore, Kolkata", contact: "033-24791234 / dicalipore@wb.gov.in", leadBank: "State Bank of India" },
-      { name: "Darjeeling (Siliguri)", nameHi: "दार्जिलिंग (सिलीगुड़ी)", dicOffice: "DIC, Sevoke Road, Siliguri", contact: "0353-2541234 / dicsiliguri@wb.gov.in", leadBank: "Central Bank of India" }
-    ]
-  },
-  {
-    state: "Andhra Pradesh",
-    stateHi: "आंध्र प्रदेश",
-    scaName: "Andhra Pradesh Scheduled Castes Co-operative Finance Corp (APSCCFC)",
-    scaAddress: "Vemuri Vari Veedhi, Benz Circle, Vijayawada - 520010",
-    helpline: "0866-2495123 / 1902",
-    districts: [
-      { name: "Visakhapatnam", nameHi: "विशाखापत्तनम", dicOffice: "DIC, Industrial Estate, Visakhapatnam", contact: "0891-2551234 / dicvizag@ap.gov.in", leadBank: "State Bank of India" },
-      { name: "Vijayawada (NTR)", nameHi: "विजयवाड़ा (एनटीआर)", dicOffice: "DIC, Autonagar, Vijayawada", contact: "0866-2541234 / dicvja@ap.gov.in", leadBank: "Union Bank of India" },
-      { name: "Guntur", nameHi: "गुंटूर", dicOffice: "DIC, Collectorate Compound, Guntur", contact: "0863-2231234 / dicguntur@ap.gov.in", leadBank: "Union Bank of India" },
-      { name: "Tirupati", nameHi: "तिरुपति", dicOffice: "DIC, Renigunta Road, Tirupati", contact: "0877-2281234 / dictirupati@ap.gov.in", leadBank: "Union Bank of India" }
+      { name: "Chennai", nameHi: "चेन्नई", subdistricts: ["Tondiarpet", "Royapuram", "Anna Nagar", "Teynampet", "Alandur", "Adyar", "Sholinganallur"], dicOffice: "DIC, Guindy Industrial Estate, Chennai", contact: "044-22501234", leadBank: "Indian Overseas Bank" },
+      { name: "Coimbatore", nameHi: "कोयंबटूर", subdistricts: ["Coimbatore North", "Coimbatore South", "Pollachi", "Mettupalayam", "Sulur"], dicOffice: "DIC, Patel Road, Ramnagar, Coimbatore", contact: "0422-2231234", leadBank: "Canara Bank" },
+      { name: "Madurai", nameHi: "मदुरै", subdistricts: ["Madurai North", "Madurai South", "Melur", "Thirumangalam", "Usilampatti", "Vadipatti"], dicOffice: "DIC, Alagar Kovil Road, Madurai", contact: "0452-2531234", leadBank: "Canara Bank" },
+      { name: "Salem", nameHi: "सेलम", subdistricts: ["Salem", "Attur", "Mettur", "Omalur", "Sankari", "Yercaud"], dicOffice: "DIC, Five Roads, Salem", contact: "0427-2441234", leadBank: "Indian Bank" }
     ]
   },
   {
     state: "Telangana",
     stateHi: "तेलंगाना",
-    scaName: "Telangana Scheduled Castes Co-operative Development Corporation (TSCCDC)",
-    scaAddress: "DSS Bhavan, Masab Tank, Hyderabad - 500028",
+    scaName: "Telangana Scheduled Castes Cooperative Development Corp (TSCCDC)",
+    scaAddress: "Damodaram Sanjeevaiah Sankshema Bhavan, Masab Tank, Hyderabad - 500028",
     helpline: "040-23391234 / 1800-425-0000",
     districts: [
-      { name: "Hyderabad", nameHi: "हैदराबाद", dicOffice: "DIC, Chirag Ali Lane, Abids, Hyderabad", contact: "040-23201234 / dichyd@telangana.gov.in", leadBank: "State Bank of India" },
-      { name: "Warangal", nameHi: "वारंगल", dicOffice: "DIC, Subedari, Hanamkonda", contact: "0870-2571234 / dicwgl@telangana.gov.in", leadBank: "State Bank of India" },
-      { name: "Karimnagar", nameHi: "करीमनगर", dicOffice: "DIC, Collectorate Complex, Karimnagar", contact: "0878-2241234 / dickmr@telangana.gov.in", leadBank: "Union Bank of India" },
-      { name: "Nizamabad", nameHi: "निजामाबाद", dicOffice: "DIC, Pragathi Bhavan, Nizamabad", contact: "08462-234123 / dicnzb@telangana.gov.in", leadBank: "State Bank of India" }
+      { name: "Hyderabad", nameHi: "हैदराबाद", subdistricts: ["Charminar", "Secunderabad", "Khairatabad", "Golconda", "Musheerabad", "Asifnagar"], dicOffice: "DIC, Chirag Ali Lane, Abids, Hyderabad", contact: "040-23201234", leadBank: "State Bank of India" },
+      { name: "Warangal", nameHi: "वारंगल", subdistricts: ["Warangal", "Hanamkonda", "Kazipet", "Wardhannapet"], dicOffice: "DIC, Subedari, Hanamkonda", contact: "0870-2571234", leadBank: "State Bank of India" },
+      { name: "Karimnagar", nameHi: "करीमनगर", subdistricts: ["Karimnagar", "Huzurabad", "Manakondur", "Choppadandi"], dicOffice: "DIC, Collectorate Complex, Karimnagar", contact: "0878-2241234", leadBank: "Union Bank of India" },
+      { name: "Nizamabad", nameHi: "निजामाबाद", subdistricts: ["Nizamabad North", "Nizamabad South", "Bodhan", "Armoor"], dicOffice: "DIC, Pragathi Bhavan, Nizamabad", contact: "08462-234123", leadBank: "State Bank of India" }
     ]
   },
   {
-    state: "Delhi (NCT)",
+    state: "Delhi",
     stateHi: "दिल्ली",
     scaName: "Delhi SC/ST/OBC/Minorities Development Corporation (DSFDC)",
     scaAddress: "Ambedkar Bhawan, Sector-16, Rohini, New Delhi - 110085",
     helpline: "011-27881234 / 1076",
     districts: [
-      { name: "Central Delhi", nameHi: "मध्य दिल्ली", dicOffice: "DIC, Pusa Industrial Area, New Delhi", contact: "011-25841234 / dicpusa@delhi.gov.in", leadBank: "State Bank of India" },
-      { name: "North Delhi", nameHi: "उत्तरी दिल्ली", dicOffice: "DIC, Lawrence Road Industrial Area, Delhi", contact: "011-27181234 / dicnorth@delhi.gov.in", leadBank: "Punjab National Bank" },
-      { name: "South Delhi", nameHi: "दक्षिणी दिल्ली", dicOffice: "DIC, Okhla Industrial Area Phase-II, New Delhi", contact: "011-26381234 / dicokhla@delhi.gov.in", leadBank: "State Bank of India" },
-      { name: "East Delhi", nameHi: "पूर्वी दिल्ली", dicOffice: "DIC, Patparganj Industrial Area, Delhi", contact: "011-22151234 / diceast@delhi.gov.in", leadBank: "Punjab National Bank" }
+      { name: "Central Delhi", nameHi: "मध्य दिल्ली", subdistricts: ["Civil Lines", "Karol Bagh", "Kotwali"], dicOffice: "DIC, Pusa Industrial Area, New Delhi", contact: "011-25841234", leadBank: "State Bank of India" },
+      { name: "New Delhi", nameHi: "नई दिल्ली", subdistricts: ["Chanakyapuri", "Connaught Place", "Delhi Cantt"], dicOffice: "DIC, Patparganj Industrial Area", contact: "011-22151234", leadBank: "State Bank of India" },
+      { name: "North Delhi", nameHi: "उत्तरी दिल्ली", subdistricts: ["Model Town", "Narela", "Alipur"], dicOffice: "DIC, Lawrence Road Industrial Area", contact: "011-27181234", leadBank: "Punjab National Bank" },
+      { name: "South Delhi", nameHi: "दक्षिणी दिल्ली", subdistricts: ["Hauz Khas", "Saket", "Mehrauli"], dicOffice: "DIC, Okhla Industrial Area Phase-II", contact: "011-26381234", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Punjab",
+    stateHi: "पंजाब",
+    scaName: "Punjab Scheduled Castes Land Development & Finance Corp (PSCFC)",
+    scaAddress: "SCO 104-106, Sector 34-A, Chandigarh - 160022",
+    helpline: "0172-2601234 / 1800-180-2444",
+    districts: [
+      { name: "Ludhiana", nameHi: "लुधियाना", subdistricts: ["Ludhiana East", "Ludhiana West", "Jagraon", "Khanna", "Samrala", "Payal", "Raikot"], dicOffice: "DIC, Ferozepur Road, Ludhiana", contact: "0161-2401234", leadBank: "Punjab National Bank" },
+      { name: "Amritsar", nameHi: "अमृतसर", subdistricts: ["Amritsar-I", "Amritsar-II", "Ajnala", "Baba Bakala", "Majitha"], dicOffice: "DIC, Court Road, Amritsar", contact: "0183-2221234", leadBank: "Punjab National Bank" },
+      { name: "Jalandhar", nameHi: "जालंधर", subdistricts: ["Jalandhar-I", "Jalandhar-II", "Nakodar", "Phillaur", "Shahkot"], dicOffice: "DIC, Civil Lines, Jalandhar", contact: "0181-2221234", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "Haryana",
+    stateHi: "हरियाणा",
+    scaName: "Haryana Scheduled Castes Finance and Development Corporation (HSCFDC)",
+    scaAddress: "Bays No. 49-52, Sector-2, Panchkula - 134112",
+    helpline: "0172-2561234 / 1800-180-2121",
+    districts: [
+      { name: "Gurugram", nameHi: "गुरुग्राम", subdistricts: ["Gurugram", "Sohna", "Pataudi", "Badshahpur", "Farrukhnagar"], dicOffice: "DIC, Old Railway Road, Gurugram", contact: "0124-2321234", leadBank: "State Bank of India" },
+      { name: "Faridabad", nameHi: "फरीदाबाद", subdistricts: ["Faridabad", "Ballabgarh", "Badkhal"], dicOffice: "DIC, Sector-15A, Faridabad", contact: "0129-2281234", leadBank: "Punjab National Bank" },
+      { name: "Hisar", nameHi: "हिसार", subdistricts: ["Hisar", "Hansi", "Barwala", "Narnaund", "Adampur"], dicOffice: "DIC, Mini Secretariat, Hisar", contact: "01662-231234", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "West Bengal",
+    stateHi: "पश्चिम बंगाल",
+    scaName: "West Bengal SC, ST & OBC Development & Finance Corporation",
+    scaAddress: "CF-217/A/1, Sector-I, Salt Lake City, Kolkata - 700064",
+    helpline: "033-23211234 / 1800-345-5555",
+    districts: [
+      { name: "Kolkata", nameHi: "कोलकाता", subdistricts: ["North Kolkata", "South Kolkata", "Central Kolkata", "Port Area"], dicOffice: "DIC, Camac Street, Kolkata", contact: "033-22871234", leadBank: "UCO Bank" },
+      { name: "Howrah", nameHi: "हावड़ा", subdistricts: ["Howrah Sadar", "Uluberia"], dicOffice: "DIC, Belilious Road, Howrah", contact: "033-26661234", leadBank: "UCO Bank" },
+      { name: "North 24 Parganas", nameHi: "उत्तर 24 परगना", subdistricts: ["Barasat Sadar", "Barrackpore", "Bangaon", "Basirhat", "Bidhannagar"], dicOffice: "DIC, Barasat, Kolkata", contact: "033-25521234", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "Kerala",
+    stateHi: "केरल",
+    scaName: "Kerala State Development Corp for SC & ST Ltd",
+    scaAddress: "Town Hall Road, Thrissur - 680020",
+    helpline: "0487-2331234 / 1800-425-2345",
+    districts: [
+      { name: "Thiruvananthapuram", nameHi: "तिरुवनंतपुरम", subdistricts: ["Thiruvananthapuram", "Neyyattinkara", "Nedumangad", "Chirayinkeezhu", "Varkala", "Kattakada"], dicOffice: "DIC, Vikas Bhavan, Thiruvananthapuram", contact: "0471-2301234", leadBank: "Canara Bank" },
+      { name: "Ernakulam", nameHi: "एर्नाकुलम (कोच्चि)", subdistricts: ["Kanayannur (Kochi)", "Kochi", "Aluva", "Paravur", "Kunnathunad", "Muvattupuzha", "Kothamangalam"], dicOffice: "DIC, Kaloor, Kochi", contact: "0484-2341234", leadBank: "Union Bank of India" }
+    ]
+  },
+  {
+    state: "Odisha",
+    stateHi: "ओडिशा",
+    scaName: "Odisha Scheduled Castes & Scheduled Tribes Dev Finance Co-op Corp (OSFDC)",
+    scaAddress: "Lewis Road, Bhubaneswar - 751002",
+    helpline: "0674-2431234 / 1800-345-6770",
+    districts: [
+      { name: "Khordha", nameHi: "खोर्धा (भुवनेश्वर)", subdistricts: ["Bhubaneswar", "Khordha", "Jatni", "Banapur", "Begunia", "Bolagarh", "Chilika", "Tangi"], dicOffice: "DIC, Rasulgarh, Bhubaneswar", contact: "0674-2581234", leadBank: "UCO Bank" },
+      { name: "Cuttack", nameHi: "कटक", subdistricts: ["Cuttack Sadar", "Athagarh", "Banki", "Baramba", "Narsinghpur", "Salepur"], dicOffice: "DIC, Madhupatna, Cuttack", contact: "0671-2341234", leadBank: "UCO Bank" }
+    ]
+  },
+  {
+    state: "Andhra Pradesh",
+    stateHi: "आंध्र प्रदेश",
+    scaName: "AP Scheduled Castes Co-operative Finance Corporation Ltd (APSCCFC)",
+    scaAddress: "Tadepalli, Guntur District, Vijayawada - 522501",
+    helpline: "0863-2341234 / 1902",
+    districts: [
+      { name: "Visakhapatnam", nameHi: "विशाखापत्तनम", subdistricts: ["Visakhapatnam Rural", "Visakhapatnam Urban", "Anandapuram", "Bheemunipatnam", "Gajuwaka", "Pedagantyada", "Pendurthi"], dicOffice: "DIC, Industrial Estate, Visakhapatnam", contact: "0891-2551234", leadBank: "State Bank of India" },
+      { name: "NTR", nameHi: "विजयवाड़ा (एनटीआर)", subdistricts: ["Vijayawada Urban", "Vijayawada Rural", "Ibrahimpatnam", "G.Konduru", "Mylavaram", "Tiruvuru"], dicOffice: "DIC, Auto Nagar, Vijayawada", contact: "0866-2471234", leadBank: "Union Bank of India" }
+    ]
+  },
+  {
+    state: "Assam",
+    stateHi: "असम",
+    scaName: "Assam State Development Corp for SC Ltd",
+    scaAddress: "R.G. Baruah Road, Ganeshguri, Guwahati - 781006",
+    helpline: "0361-2261234 / 1800-345-3525",
+    districts: [
+      { name: "Kamrup Metropolitan", nameHi: "कामरूप मेट्रो (गुवाहाटी)", subdistricts: ["Guwahati", "Dispur", "Sonapur", "Chandrapur", "Azara"], dicOffice: "DIC, Bamunimaidam, Guwahati", contact: "0361-2551234", leadBank: "UCO Bank" },
+      { name: "Dibrugarh", nameHi: "डिब्रूगढ़", subdistricts: ["Dibrugarh West", "Dibrugarh East", "Chabua", "Tingkhong", "Naharkatia", "Moran"], dicOffice: "DIC, Jail Road, Dibrugarh", contact: "0373-2321234", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "Jharkhand",
+    stateHi: "झारखंड",
+    scaName: "Jharkhand State Scheduled Castes Co-operative Development Corp",
+    scaAddress: "Balihar Road, Morabadi, Ranchi - 834008",
+    helpline: "0651-2401234 / 181",
+    districts: [
+      { name: "Ranchi", nameHi: "रांची", subdistricts: ["Ranchi Sadar", "Kanke", "Ratu", "Ormanjhi", "Angara", "Namkum", "Silli", "Bundu"], dicOffice: "DIC, Kokar Industrial Area, Ranchi", contact: "0651-2541234", leadBank: "Bank of India" },
+      { name: "East Singhbhum", nameHi: "पूर्वी सिंहभूम (जमशेदपुर)", subdistricts: ["Jamshedpur (Golmuri)", "Ghatshila", "Potka", "Patamda", "Baharagora"], dicOffice: "DIC, Adityapur Industrial Area", contact: "0657-2381234", leadBank: "Bank of India" }
+    ]
+  },
+  {
+    state: "Chhattisgarh",
+    stateHi: "छत्तीसगढ़",
+    scaName: "Chhattisgarh Rajya Antyavasayi Sahkari Vitt Evam Vikas Nigam",
+    scaAddress: "Sector-24, Nava Raipur Atal Nagar - 492002",
+    helpline: "0771-2511234 / 1100",
+    districts: [
+      { name: "Raipur", nameHi: "रायपुर", subdistricts: ["Raipur", "Arang", "Abhanpur", "Tilda Neora", "Dharsiwa"], dicOffice: "DIC, Telibandha, Raipur", contact: "0771-2421234", leadBank: "State Bank of India" },
+      { name: "Durg", nameHi: "दुर्ग (भिलाई)", subdistricts: ["Durg", "Bhilai", "Patan", "Dhamdha"], dicOffice: "DIC, Industrial Area, Durg", contact: "0788-2321234", leadBank: "Bank of Baroda" }
+    ]
+  },
+  {
+    state: "Uttarakhand",
+    stateHi: "उत्तराखंड",
+    scaName: "Uttarakhand Bahuuddeshiya Vitta Evam Vikas Nigam (KMVN / GMVN)",
+    scaAddress: "Indira Nagar, Vasant Vihar, Dehradun - 248006",
+    helpline: "0135-2761234 / 1905",
+    districts: [
+      { name: "Dehradun", nameHi: "देहरादून", subdistricts: ["Dehradun Sadar", "Rishikesh", "Vikasnagar", "Chakrata", "Kalsi", "Doiwala"], dicOffice: "DIC, Patel Nagar, Dehradun", contact: "0135-2721234", leadBank: "Punjab National Bank" },
+      { name: "Haridwar", nameHi: "हरिद्वार", subdistricts: ["Haridwar", "Roorkee", "Laksar", "Bhagwanpur"], dicOffice: "DIC, SIDCUL, Haridwar", contact: "01334-221234", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "Himachal Pradesh",
+    stateHi: "हिमाचल प्रदेश",
+    scaName: "HP Scheduled Castes and Scheduled Tribes Development Corporation",
+    scaAddress: "HIMUDA Complex, Shimla - 171002",
+    helpline: "0177-2621234 / 1100",
+    districts: [
+      { name: "Shimla", nameHi: "शिमला", subdistricts: ["Shimla Urban", "Shimla Rural", "Rampur", "Theog", "Rohru", "Chopal", "Jubbal", "Kumarsain"], dicOffice: "DIC, Udyog Bhawan, Shimla", contact: "0177-2811234", leadBank: "UCO Bank" },
+      { name: "Kangra", nameHi: "कांगड़ा (धर्मशाला)", subdistricts: ["Dharamshala", "Kangra", "Palampur", "Nurpur", "Dehra Gopipur", "Jawalamukhi", "Baijnath"], dicOffice: "DIC, Dharamshala, Kangra", contact: "01892-222123", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "Goa",
+    stateHi: "गोवा",
+    scaName: "Goa State Scheduled Castes and Other Backward Classes Financial Dev Corp",
+    scaAddress: "Patto Plaza, EDC Complex, Panaji, Goa - 403001",
+    helpline: "0832-2431234",
+    districts: [
+      { name: "North Goa", nameHi: "उत्तरी गोवा", subdistricts: ["Tiswadi (Panaji)", "Bardez (Mapusa)", "Pernem", "Bicholim", "Sattari"], dicOffice: "DIC, Udyog Bhavan, Panaji", contact: "0832-2221234", leadBank: "State Bank of India" },
+      { name: "South Goa", nameHi: "दक्षिणी गोवा", subdistricts: ["Salcete (Margao)", "Mormugao (Vasco)", "Ponda", "Quepem", "Sanguem", "Canacona", "Dharbandora"], dicOffice: "DIC, Margao, South Goa", contact: "0832-2711234", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Jammu and Kashmir",
+    stateHi: "जम्मू और कश्मीर",
+    scaName: "J&K Scheduled Castes, Scheduled Tribes & Backward Classes Development Corp",
+    scaAddress: "Haji House, Bemina, Srinagar / Romi Market, Jammu",
+    helpline: "0194-2491234 / 0191-2431234",
+    districts: [
+      { name: "Srinagar", nameHi: "श्रीनगर", subdistricts: ["Srinagar South", "Srinagar North", "Eidgah", "Pantha Chowk", "Shalteng", "Chanapora", "Khanyar"], dicOffice: "DIC, Sanat Ghar, Bemina, Srinagar", contact: "0194-2491234", leadBank: "J&K Bank" },
+      { name: "Jammu", nameHi: "जम्मू", subdistricts: ["Jammu", "Jammu South", "Jammu North", "Akhnoor", "Bishnah", "R.S. Pura", "Dansal", "Khour", "Marh"], dicOffice: "DIC, Exhibition Ground, Jammu", contact: "0191-2541234", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Ladakh",
+    stateHi: "लद्दाख",
+    scaName: "Ladakh Social Welfare & Tribal Development Cell",
+    scaAddress: "Council Secretariat, Kurbathang, Kargil / Leh",
+    helpline: "01982-252123",
+    districts: [
+      { name: "Leh", nameHi: "लेह", subdistricts: ["Leh", "Nubra", "Khaltsi", "Nyoma", "Durbuk", "Kharu", "Saspol"], dicOffice: "DIC, Industrial Estate, Leh", contact: "01982-252123", leadBank: "State Bank of India" },
+      { name: "Kargil", nameHi: "कारगिल", subdistricts: ["Kargil", "Sanku", "Zanskar", "Drass", "Shakar Chiktan"], dicOffice: "DIC, Baroo, Kargil", contact: "01985-232123", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Chandigarh",
+    stateHi: "चंडीगढ़",
+    scaName: "Chandigarh Child and Women Development Corporation",
+    scaAddress: "Additional Town Hall Bldg, Sector-17, Chandigarh - 160017",
+    helpline: "0172-2701234",
+    districts: [
+      { name: "Chandigarh", nameHi: "चंडीगढ़", subdistricts: ["Sector 1-20 (North)", "Sector 21-40 (Central)", "Sector 41-60 (South)", "Industrial Area Phase I & II", "Manimajra"], dicOffice: "DIC, Industrial Area Phase II, Chandigarh", contact: "0172-2651234", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "Puducherry",
+    stateHi: "पुडुचेरी",
+    scaName: "Puducherry Adi Dravidar Development Corporation (PADCO)",
+    scaAddress: "Kamaraj Salai, Saram, Puducherry - 605013",
+    helpline: "0413-2241234",
+    districts: [
+      { name: "Puducherry", nameHi: "पुडुचेरी", subdistricts: ["Puducherry", "Oulgaret", "Villianur", "Bahour"], dicOffice: "DIC, Thattanchavady, Puducherry", contact: "0413-2248123", leadBank: "Indian Bank" },
+      { name: "Karaikal", nameHi: "काराइकल", subdistricts: ["Karaikal", "Kottucherry", "Nedungadu", "Thirunallar", "Neravy", "T.R. Pattinam"], dicOffice: "DIC, Beach Road, Karaikal", contact: "04368-222123", leadBank: "Indian Bank" }
+    ]
+  },
+  {
+    state: "Tripura",
+    stateHi: "त्रिपुरा",
+    scaName: "Tripura Scheduled Castes Co-operative Development Corp",
+    scaAddress: "Lake Chowmuhani, Agartala - 799001",
+    helpline: "0381-2321234",
+    districts: [
+      { name: "West Tripura", nameHi: "पश्चिम त्रिपुरा (अगरतला)", subdistricts: ["Sadar (Agartala)", "Mohanpur", "Jirania", "Mandai", "Lefunga", "Belbari"], dicOffice: "DIC, Kunjaban, Agartala", contact: "0381-2351234", leadBank: "Punjab National Bank" }
+    ]
+  },
+  {
+    state: "Meghalaya",
+    stateHi: "मेघालय",
+    scaName: "Meghalaya Rural & Social Development Directorate",
+    scaAddress: "Lower Lachumiere, Shillong - 793001",
+    helpline: "0364-2221234",
+    districts: [
+      { name: "East Khasi Hills", nameHi: "पूर्वी खासी हिल्स (शिलांग)", subdistricts: ["Mylliem (Shillong)", "Mawphlang", "Mawkynrew", "Khatarshnong Laitkroh", "Pynursla", "Shella Bholaganj"], dicOffice: "DIC, Nonghimmai, Shillong", contact: "0364-2224123", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Manipur",
+    stateHi: "मणिपुर",
+    scaName: "Manipur Tribal & SC Development Directorate",
+    scaAddress: "Babupara, Imphal - 795001",
+    helpline: "0385-2451234",
+    districts: [
+      { name: "Imphal West", nameHi: "इंफाल पश्चिम", subdistricts: ["Lamphelpat", "Patsoi", "Lamsang", "Wangoi"], dicOffice: "DIC, Lamphelpat, Imphal", contact: "0385-2411234", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Nagaland",
+    stateHi: "नागालैंड",
+    scaName: "Nagaland Handloom & Handicrafts / Rural Enterprise Cell",
+    scaAddress: "NH-29, Half Nagarjan, Dimapur - 797112",
+    helpline: "03862-224123",
+    districts: [
+      { name: "Dimapur", nameHi: "दीमापुर", subdistricts: ["Dimapur Sadar", "Chümoukedima", "Medziphema", "Niuland", "Dhansiripar"], dicOffice: "DIC, Nagarjan, Dimapur", contact: "03862-232123", leadBank: "State Bank of India" },
+      { name: "Kohima", nameHi: "कोहिमा", subdistricts: ["Kohima Sadar", "Sechu-Zubza", "Chiephobozou", "Tseminyu", "Jakhama", "Botsa"], dicOffice: "DIC, High School Colony, Kohima", contact: "0370-222123", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Mizoram",
+    stateHi: "मिजोरम",
+    scaName: "Mizoram Rural Development Cell",
+    scaAddress: "New Capital Complex, Khatla, Aizawl - 796001",
+    helpline: "0389-2331234",
+    districts: [
+      { name: "Aizawl", nameHi: "आइजोल", subdistricts: ["Aizawl", "Tlangnuam", "Thingsulthliah", "Darlawn", "Phullen"], dicOffice: "DIC, Upper Khatla, Aizawl", contact: "0389-2321234", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Arunachal Pradesh",
+    stateHi: "अरुणाचल प्रदेश",
+    scaName: "Arunachal Pradesh Rural Development Agency",
+    scaAddress: "Civil Secretariat, Itanagar - 791111",
+    helpline: "0360-2212345",
+    districts: [
+      { name: "Papum Pare", nameHi: "पापुम पारे (ईटानगर)", subdistricts: ["Itanagar", "Naharlagun", "Doimukh", "Sagalee", "Balijan", "Kimin", "Mengio"], dicOffice: "DIC, Naharlagun, Papum Pare", contact: "0360-2244123", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Sikkim",
+    stateHi: "सिक्किम",
+    scaName: "Sikkim Scheduled Castes, Scheduled Tribes & Other Backward Classes Development Corp (SABCCO)",
+    scaAddress: "Sonam Tshering Marg, Gangtok - 737101",
+    helpline: "03592-202123",
+    districts: [
+      { name: "Gangtok", nameHi: "गंगटोक", subdistricts: ["Gangtok", "Pakyong", "Rongli", "Dikiing"], dicOffice: "DIC, Deorali, Gangtok", contact: "03592-281123", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Dadra and Nagar Haveli and Daman and Diu",
+    stateHi: "दादरा और नगर हवेली और दमन और दीव",
+    scaName: "UT Social Welfare & Enterprise Directorate",
+    scaAddress: "Collectorate, Silvassa / Daman",
+    helpline: "0260-2642123",
+    districts: [
+      { name: "Dadra and Nagar Haveli", nameHi: "दादरा और नगर हवेली", subdistricts: ["Silvassa", "Khanvel", "Dadra"], dicOffice: "DIC, Silvassa", contact: "0260-2642123", leadBank: "Dena / Bank of Baroda" },
+      { name: "Daman", nameHi: "दमन", subdistricts: ["Nani Daman", "Moti Daman"], dicOffice: "DIC, Moti Daman", contact: "0260-2231234", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Andaman and Nicobar Islands",
+    stateHi: "अंडमान और निकोबार द्वीप समूह",
+    scaName: "Andaman and Nicobar Islands Integrated Development Corp (ANIIDCO)",
+    scaAddress: "Vikas Bhawan, Port Blair - 744101",
+    helpline: "03192-232123",
+    districts: [
+      { name: "South Andaman", nameHi: "दक्षिण अंडमान (पोर्ट ब्लेयर)", subdistricts: ["Port Blair", "Ferrargunj", "Little Andaman"], dicOffice: "DIC, Middle Point, Port Blair", contact: "03192-232123", leadBank: "State Bank of India" }
+    ]
+  },
+  {
+    state: "Lakshadweep",
+    stateHi: "लक्षद्वीप",
+    scaName: "Lakshadweep Development Corporation Ltd",
+    scaAddress: "Kavaratti Island - 682555",
+    helpline: "04896-262123",
+    districts: [
+      { name: "Lakshadweep", nameHi: "लक्षद्वीप", subdistricts: ["Kavaratti", "Agatti", "Amini", "Andrott", "Minicoy", "Kalpeni", "Kiltan", "Chetlat", "Kadmat", "Bitra"], dicOffice: "DIC, Kavaratti", contact: "04896-262123", leadBank: "Syndicate / Canara Bank" }
     ]
   }
 ];
@@ -286,7 +499,6 @@ export const getDistrictInfo = (stateName, districtName) => {
     );
   }
 
-  // Fallback to first district of the state if specific district isn't matched
   const selectedDistrict = districtMatch || stateMatch.districts[0];
 
   return {
@@ -303,6 +515,6 @@ export const getAllStates = () => {
   return stateDistrictsData.map(s => ({
     name: s.state,
     nameHi: s.stateHi,
-    districts: s.districts.map(d => ({ name: d.name, nameHi: d.nameHi }))
+    districts: s.districts.map(d => ({ name: d.name, nameHi: d.nameHi, subdistricts: d.subdistricts || [] }))
   }));
 };

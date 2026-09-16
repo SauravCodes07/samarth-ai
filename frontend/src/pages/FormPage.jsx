@@ -6,6 +6,7 @@ import { submitAdvisoryRequest } from '../services/api';
 import { logInquiryToSupabase } from '../services/supabaseClient';
 import ResultCard from '../components/ResultCard';
 import VoiceAssistantModal from '../components/VoiceAssistantModal';
+import LocationCatchmentPicker from '../components/LocationCatchmentPicker';
 import { 
   Store, 
   Milk, 
@@ -58,6 +59,12 @@ const FormPage = () => {
     gender: 'General',
     state: prefilled?.state && prefilled.state !== 'Central / All India' ? prefilled.state : 'Maharashtra',
     district: 'Pune',
+    sub_district: 'Haveli',
+    village_or_town: '',
+    pincode: '411001',
+    latitude: 18.5204,
+    longitude: 73.8567,
+    catchment_radius_km: 5,
     experience_level: '1-3 years'
   });
 
@@ -911,62 +918,12 @@ const FormPage = () => {
               </div>
             </div>
 
-            {/* Geographic Location: Dynamic State & District Cascading Dropdowns */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                  <span>{lang === 'mr' ? 'राज्य निवडा (Select State):' : lang === 'hi' ? 'राज्य चुनें (Select State):' : 'Select State:'}</span>
-                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
-                    {stateDistrictsData.length} States / UTs
-                  </span>
-                </label>
-                <div className="relative">
-                  <select
-                    id="state-select-dropdown"
-                    required
-                    value={formData.state}
-                    onChange={(e) => handleStateChange(e.target.value)}
-                    className="w-full p-3 pr-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 cursor-pointer shadow-sm transition-colors appearance-none"
-                  >
-                    {stateDistrictsData.map((st) => (
-                      <option key={st.state} value={st.state}>
-                        {lang === 'mr' ? (st.stateHi || st.state) : lang === 'hi' ? (st.stateHi || st.state) : st.state}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                    <ChevronDown className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
-                  <span>{lang === 'mr' ? 'जिल्हा निवडा (Select District):' : lang === 'hi' ? 'जिला चुनें (Select District):' : 'Select District:'}</span>
-                  <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-full">
-                    {currentDistricts.length} Districts Available
-                  </span>
-                </label>
-                <div className="relative">
-                  <select
-                    id="district-select-dropdown"
-                    required
-                    value={formData.district}
-                    onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                    className="w-full p-3 pr-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0B3D91] dark:focus:ring-blue-500 cursor-pointer shadow-sm transition-colors appearance-none"
-                  >
-                    {currentDistricts.map((dst) => (
-                      <option key={dst.name} value={dst.name}>
-                        {lang === 'mr' ? (dst.nameHi || dst.name) : lang === 'hi' ? (dst.nameHi || dst.name) : dst.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                    <ChevronDown className="w-4 h-4" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Geographic Location & Catchment Area: GPS, Map, and Complete Administrative Hierarchy */}
+            <LocationCatchmentPicker
+              formData={formData}
+              setFormData={setFormData}
+              lang={lang}
+            />
 
             <div className="pt-4 flex items-center justify-between">
               <button

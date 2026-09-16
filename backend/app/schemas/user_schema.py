@@ -8,9 +8,15 @@ class AdvisoryRequest(BaseModel):
     margin_capital: Optional[float] = Field(None, gt=0, description="Available margin money capital (10% contribution) in INR")
     gender: Optional[str] = Field("General", description="Gender of entrepreneur (Male, Female, Other)")
     state: Optional[str] = Field(None, description="State of the entrepreneur")
-    district: Optional[str] = Field(None, description="District / Village location")
+    district: Optional[str] = Field(None, description="District location")
+    sub_district: Optional[str] = Field(None, description="Sub-district / Tehsil / Taluk / Block")
+    village_or_town: Optional[str] = Field(None, description="Village, Gram Panchayat, or Town")
+    pincode: Optional[str] = Field(None, description="Postal PIN code")
+    latitude: Optional[float] = Field(None, description="Exact latitude from GPS or Map pin")
+    longitude: Optional[float] = Field(None, description="Exact longitude from GPS or Map pin")
+    catchment_radius_km: Optional[float] = Field(5.0, description="Catchment radius in km (typically 2-10 km)")
     experience_level: Optional[str] = Field("1-3 years", description="Experience level: New / 1-3 years / 3+ years")
-    preferred_language: Optional[str] = Field("hi", description="Preferred response language: hi or en")
+    preferred_language: Optional[str] = Field("hi", description="Preferred response language: hi, mr or en")
 
 class SchemeResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -99,6 +105,8 @@ class CompetitorMapping(BaseModel):
     density_analysis_hi: str
     unserved_demand_gap: str
     unserved_demand_gap_hi: str
+    nearby_poi_list: List[Dict[str, Any]] = []
+    is_live_data: bool = False
 
 class ProductMarketValue(BaseModel):
     suggested_pricing_strategy: str
