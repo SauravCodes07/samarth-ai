@@ -26,6 +26,6 @@ class Settings:
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
     
     # Frontend origin for CORS
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "https://samarth-ai-blue.vercel.app")
 
 settings = Settings()
