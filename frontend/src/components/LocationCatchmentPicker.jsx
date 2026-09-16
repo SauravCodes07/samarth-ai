@@ -84,66 +84,84 @@ const LocationCatchmentPicker = ({
   useEffect(() => {
     if (!isLeafletReady || !mapContainerRef.current || !window.L) return;
 
-    if (!mapInstanceRef.current) {
-      const map = window.L.map(mapContainerRef.current, {
-        center: [currentLat, currentLon],
-        zoom: 12,
-        zoomControl: true
-      });
+    try {
+      if (!mapInstanceRef.current) {
+        // Prevent "Map container is already initialized" error in React StrictMode
+        if (mapContainerRef.current._leaflet_id) {
+          mapContainerRef.current._leaflet_id = null;
+        }
 
-      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
-      }).addTo(map);
+        const map = window.L.map(mapContainerRef.current, {
+          center: [currentLat, currentLon],
+          zoom: 12,
+          zoomControl: true
+        });
 
-      // Custom Pin Icon
-      const customPin = window.L.divIcon({
-        className: 'custom-pin',
-        html: `<div style="background-color: #0B3D91; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>`,
-        iconSize: [34, 34],
-        iconAnchor: [17, 34]
-      });
+        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19
+        }).addTo(map);
 
-      const marker = window.L.marker([currentLat, currentLon], {
-        draggable: true,
-        icon: customPin
-      }).addTo(map);
+        // Custom Pin Icon
+        const customPin = window.L.divIcon({
+          className: 'custom-pin',
+          html: `<div style="background-color: #0B3D91; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 34]
+        });
 
-      const circle = window.L.circle([currentLat, currentLon], {
-        radius: currentRadius * 1000,
-        color: '#0B3D91',
-        fillColor: '#3B82F6',
-        fillOpacity: 0.18,
-        weight: 2
-      }).addTo(map);
+        const marker = window.L.marker([currentLat, currentLon], {
+          draggable: true,
+          icon: customPin
+        }).addTo(map);
 
-      // Click on map to relocate pin
-      map.on('click', async (e) => {
-        const { lat, lng } = e.latlng;
-        marker.setLatLng([lat, lng]);
-        circle.setLatLng([lat, lng]);
-        await handleCoordinatesResolved(lat, lng);
-      });
+        const circle = window.L.circle([currentLat, currentLon], {
+          radius: currentRadius * 1000,
+          color: '#0B3D91',
+          fillColor: '#3B82F6',
+          fillOpacity: 0.18,
+          weight: 2
+        }).addTo(map);
 
-      // Drag pin to relocate
-      marker.on('dragend', async () => {
-        const pos = marker.getLatLng();
-        circle.setLatLng(pos);
-        await handleCoordinatesResolved(pos.lat, pos.lng);
-      });
+        // Click on map to relocate pin
+        map.on('click', async (e) => {
+          const { lat, lng } = e.latlng;
+          marker.setLatLng([lat, lng]);
+          circle.setLatLng([lat, lng]);
+          await handleCoordinatesResolved(lat, lng);
+        });
 
-      mapInstanceRef.current = map;
-      markerRef.current = marker;
-      circleRef.current = circle;
-    } else {
-      // Update existing map view
-      mapInstanceRef.current.setView([currentLat, currentLon], 12);
-      if (markerRef.current) markerRef.current.setLatLng([currentLat, currentLon]);
-      if (circleRef.current) {
-        circleRef.current.setLatLng([currentLat, currentLon]);
-        circleRef.current.setRadius(currentRadius * 1000);
+        // Drag pin to relocate
+        marker.on('dragend', async () => {
+          const pos = marker.getLatLng();
+          circle.setLatLng(pos);
+          await handleCoordinatesResolved(pos.lat, pos.lng);
+        });
+
+        mapInstanceRef.current = map;
+        markerRef.current = marker;
+        circleRef.current = circle;
+      } else {
+        // Update existing map view
+        mapInstanceRef.current.setView([currentLat, currentLon], 12);
+        if (markerRef.current) markerRef.current.setLatLng([currentLat, currentLon]);
+        if (circleRef.current) {
+          circleRef.current.setLatLng([currentLat, currentLon]);
+          circleRef.current.setRadius(currentRadius * 1000);
+        }
       }
+    } catch (mapErr) {
+      console.warn('Leaflet map init notice:', mapErr);
     }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        try {
+          mapInstanceRef.current.remove();
+        } catch (e) {}
+        mapInstanceRef.current = null;
+      }
+    };
   }, [isLeafletReady]);
 
   // Update radius circle dynamically

@@ -63,19 +63,28 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
   if (!data) return null;
 
   const {
-    matched_scheme,
-    alternate_schemes,
-    loan_structure,
-    business_viability,
-    hyper_local_feasibility,
-    ai_advisory_text,
-    ai_advisory_text_hi,
-    business_action_plan,
-    business_action_plan_hi,
-    application_steps,
-    application_steps_hi,
-    disclaimer
-  } = data;
+    matched_scheme = {},
+    alternate_schemes = [],
+    loan_structure = {},
+    business_viability = {},
+    hyper_local_feasibility = {},
+    ai_advisory_text = '',
+    ai_advisory_text_hi = '',
+    business_action_plan = [],
+    business_action_plan_hi = [],
+    application_steps = [],
+    application_steps_hi = [],
+    disclaimer = 'Institutional AI-assisted business feasibility study and financial structuring plan.'
+  } = (data || {});
+
+  const totalCost = Number(loan_structure?.total_project_cost || 0);
+  const marginMoneyVal = Number(loan_structure?.margin_money || 0);
+  const loanAmountVal = Number(loan_structure?.loan_amount || 0);
+  const monthlyEmiVal = Number(loan_structure?.monthly_emi || 0);
+  const quarterlyInstallmentVal = Number(loan_structure?.quarterly_installment || 0);
+
+  const schemeName = matched_scheme?.scheme_name || 'Government Concessional Scheme';
+  const schemeNameHi = matched_scheme?.scheme_name_hi || schemeName;
 
   const handleDownloadPDF = async () => {
     if (!reportRef.current) return;
@@ -92,7 +101,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`SIH2026_Feasibility_Report_${matched_scheme.scheme_name.replace(/\s+/g, '_')}.pdf`);
+      pdf.save(`SIH2026_Feasibility_Report_${schemeName.replace(/\s+/g, '_')}.pdf`);
     } catch (err) {
       console.error('PDF export error:', err);
       alert('Could not export PDF. Please try again.');
@@ -102,15 +111,15 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
   };
 
   const narrative = (lang === 'mr' || lang === 'hi') ? (ai_advisory_text_hi || ai_advisory_text) : ai_advisory_text;
-  const actionPlan = (lang === 'mr' || lang === 'hi') ? (business_action_plan_hi || business_action_plan) : business_action_plan;
-  const appSteps = (lang === 'mr' || lang === 'hi') ? (application_steps_hi || application_steps) : application_steps;
+  const actionPlan = (lang === 'mr' || lang === 'hi') ? (business_action_plan_hi || business_action_plan || []) : (business_action_plan || []);
+  const appSteps = (lang === 'mr' || lang === 'hi') ? (application_steps_hi || application_steps || []) : (application_steps || []);
 
   const toggleSpeech = () => {
     if (isSpeaking) {
       stopSpeaking();
       setIsSpeaking(false);
     } else {
-      const textToSpeak = `${matched_scheme.scheme_name}. ${narrative}`;
+      const textToSpeak = `${schemeName}. ${narrative}`;
       speakText(
         textToSpeak,
         lang,
@@ -123,6 +132,25 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
   const swot = hyper_local_feasibility?.swot_analysis;
   const comp = hyper_local_feasibility?.competitor_mapping;
   const pmv = hyper_local_feasibility?.product_market_value;
+
+  const consumerCount = Number(hyper_local_feasibility?.target_consumer_base_count ?? hyper_local_feasibility?.immediate_consumer_base ?? 5000);
+  const marketReachText = (lang === 'mr' || lang === 'hi')
+    ? (hyper_local_feasibility?.market_reach_5_to_10km_hi || hyper_local_feasibility?.market_reach_5_to_10km || hyper_local_feasibility?.market_reach || '')
+    : (hyper_local_feasibility?.market_reach_5_to_10km || hyper_local_feasibility?.market_reach || '');
+
+  const oppAnalysisText = (lang === 'mr' || lang === 'hi')
+    ? (hyper_local_feasibility?.opportunity_analysis_hi || hyper_local_feasibility?.opportunity_analysis || '')
+    : (hyper_local_feasibility?.opportunity_analysis || '');
+
+  const distChannels = (lang === 'mr' || lang === 'hi')
+    ? (hyper_local_feasibility?.distribution_channels_hi || hyper_local_feasibility?.distribution_channels || hyper_local_feasibility?.primary_distribution_channels || [])
+    : (hyper_local_feasibility?.distribution_channels || hyper_local_feasibility?.primary_distribution_channels || []);
+
+  const strengthsList = (lang === 'mr' || lang === 'hi') ? (swot?.strengths_hi || swot?.strengths || []) : (swot?.strengths || []);
+  const weaknessesList = (lang === 'mr' || lang === 'hi') ? (swot?.weaknesses_hi || swot?.weaknesses || []) : (swot?.weaknesses || []);
+  const oppsList = (lang === 'mr' || lang === 'hi') ? (swot?.opportunities_hi || swot?.opportunities || []) : (swot?.opportunities || []);
+  const threatsList = (lang === 'mr' || lang === 'hi') ? (swot?.threats_hi || swot?.threats || []) : (swot?.threats || []);
+  const threatsIdentList = (lang === 'mr' || lang === 'hi') ? (hyper_local_feasibility?.threats_identification_hi || hyper_local_feasibility?.threats_identification || []) : (hyper_local_feasibility?.threats_identification || []);
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -241,24 +269,24 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
               <span className="text-amber-600 dark:text-amber-400 font-extrabold">{loan_structure.scheme_type}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-[#0B3D91] dark:text-blue-400 tracking-tight">
-              {(lang === 'mr' || lang === 'hi') ? (matched_scheme.scheme_name_hi || matched_scheme.scheme_name) : matched_scheme.scheme_name}
+              {(lang === 'mr' || lang === 'hi') ? schemeNameHi : schemeName}
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-3xl">
-              {(lang === 'mr' || lang === 'hi') ? (matched_scheme.description_hi || matched_scheme.description) : matched_scheme.description}
+              {(lang === 'mr' || lang === 'hi') ? (matched_scheme?.description_hi || matched_scheme?.description) : matched_scheme?.description}
             </p>
           </div>
 
           <div className="bg-gradient-to-br from-emerald-500 to-[#138808] text-white px-5 py-4 rounded-2xl text-center shadow-lg flex-shrink-0 min-w-[170px]">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-100 block">
-              {loan_structure.scheme_type === 'Micro Finance Scheme' 
+              {loan_structure?.scheme_type === 'Micro Finance Scheme' 
                 ? (lang === 'mr' ? 'मायक्रो फायनान्स (<= १.४ लाख)' : lang === 'hi' ? 'माइक्रो फाइनेंस (<= 1.4 लाख)' : 'Micro Finance (<= 1.4L)') 
                 : (lang === 'mr' ? 'मुदत कर्ज (> १.४ लाख)' : lang === 'hi' ? 'टर्म लोन (> 1.4 लाख)' : 'Term Loan (> 1.4L)')}
             </span>
             <div className="text-3xl font-black text-white mt-0.5">
-              {loan_structure.effective_interest_rate}% <span className="text-xs font-normal text-emerald-100">p.a.</span>
+              {loan_structure?.effective_interest_rate || 5.0}% <span className="text-xs font-normal text-emerald-100">p.a.</span>
             </div>
             <span className="text-[11px] font-bold bg-white/20 px-2 py-0.5 rounded-full inline-block mt-1">
-              {loan_structure.tenure_years} {lang === 'mr' ? 'वर्षे परतफेड' : lang === 'hi' ? 'वर्ष पुनर्भुगतान' : 'Years Tenure'}
+              {loan_structure?.tenure_years || 5} {lang === 'mr' ? 'वर्षे परतफेड' : lang === 'hi' ? 'वर्ष पुनर्भुगतान' : 'Years Tenure'}
             </span>
           </div>
         </div>
@@ -284,7 +312,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                 <IndianRupee className="w-4 h-4 text-slate-400" />
               </div>
               <div className="text-2xl font-black text-slate-900">
-                ₹{loan_structure.total_project_cost.toLocaleString('en-IN')}
+                ₹{totalCost.toLocaleString('en-IN')}
               </div>
               <p className="text-[11px] text-slate-500 mt-1">
                 {lang === 'mr' ? 'उपलब्ध भांडवल / १०% च्या आधारे' : lang === 'hi' ? 'उपलब्ध पूंजी / 10% के आधार पर' : 'Calculated: Margin Capital / 10%'}
@@ -296,11 +324,11 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
               <div className="flex items-center justify-between text-xs text-amber-950 font-bold mb-1">
                 <span>{lang === 'mr' ? '१०% स्वभांडवल (तुमचा हिस्सा)' : lang === 'hi' ? '10% मार्जिन मनी (आपकी जेब से)' : '10% Margin Money (Your Share)'}</span>
                 <span className="bg-[#FF9933] text-black text-[10px] font-extrabold px-1.5 py-0.5 rounded">
-                  {loan_structure.margin_percent}%
+                  {loan_structure?.margin_percent || 10}%
                 </span>
               </div>
               <div className="text-2xl font-black text-amber-950">
-                ₹{loan_structure.margin_money.toLocaleString('en-IN')}
+                ₹{marginMoneyVal.toLocaleString('en-IN')}
               </div>
               <p className="text-[11px] text-amber-800 mt-1 font-medium">
                 {lang === 'mr' ? 'केवळ एवढी रक्कम तुम्हाला स्वतः उभी करायची आहे' : lang === 'hi' ? 'केवल इतना आपको स्वयं वहन करना है' : 'Upfront entrepreneur equity needed'}
@@ -312,11 +340,11 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
               <div className="flex items-center justify-between text-xs text-blue-950 font-bold mb-1">
                 <span>{lang === 'mr' ? '९०% शासकीय सवलतीचे कर्ज' : lang === 'hi' ? '90% सरकारी रियायती लोन' : '90% Govt Concessional Loan'}</span>
                 <span className="bg-[#0B3D91] text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded">
-                  {loan_structure.loan_percent}%
+                  {loan_structure?.loan_percent || 90}%
                 </span>
               </div>
               <div className="text-2xl font-black text-[#0B3D91]">
-                ₹{loan_structure.loan_amount.toLocaleString('en-IN')}
+                ₹{loanAmountVal.toLocaleString('en-IN')}
               </div>
               <p className="text-[11px] text-blue-800 mt-1 font-medium">
                 {lang === 'mr' ? 'राज्य चॅनेलाइजिंग एजन्सी (SCA) द्वारे स्वीकृत' : lang === 'hi' ? 'राज्य एजेंसी (SCA) द्वारा स्वीकृत' : 'Funded via State Channelizing Agency'}
@@ -328,14 +356,14 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
               <div className="flex items-center justify-between text-xs text-emerald-950 font-bold mb-1">
                 <span>{lang === 'mr' ? 'मासिक / त्रैमासिक हप्ता' : lang === 'hi' ? 'मासिक / त्रैमासिक किश्त' : 'Monthly / Quarterly EMI'}</span>
                 <span className="text-[11px] text-emerald-800 font-bold bg-emerald-200/60 px-1.5 py-0.5 rounded">
-                  {loan_structure.moratorium_months}m {lang === 'mr' ? 'सवलत' : lang === 'hi' ? 'छूट' : 'Moratorium'}
+                  {loan_structure?.moratorium_months || 6}m {lang === 'mr' ? 'सवलत' : lang === 'hi' ? 'छूट' : 'Moratorium'}
                 </span>
               </div>
               <div className="text-2xl font-black text-[#138808]">
-                ₹{loan_structure.monthly_emi.toLocaleString('en-IN')} <span className="text-xs text-emerald-700 font-normal">/{lang === 'mr' ? 'महिना' : lang === 'hi' ? 'माह' : 'mo'}</span>
+                ₹{monthlyEmiVal.toLocaleString('en-IN')} <span className="text-xs text-emerald-700 font-normal">/{lang === 'mr' ? 'महिना' : lang === 'hi' ? 'माह' : 'mo'}</span>
               </div>
               <p className="text-[11px] text-emerald-800 mt-1 font-medium">
-                {lang === 'mr' ? `त्रैमासिक हप्ता: ₹${loan_structure.quarterly_installment.toLocaleString('en-IN')}` : lang === 'hi' ? `त्रैमासिक: ₹${loan_structure.quarterly_installment.toLocaleString('en-IN')}` : `Quarterly: ₹${loan_structure.quarterly_installment.toLocaleString('en-IN')}`}
+                {lang === 'mr' ? `त्रैमासिक हप्ता: ₹${quarterlyInstallmentVal.toLocaleString('en-IN')}` : lang === 'hi' ? `त्रैमासिक: ₹${quarterlyInstallmentVal.toLocaleString('en-IN')}` : `Quarterly: ₹${quarterlyInstallmentVal.toLocaleString('en-IN')}`}
               </p>
             </div>
 
@@ -343,7 +371,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
         </div>
 
         {/* TAB 1: MODULE 1 HYPER-LOCAL FEASIBILITY STUDY */}
-        {activeTab === 'hyperlocal' && hyper_local_feasibility && (
+        {activeTab === 'hyperlocal' && (
           <div className="space-y-6 animate-fadeIn">
             
             {/* Sub-section A: Market Reach (5-10 km) & Opportunity Analysis */}
@@ -358,18 +386,18 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                   </h3>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                  {(lang === 'mr' || lang === 'hi') ? (hyper_local_feasibility.market_reach_5_to_10km_hi || hyper_local_feasibility.market_reach_5_to_10km) : hyper_local_feasibility.market_reach_5_to_10km}
+                  {marketReachText}
                 </p>
                 <div className="flex items-center space-x-2 text-xs font-bold text-blue-900 bg-white p-2.5 rounded-xl border border-blue-200">
                   <Users className="w-4 h-4 text-[#0B3D91]" />
-                  <span>{lang === 'mr' ? `अंदाजे स्थानिक ग्राहक संख्या: ${hyper_local_feasibility.target_consumer_base_count.toLocaleString()} नागरिक` : lang === 'hi' ? `अनुमानित प्रत्यक्ष उपभोक्ता आधार: ${hyper_local_feasibility.target_consumer_base_count.toLocaleString()} निवासी` : `Estimated Local Consumer Base: ~${hyper_local_feasibility.target_consumer_base_count.toLocaleString()} residents`}</span>
+                  <span>{lang === 'mr' ? `अंदाजे स्थानिक ग्राहक संख्या: ${consumerCount.toLocaleString('en-IN')} नागरिक` : lang === 'hi' ? `अनुमानित प्रत्यक्ष उपभोक्ता आधार: ${consumerCount.toLocaleString('en-IN')} निवासी` : `Estimated Local Consumer Base: ~${consumerCount.toLocaleString('en-IN')} residents`}</span>
                 </div>
                 <div>
                   <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">
                     {lang === 'mr' ? 'प्राथमिक विक्री चॅनेल्स:' : lang === 'hi' ? 'प्राथमिक वितरण चैनल:' : 'Primary Distribution Channels:'}
                   </span>
                   <ul className="space-y-1.5 text-xs text-slate-700">
-                    {((lang === 'mr' || lang === 'hi') ? (hyper_local_feasibility.distribution_channels_hi || hyper_local_feasibility.distribution_channels) : hyper_local_feasibility.distribution_channels).map((ch, idx) => (
+                    {distChannels.map((ch, idx) => (
                       <li key={idx} className="flex items-start space-x-2">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#138808] flex-shrink-0 mt-0.5" />
                         <span>{ch}</span>
@@ -388,7 +416,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                   </h3>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
-                  {(lang === 'mr' || lang === 'hi') ? (hyper_local_feasibility.opportunity_analysis_hi || hyper_local_feasibility.opportunity_analysis) : hyper_local_feasibility.opportunity_analysis}
+                  {oppAnalysisText}
                 </p>
                 <div className="p-3 bg-white rounded-xl border border-emerald-200 space-y-1">
                   <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
@@ -424,7 +452,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                       <span>{lang === 'mr' ? 'सामर्थ्य (Strengths)' : lang === 'hi' ? 'ताकत (Strengths)' : 'Strengths'}</span>
                     </div>
                     <ul className="space-y-1.5 text-xs text-slate-700">
-                      {((lang === 'mr' || lang === 'hi') ? (swot.strengths_hi || swot.strengths) : swot.strengths).map((s, idx) => (
+                      {strengthsList.map((s, idx) => (
                         <li key={idx} className="flex items-start space-x-1.5">
                           <span className="text-emerald-700 font-bold">•</span>
                           <span>{s}</span>
@@ -440,7 +468,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                       <span>{lang === 'mr' ? 'कमतरता (Weaknesses)' : lang === 'hi' ? 'कमजोरियां (Weaknesses)' : 'Weaknesses'}</span>
                     </div>
                     <ul className="space-y-1.5 text-xs text-slate-700">
-                      {((lang === 'mr' || lang === 'hi') ? (swot.weaknesses_hi || swot.weaknesses) : swot.weaknesses).map((w, idx) => (
+                      {weaknessesList.map((w, idx) => (
                         <li key={idx} className="flex items-start space-x-1.5">
                           <span className="text-amber-700 font-bold">•</span>
                           <span>{w}</span>
@@ -456,7 +484,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                       <span>{lang === 'mr' ? 'संधी (Opportunities)' : lang === 'hi' ? 'अवसर (Opportunities)' : 'Opportunities'}</span>
                     </div>
                     <ul className="space-y-1.5 text-xs text-slate-700">
-                      {((lang === 'mr' || lang === 'hi') ? (swot.opportunities_hi || swot.opportunities) : swot.opportunities).map((o, idx) => (
+                      {oppsList.map((o, idx) => (
                         <li key={idx} className="flex items-start space-x-1.5">
                           <span className="text-blue-700 font-bold">•</span>
                           <span>{o}</span>
@@ -472,7 +500,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                       <span>{lang === 'mr' ? 'धोके व आव्हाने (Threats)' : lang === 'hi' ? 'चुनौतियां (Threats)' : 'Threats'}</span>
                     </div>
                     <ul className="space-y-1.5 text-xs text-slate-700">
-                      {((lang === 'mr' || lang === 'hi') ? (swot.threats_hi || swot.threats) : swot.threats).map((t, idx) => (
+                      {threatsList.map((t, idx) => (
                         <li key={idx} className="flex items-start space-x-1.5">
                           <span className="text-rose-700 font-bold">•</span>
                           <span>{t}</span>
@@ -502,7 +530,7 @@ const ResultCard = ({ data, onReset, userState = "Uttar Pradesh", userDistrict =
                     : 'Pinpointed risks such as supply chain bottlenecks, seasonal swings, and single-buyer dependency:'}
                 </p>
                 <ul className="space-y-2 text-xs text-slate-800">
-                  {((lang === 'mr' || lang === 'hi') ? (hyper_local_feasibility.threats_identification_hi || hyper_local_feasibility.threats_identification) : hyper_local_feasibility.threats_identification).map((th, idx) => (
+                  {threatsIdentList.map((th, idx) => (
                     <li key={idx} className="p-2.5 rounded-xl bg-white border border-rose-200 flex items-start space-x-2 font-medium">
                       <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
                       <span>{th}</span>

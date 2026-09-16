@@ -320,11 +320,24 @@ export const submitAdvisoryRequest = async (payload) => {
     hyper_local_feasibility: {
       location_catchment: `${districtName}, ${stateName} (5-10 किमी दायरा)`,
       market_reach: `Immediate 5–10 km catchment servicing ~4,500–6,000 residents across ${districtName}.`,
+      market_reach_5_to_10km: `Immediate 5–10 km catchment servicing ~4,500–6,000 residents across ${districtName}.`,
+      market_reach_5_to_10km_hi: `${districtName} के आसपास 5-10 किमी के दायरे में लगभग 4,500 से 6,000 स्थानीय निवासियों तक सीधी पहुंच।`,
       immediate_consumer_base: 5400,
+      target_consumer_base_count: 5400,
       primary_distribution_channels: [
         `Direct local retail counter in ${districtName} town center`,
         'Weekly village Haat / Mandi distribution network',
         'Direct supply contracts with local institutions and retail shops'
+      ],
+      distribution_channels: [
+        `Direct local retail counter in ${districtName} town center`,
+        'Weekly village Haat / Mandi distribution network',
+        'Direct supply contracts with local institutions and retail shops'
+      ],
+      distribution_channels_hi: [
+        `${districtName} मुख्य बाजार में सीधी खुदरा बिक्री दुकान`,
+        'साप्ताहिक ग्रामीण हाट एवं मंडी वितरण नेटवर्क',
+        'स्थानीय संस्थानों व खुदरा व्यापारियों के साथ सीधे आपूर्ति अनुबंध'
       ],
       opportunity_analysis: `High untapped demand for quality ${bType} products within ${districtName} with 15-20% underserved consumer gap.`,
       opportunity_analysis_hi: `${districtName} में गुणवत्तापूर्ण ${bType} उत्पादों की 15-20% अतिरिक्त अपूर्ण मांग उपलब्ध है।`,

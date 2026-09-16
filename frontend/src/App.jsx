@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AIChatbot from './components/AIChatbot';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
@@ -23,13 +24,15 @@ function App() {
             <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#090D16] text-[#0F172A] dark:text-[#F8FAFC] selection:bg-amber-200 dark:selection:bg-blue-600/40 selection:text-amber-900 dark:selection:text-blue-200 transition-colors duration-300">
               <Navbar />
               <main className="flex-grow">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/advisory" element={<ProtectedRoute><FormPage /></ProtectedRoute>} />
-                  <Route path="/schemes" element={<ProtectedRoute><SchemesPage /></ProtectedRoute>} />
-                  <Route path="/calculator" element={<ProtectedRoute><CalculatorPage /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                </Routes>
+                <ErrorBoundary>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/advisory" element={<ProtectedRoute><FormPage /></ProtectedRoute>} />
+                    <Route path="/schemes" element={<ProtectedRoute><SchemesPage /></ProtectedRoute>} />
+                    <Route path="/calculator" element={<ProtectedRoute><CalculatorPage /></ProtectedRoute>} />
+                    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                  </Routes>
+                </ErrorBoundary>
               </main>
               <Footer />
               <AIChatbot />
