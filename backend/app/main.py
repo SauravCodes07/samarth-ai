@@ -6,6 +6,7 @@ from app.database.seed_data import seed_database
 from app.routes.scheme_routes import router as scheme_router
 from app.routes.advisory_routes import router as advisory_router
 from app.routes.geo_routes import router as geo_router
+from app.routes.admin_routes import router as admin_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -38,6 +39,7 @@ app.add_middleware(
 app.include_router(scheme_router, prefix=settings.API_V1_PREFIX)
 app.include_router(advisory_router, prefix=settings.API_V1_PREFIX)
 app.include_router(geo_router, prefix=settings.API_V1_PREFIX)
+app.include_router(admin_router, prefix=settings.API_V1_PREFIX)
 
 @app.get("/")
 def root():

@@ -10,6 +10,7 @@ import FormPage from './pages/FormPage';
 import SchemesPage from './pages/SchemesPage';
 import CalculatorPage from './pages/CalculatorPage';
 import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AIChatbot from './components/AIChatbot';
@@ -31,6 +32,7 @@ function App() {
                     <Route path="/schemes" element={<ProtectedRoute><SchemesPage /></ProtectedRoute>} />
                     <Route path="/calculator" element={<ProtectedRoute><CalculatorPage /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                    <Route path="/admin" element={<AdminPage />} />
                   </Routes>
                 </ErrorBoundary>
               </main>

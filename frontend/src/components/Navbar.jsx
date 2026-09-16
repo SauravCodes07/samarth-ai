@@ -144,6 +144,13 @@ const Navbar = () => {
       icon: Sparkles,
       highlight: true
     },
+    { 
+      path: '/admin', 
+      labelEn: 'Nodal Admin', 
+      labelHi: 'नोडल अधिकारी', 
+      labelMr: 'नोडल अधिकारी',
+      icon: ShieldCheck 
+    },
   ];
 
   const getNavLabel = (link) => {
@@ -193,7 +200,9 @@ const Navbar = () => {
                     key={link.path}
                     type="button"
                     onClick={() => {
-                      if (!user) {
+                      if (link.path === '/admin') {
+                        navigate('/admin');
+                      } else if (!user) {
                         setAuthMode('login');
                         setShowAuthModal(true);
                       } else {
@@ -345,7 +354,9 @@ const Navbar = () => {
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    if (!user) {
+                    if (link.path === '/admin') {
+                      navigate('/admin');
+                    } else if (!user) {
                       setAuthMode('login');
                       setShowAuthModal(true);
                     } else {
@@ -360,7 +371,7 @@ const Navbar = () => {
                     <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                     <span>{getNavLabel(link)}</span>
                   </div>
-                  {!user && (
+                  {link.path !== '/admin' && !user && (
                     <Lock className="w-3.5 h-3.5 text-amber-500" />
                   )}
                 </button>
