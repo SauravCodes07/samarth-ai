@@ -269,13 +269,25 @@ def translate_text(payload: TranslationRequest):
     if not t_text:
         return {"translated_text": "", "target_lang": payload.target_lang}
     
-    # Try Gemini 2.5 Flash if available
+    # 1. Try Groq LPU API (sub-150ms instant translation)
+    from app.services.ai_advisory import call_groq_llm
     from app.config import settings
+    groq_prompt = f"Translate the following text accurately into {payload.target_lang} (ISO code: hi=Hindi, mr=Marathi, en=English, gu=Gujarati). Preserve financial and business terminology. Output ONLY the translated text without commentary:\n{t_text}"
+    groq_res = call_groq_llm([{"role": "user", "content": groq_prompt}], max_tokens=600, json_mode=False)
+    if groq_res and groq_res.get("text"):
+        return {
+            "translated_text": groq_res["text"].strip(),
+            "source_lang": payload.source_lang,
+            "target_lang": payload.target_lang,
+            "provider": "Groq LPU API"
+        }
+
+    # 2. Try Gemini 2.5 Flash if available
     if settings.GEMINI_API_KEY:
         try:
             from google import genai
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            prompt = f"Translate the following text accurately into {payload.target_lang} (ISO code: hi=Hindi, mr=Marathi, en=English, gu=Gujarati). Preserve financial and business terminology. Output ONLY the translated text without commentary:\n{t_text}"
+            prompt = groq_prompt
             res = client.models.generate_content(
                 model=settings.GEMINI_MODEL,
                 contents=prompt

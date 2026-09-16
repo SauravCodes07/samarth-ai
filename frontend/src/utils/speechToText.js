@@ -298,9 +298,8 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'en-I
         
         const isTrailing = trailingMarkers.includes(lastWord) || words.length <= 3;
         
-        // If trailing/short incomplete thought, allow 3200ms grace window so user can finish speaking.
-        // If user finished a complete thought (4+ words and not trailing), pause for 1800ms (natural Siri/Google Assistant pause) then finalize turn.
-        const pauseDelay = isTrailing ? 3200 : 1800;
+        // Generous, natural pause window (2.6s - 3.5s) so the user is never cut off mid-thought
+        const pauseDelay = isTrailing ? 3500 : 2600;
 
         silenceTimer = setTimeout(() => {
           triggerFinalDelivery();
@@ -325,7 +324,7 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'en-I
       if (!hasDeliveredFinal) {
         const combined = (accumulatedFinal + ' ' + latestInterim).trim();
         const fallbackCandidate = cleanVoiceTranscript(combined);
-        if (fallbackCandidate) {
+        if (fallbackCandidate && fallbackCandidate.length > 3) {
           hasDeliveredFinal = true;
           playStopChime();
           onResult && onResult(fallbackCandidate);
@@ -341,4 +340,97 @@ export const initSpeechRecognition = (onResult, onError, onEnd, langCode = 'en-I
     return null;
   }
 };
+
+/**
+ * Microphone Audio Stream Recording with MediaRecorder
+ * Captures clean, uncompressed audio bytes to send to Groq Whisper Large V3 Turbo.
+ */
+let activeMediaStream = null;
+let activeMediaRecorder = null;
+let recordedAudioChunks = [];
+
+export const startMicrophoneRecording = async () => {
+  try {
+    recordedAudioChunks = [];
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
+      return false;
+    }
+
+    activeMediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+
+    let mimeType = 'audio/webm;codecs=opus';
+    if (typeof MediaRecorder !== 'undefined') {
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' :
+                   MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' :
+                   MediaRecorder.isTypeSupported('audio/ogg') ? 'audio/ogg' : '';
+      }
+    }
+
+    activeMediaRecorder = mimeType 
+      ? new MediaRecorder(activeMediaStream, { mimeType }) 
+      : new MediaRecorder(activeMediaStream);
+
+    activeMediaRecorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        recordedAudioChunks.push(event.data);
+      }
+    };
+
+    activeMediaRecorder.start(250);
+    return true;
+  } catch (err) {
+    console.warn('Microphone MediaRecorder start error:', err);
+    return false;
+  }
+};
+
+export const stopMicrophoneRecording = async () => {
+  return new Promise((resolve) => {
+    if (!activeMediaRecorder || activeMediaRecorder.state === 'inactive') {
+      if (activeMediaStream) {
+        try {
+          activeMediaStream.getTracks().forEach(track => track.stop());
+        } catch (e) {}
+        activeMediaStream = null;
+      }
+      resolve(null);
+      return;
+    }
+
+    activeMediaRecorder.onstop = () => {
+      try {
+        const mimeType = activeMediaRecorder?.mimeType || 'audio/webm';
+        const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
+        recordedAudioChunks = [];
+        if (activeMediaStream) {
+          activeMediaStream.getTracks().forEach(track => track.stop());
+          activeMediaStream = null;
+        }
+        resolve(audioBlob);
+      } catch (e) {
+        resolve(null);
+      }
+    };
+
+    try {
+      activeMediaRecorder.stop();
+    } catch (e) {
+      if (activeMediaStream) {
+        try {
+          activeMediaStream.getTracks().forEach(track => track.stop());
+        } catch (trackErr) {}
+        activeMediaStream = null;
+      }
+      resolve(null);
+    }
+  });
+};
+
 

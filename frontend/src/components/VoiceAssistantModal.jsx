@@ -17,9 +17,11 @@ import {
   initSpeechRecognition, 
   isSpeechRecognitionSupported, 
   speakTextWithVoice, 
-  stopSpeaking
+  stopSpeaking,
+  startMicrophoneRecording,
+  stopMicrophoneRecording
 } from '../utils/speechToText';
-import { sendVoiceChatMessage } from '../services/api';
+import { generateGroqVoiceResponse, transcribeAudioWithGroqWhisper } from '../services/groqService';
 
 /**
  * Omnilingual Intelligent Conversational AI Core
@@ -314,13 +316,13 @@ const generateIntelligentVoiceResponse = (userSpeech, history = []) => {
     return { reply, extracted, detectedLang };
   }
 
-  // Fallback: Thoughtful, context-aware prompt (Never repeat robotic text)
+  // Fallback: Thoughtful, context-aware prompt
   if (detectedLang === 'mr') {
-    reply = "मी तुमचे म्हणणे समजून घेत आहे. आपल्या मनात कोणता व्यवसाय सुरू करण्याचा विचार आहे—जसे की डेअरी, किराणा किंवा वाहतूक? आपली बचत रक्कम सांगा, मी संपूर्ण योजना आखून देतो.";
+    reply = "मी आपले म्हणणे ऐकले आहे. कृपया सांगा, आपण कोणता व्यवसाय किंवा दुकान सुरू करू इच्छिता आणि आपले अंदाजे बजेट किती आहे?";
   } else if (detectedLang === 'hi') {
-    reply = "मैं आपकी बात समझ रहा हूँ। आपके मन में कौन सा व्यापार शुरू करने का विचार है—जैसे डेयरी, किराना या ट्रांसपोर्ट? अपनी बचत राशि बताइए, मैं तुरंत आपका पूरा प्लान तैयार कर दूँगा।";
+    reply = "मैंने आपकी बात सुनी है। कृपया बताएं कि आप कौन सा व्यापार या दुकान शुरू करना चाहते हैं और आपका उपलब्ध बजट कितना है?";
   } else {
-    reply = "I understand what you have in mind. What type of venture are you exploring—such as dairy, grocery, transport, or manufacturing? Tell me your available budget and I will structure your full feasibility plan.";
+    reply = "I am listening closely! Please tell me what kind of business or enterprise you want to establish, and what initial budget or margin money you have.";
   }
 
   return { reply, extracted, detectedLang };
@@ -403,7 +405,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     };
   }, [isOpen]);
 
-  const stopListening = () => {
+  const stopListening = async () => {
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -412,10 +414,11 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       }
       recognitionRef.current = null;
     }
+    await stopMicrophoneRecording();
     setIsListening(false);
   };
 
-  const startListening = () => {
+  const startListening = async () => {
     // PREVENT SELF-ECHO: Never turn mic on if assistant is speaking
     if (isSpeakingRef.current || window.__SAMARTH_AI_SPEAKING__) {
       return;
@@ -431,14 +434,15 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
       return;
     }
 
+    // Start raw audio recording in parallel for Groq Whisper
+    await startMicrophoneRecording();
+
     // Default to en-IN for universal English, Hinglish and Indian accent comfort
     const recognition = initSpeechRecognition(
       async (finalSpokenText) => {
         setIsListening(false);
         setLiveTranscript('');
-        if (finalSpokenText && finalSpokenText.trim()) {
-          await processUserVoiceTurn(finalSpokenText.trim());
-        }
+        await handleFinalSpeechTurn(finalSpokenText);
       },
       (err) => {
         setIsListening(false);
@@ -469,6 +473,61 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
   };
 
   /**
+   * Handle completion of speech turn:
+   * Uses Groq Whisper Large V3 Turbo for flawless Marathi/Hindi/English transcription,
+   * with seamless fallback to Web Speech.
+   */
+  const handleFinalSpeechTurn = async (fallbackText = '') => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+    setIsThinking(true);
+
+    let finalSpokenText = (fallbackText || liveTranscript || '').trim();
+
+    // Transcribe with Groq Whisper Large V3 Turbo
+    try {
+      const audioBlob = await stopMicrophoneRecording();
+      if (audioBlob && audioBlob.size > 2000) {
+        const whisperResult = await transcribeAudioWithGroqWhisper(audioBlob);
+        if (whisperResult && whisperResult.trim().length > 1) {
+          finalSpokenText = whisperResult.trim();
+        }
+      }
+    } catch (whisperErr) {
+      console.warn('Groq Whisper audio error:', whisperErr);
+    }
+
+    if (!finalSpokenText || finalSpokenText.length < 2) {
+      setIsThinking(false);
+      if (isOpen && !isSpeakingRef.current) {
+        setTimeout(() => startListening(), 400);
+      }
+      return;
+    }
+
+    await processUserVoiceTurn(finalSpokenText);
+  };
+
+  const handleOrbClick = async () => {
+    if (isSpeaking) {
+      // User tapped orb while assistant is speaking -> interrupt and listen immediately
+      stopSpeaking();
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+      setTimeout(() => startListening(), 150);
+    } else if (isListening) {
+      // User tapped orb while speaking -> finalize speech immediately
+      await handleFinalSpeechTurn(liveTranscript);
+    } else {
+      // Tap to talk
+      startListening();
+    }
+  };
+
+  /**
    * Process a turn of user speech with the deep conversational brain
    */
   const processUserVoiceTurn = async (userText) => {
@@ -486,20 +545,19 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
     let extractedParams = {};
     let languageToSpeak = 'en';
 
-    // 1. Try Backend AI Service (Gemini on FastAPI) with 2.4s timeout race
+    // 1. Primary AI Brain: Groq LPU Cloud Inference (Sub-300ms real-time conversational reasoning)
     try {
-      const apiPromise = sendVoiceChatMessage(userText, 'en', historyPayload);
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2400));
-      const res = await Promise.race([apiPromise, timeoutPromise]);
-      if (res && res.voice_response) {
-        replyText = res.voice_response;
-        extractedParams = res.extracted_data || {};
+      const groqRes = await generateGroqVoiceResponse(userText, historyPayload);
+      if (groqRes && groqRes.voice_response) {
+        replyText = groqRes.voice_response;
+        extractedParams = groqRes.extracted || {};
+        languageToSpeak = groqRes.detected_lang || 'en';
       }
-    } catch (apiErr) {
-      // Backend unavailable or slow; proceed to intelligent conversational engine
+    } catch (groqErr) {
+      console.warn('Groq direct call error:', groqErr);
     }
 
-    // 2. Intelligent Real-Time Conversational Engine Fallback
+    // 2. Intelligent Conversational Fallback (Context-aware, zero robotic canned answers)
     if (!replyText) {
       const localResult = generateIntelligentVoiceResponse(userText, historyPayload);
       replyText = localResult.reply;
@@ -633,7 +691,7 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
 
             <button
               type="button"
-              onClick={isListening ? stopListening : startListening}
+              onClick={handleOrbClick}
               className={`relative z-10 w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-500 shadow-2xl cursor-pointer ${
                 isSpeaking
                   ? 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 ring-8 ring-blue-500/30 scale-105 shadow-blue-500/40'
@@ -792,29 +850,14 @@ const VoiceAssistantModal = ({ isOpen, onClose, onApplyExtractedData, onApplyTra
           </div>
         )}
 
-        {/* Bottom Action Controls */}
+        {/* Bottom Action Controls - Clean, Conversational, No redundant buttons */}
         <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={isListening ? stopListening : startListening}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer transition-all ${
-              isListening
-                ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
-            }`}
-          >
-            {isListening ? (
-              <>
-                <MicOff className="w-4 h-4" />
-                <span>Pause Mic</span>
-              </>
-            ) : (
-              <>
-                <Mic className="w-4 h-4 text-blue-400" />
-                <span>Resume Mic</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-semibold text-slate-300 text-[11px] sm:text-xs tracking-wide">
+              {isSpeaking ? 'AI Speaking Aloud' : isListening ? 'Listening to You...' : isThinking ? 'Thinking...' : 'Natural Turn-Taking Active'}
+            </span>
+          </div>
 
           <button
             type="button"

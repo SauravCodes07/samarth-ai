@@ -15,8 +15,41 @@ All numbers must remain 100% deterministic.
 """
 
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+import httpx
 from app.config import settings
+
+
+def call_groq_llm(messages: List[Dict[str, str]], max_tokens: int = 1200, json_mode: bool = True) -> Optional[dict]:
+    """Execute ultra-fast chat completion on Groq Cloud LPU."""
+    if not settings.GROQ_API_KEY:
+        return None
+    models_to_try = [settings.GROQ_MODEL, "qwen/qwen3.8-27b", "openai/gpt-oss-120b", "groq/compound"]
+    for model_name in models_to_try:
+        try:
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": model_name,
+                "messages": messages,
+                "temperature": 0.3,
+                "max_tokens": max_tokens
+            }
+            if json_mode:
+                payload["response_format"] = {"type": "json_object"}
+            with httpx.Client(timeout=8.0) as client:
+                res = client.post(url, headers=headers, json=payload)
+                if res.status_code == 200:
+                    raw = res.json()["choices"][0]["message"]["content"]
+                    if json_mode:
+                        return json.loads(raw)
+                    return {"text": raw}
+        except Exception as e:
+            continue
+    return None
 from app.schemas.user_schema import (
     AdvisoryRequest, 
     SchemeResponse, 
@@ -542,7 +575,19 @@ def generate_advisory_narrative(
     }}
     """
 
-    # 1. Try Google Gemini API
+    # 1. Try Groq Cloud LPU (Sub-300ms ultra-fast inference)
+    groq_data = call_groq_llm([{"role": "user", "content": prompt}], max_tokens=1000, json_mode=True)
+    if groq_data and isinstance(groq_data, dict) and groq_data.get("ai_advisory_text"):
+        return {
+            "ai_advisory_text": groq_data.get("ai_advisory_text"),
+            "ai_advisory_text_hi": groq_data.get("ai_advisory_text_hi"),
+            "business_action_plan": groq_data.get("business_action_plan", []),
+            "business_action_plan_hi": groq_data.get("business_action_plan_hi", []),
+            "application_steps": groq_data.get("application_steps", []),
+            "application_steps_hi": groq_data.get("application_steps_hi", [])
+        }
+
+    # 2. Try Google Gemini API
     if settings.GEMINI_API_KEY:
         try:
             from google import genai
@@ -733,12 +778,8 @@ def generate_voice_chat_response(message: str, lang: str = "hi", history: list =
     elif any(k in lower for k in ['3 साल', '4 साल', '5 साल', '5 year', '3 year', 'पुराना']):
         extracted['experience_level'] = '3-5 years'
 
-    # Try Gemini if API Key is configured
-    if settings.GEMINI_API_KEY:
-        try:
-            from google import genai
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
-            prompt = f"""You are Samarth AI, an empathetic, highly knowledgeable voice assistant for rural and small business entrepreneurs in India.
+    # 1. Try Groq Cloud LPU (Sub-250ms instant voice chat reasoning)
+    groq_voice_prompt = f"""You are Samarth AI, an empathetic, highly knowledgeable voice assistant for rural and small business entrepreneurs in India.
 User's language preference: {lang} (mr = Marathi, hi = Hindi, en = English).
 User voice message: "{msg}"
 
@@ -762,6 +803,25 @@ Output strict JSON:
      "experience_level": "..."
   }}
 }}"""
+    groq_voice = call_groq_llm([{"role": "user", "content": groq_voice_prompt}], max_tokens=450, json_mode=True)
+    if groq_voice and isinstance(groq_voice, dict) and groq_voice.get("voice_response"):
+        v_resp = groq_voice.get("voice_response", "").replace("*", "").replace("#", "").strip()
+        gem_extracted = groq_voice.get("extracted", {})
+        cleaned_gem = {k: v for k, v in gem_extracted.items() if v}
+        extracted.update(cleaned_gem)
+        return {
+            "voice_response": v_resp,
+            "display_response": v_resp,
+            "extracted_data": extracted,
+            "suggested_action": "update_form"
+        }
+
+    # 2. Try Gemini if API Key is configured
+    if settings.GEMINI_API_KEY:
+        try:
+            from google import genai
+            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            prompt = groq_voice_prompt
             res = client.models.generate_content(
                 model=settings.GEMINI_MODEL,
                 contents=prompt,

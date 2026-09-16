@@ -19,6 +19,7 @@ import {
   MicOff
 } from 'lucide-react';
 import { initSpeechRecognition, isSpeechRecognitionSupported, speakTextWithVoice, stopSpeaking } from '../utils/speechToText';
+import { generateGroqChatbotResponse } from '../services/groqService';
 
 // Comprehensive Reasoning Engine for Concessional MSME Banking
 const REASONING_DATABASE = [
@@ -642,7 +643,7 @@ Please ask a question related to loans, schemes, or enterprise feasibility!`,
     };
   };
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const q = (textToSend || inputValue).trim();
     if (!q) return;
 
@@ -657,19 +658,38 @@ Please ask a question related to loans, schemes, or enterprise feasibility!`,
     setInputValue('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    let replyText = '';
+    let cta = null;
+
+    // 1. Try Groq LPU Cloud LLM for deep reasoning and live ChatGPT-grade answers
+    try {
+      const historyPayload = messages.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text }));
+      const groqReply = await generateGroqChatbotResponse(q, historyPayload, lang);
+      if (groqReply && groqReply.trim()) {
+        replyText = groqReply.trim();
+        cta = { label: lang === 'mr' ? 'शासकीय योजना पहा' : lang === 'hi' ? 'सरकारी योजनाएं देखें' : 'View Government Schemes', path: '/schemes' };
+      }
+    } catch (groqErr) {
+      console.warn('Groq chatbot fallback:', groqErr);
+    }
+
+    // 2. If Groq unavailable, fallback to instant deterministic reasoning engine
+    if (!replyText) {
       const response = generateSmartReasoning(q);
-      const newBotMsgId = (Date.now() + 1).toString();
-      const botMsg = {
-        id: newBotMsgId,
-        sender: 'bot',
-        text: response.text,
-        cta: response.cta,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      setMessages(prev => [...prev, botMsg]);
-      setIsTyping(false);
-    }, 450);
+      replyText = response.text;
+      cta = response.cta;
+    }
+
+    const newBotMsgId = (Date.now() + 1).toString();
+    const botMsg = {
+      id: newBotMsgId,
+      sender: 'bot',
+      text: replyText,
+      cta,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMessages(prev => [...prev, botMsg]);
+    setIsTyping(false);
   };
 
   const quickPills = [
