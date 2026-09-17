@@ -632,42 +632,20 @@ export const ingestCircularText = async (text, officialSourceUrl = '', state = '
     });
     if (res.data) return res.data;
   } catch (err) {
-    console.warn('Backend HF ingestion notice, using client NLP extractor...');
+    if (err.response?.data?.detail) {
+      throw new Error(err.response.data.detail);
+    }
+    throw new Error(err.message || "Failed to communicate with Government Scheme NLP Service.");
   }
-
-  // Client-side resilience fallback
-  const mockSlug = `custom-scheme-${Date.now()}`;
-  const localParsed = {
-    id: Date.now(),
-    slug: mockSlug,
-    scheme_name: text.split('\n')[0].substring(0, 60) || 'New Government Assisted Enterprise Scheme',
-    scheme_name_hi: 'नवीन शासकीय वित्तीय सहायता योजना',
-    agency: 'State Channelizing Agency (SCA) / Nodal DIC',
-    ministry: 'Ministry of Social Justice and Empowerment',
-    state: state || 'Central / All India',
-    category: 'Business & Entrepreneurship',
-    min_cost: 15000,
-    max_cost: 300000,
-    margin_percent: 5.0,
-    govt_loan_percent: 95.0,
-    interest_rate: 5.0,
-    interest_rebate_women: 1.0,
-    repayment_years: 5,
-    moratorium_months: 6,
-    description: text.substring(0, 240),
-    benefits: 'Up to 95% project cost funded at 5% concessional interest.',
-    eligibility: 'Target rural artisans and micro-entrepreneurs as per norms.',
-    verification_status: 'pending_verification',
-    is_active: false
-  };
-  return {
-    success: true,
-    scheme: localParsed,
-    pipeline: 'Hugging Face Gazette NLP & Rule-Based Ingestion Pipeline'
-  };
 };
 
 export const ingestCircularPdf = async (file, officialSourceUrl = '', state = 'Central / All India') => {
+  // Pre-screen obvious non-scheme file types like presentation slide decks, resumes, invoices
+  const lowerName = (file?.name || '').toLowerCase();
+  if (lowerName.includes('.pptx') || lowerName.includes('.ppt') || lowerName.includes('deck') || lowerName.includes('pitch') || lowerName.includes('presentation') || lowerName.includes('resume') || lowerName.includes('assignment')) {
+    throw new Error(`Document Verification Rejected: The uploaded file ('${file.name}') is identified as a Presentation Slide Deck / Pitch Deck, not an authentic Government Scheme Gazette or Policy Circular. Please upload an official Government Circular PDF (e.g. PMEGP, Mudra, Stand-Up India guidelines).`);
+  }
+
   const formData = new FormData();
   formData.append('file', file);
   if (officialSourceUrl) formData.append('official_source_url', officialSourceUrl);
@@ -679,37 +657,11 @@ export const ingestCircularPdf = async (file, officialSourceUrl = '', state = 'C
     });
     if (res.data) return res.data;
   } catch (err) {
-    console.warn('Backend PDF upload notice, creating pending draft...');
+    if (err.response?.data?.detail) {
+      throw new Error(err.response.data.detail);
+    }
+    throw new Error(err.message || `Document Ingestion Error: Failed to verify and ingest '${file.name}'.`);
   }
-
-  const localParsed = {
-    id: Date.now(),
-    slug: `pdf-scheme-${Date.now()}`,
-    scheme_name: file.name.replace('.pdf', '').replace(/[-_]/g, ' ').toUpperCase(),
-    scheme_name_hi: 'पीडीएफ से निष्कर्षित शासकीय योजना',
-    agency: 'State Channelizing Agency (SCA) / Nodal DIC',
-    ministry: 'Ministry of Social Justice and Empowerment',
-    state: state || 'Central / All India',
-    category: 'Business & Entrepreneurship',
-    min_cost: 20000,
-    max_cost: 500000,
-    margin_percent: 10.0,
-    govt_loan_percent: 90.0,
-    interest_rate: 5.0,
-    interest_rebate_women: 1.0,
-    repayment_years: 5,
-    moratorium_months: 6,
-    description: `Extracted from uploaded Government circular PDF: ${file.name}`,
-    benefits: 'Concessional subsidized credit with minimal documentation.',
-    eligibility: 'Eligible citizens per official gazette notification.',
-    verification_status: 'pending_verification',
-    is_active: false
-  };
-  return {
-    success: true,
-    scheme: localParsed,
-    pipeline: 'Hugging Face PDF Token Extraction Pipeline'
-  };
 };
 
 export const fetchPendingSchemes = async () => {

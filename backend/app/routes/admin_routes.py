@@ -13,7 +13,13 @@ import re
 
 from app.database.db_connection import get_db
 from app.models.scheme_model import Scheme, VerificationLog
-from app.services.huggingface_service import parse_scheme_with_huggingface, extract_text_from_pdf_bytes
+from app.models.user_model import User
+from app.routes.auth_routes import verify_password
+from app.services.huggingface_service import (
+    parse_scheme_with_huggingface, 
+    extract_text_from_pdf_bytes,
+    DocumentRejectionError
+)
 
 router = APIRouter(prefix="/admin", tags=["Administrative & Nodal Ingestion"])
 
@@ -105,9 +111,11 @@ async def ingest_scheme_text(
     extracts structured scheme rules, and creates a pending draft scheme in the database.
     """
     try:
-        extracted = await parse_scheme_with_huggingface(payload.circular_text)
+        extracted = await parse_scheme_with_huggingface(payload.circular_text, filename="pasted_circular_text.txt")
+    except DocumentRejectionError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Hugging Face ingestion failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Scheme Ingestion Error: {str(e)}")
 
     # Generate unique slug
     raw_slug = re.sub(r'[^a-zA-Z0-9]+', '-', extracted["scheme_name"].lower()).strip('-')
@@ -175,11 +183,19 @@ async def ingest_scheme_pdf(
         raise HTTPException(status_code=400, detail="Uploaded PDF file is empty.")
 
     extracted_text = extract_text_from_pdf_bytes(content)
-    if not extracted_text or len(extracted_text.strip()) < 20:
-        extracted_text = f"Government scheme circular uploaded: {file.filename}. Provides financial assistance and subsidized enterprise loan."
+    if not extracted_text or len(extracted_text.strip()) < 30:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Document Verification Failed: Could not extract readable text from '{file.filename}'. Please ensure the PDF contains authentic text from an official Government Gazette or Policy Circular."
+        )
 
-    # Parse extracted text with Hugging Face
-    extracted = await parse_scheme_with_huggingface(extracted_text)
+    # Parse extracted text with Hugging Face & AI document verification
+    try:
+        extracted = await parse_scheme_with_huggingface(extracted_text, filename=file.filename)
+    except DocumentRejectionError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Scheme Ingestion Error: {str(e)}")
 
     raw_slug = re.sub(r'[^a-zA-Z0-9]+', '-', extracted["scheme_name"].lower()).strip('-')
     unique_slug = f"{raw_slug}-{int(datetime.datetime.now().timestamp())}"

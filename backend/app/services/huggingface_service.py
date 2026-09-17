@@ -1,7 +1,8 @@
 """
 Hugging Face & AI Document Ingestion Service for Government Schemes
-Extracts structured scheme rules, financial numbers, eligibility, and subsidies
-from raw Government Gazette text, policy circulars, and PDF uploads.
+Enforces strict document classification & relevance filtering before extraction.
+Rejects non-scheme documents (PPTs, slide decks, resumes, academic projects, invoices)
+and extracts structured parameters only from authentic Government Gazette & Policy Circulars.
 """
 import io
 import re
@@ -13,9 +14,14 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Hugging Face Inference API Model for zero-shot and token classification / structured extraction
-HF_INFERENCE_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
-HF_NER_URL = "https://api-inference.huggingface.co/models/dslim/bert-base-NER"
+class DocumentRejectionError(Exception):
+    """Raised when an uploaded document is verified to be non-relevant or not a government scheme."""
+    def __init__(self, message: str, document_type: str = "non_scheme_document", rejection_reason: str = "", confidence: float = 0.95):
+        super().__init__(message)
+        self.document_type = document_type
+        self.rejection_reason = rejection_reason or message
+        self.confidence = confidence
+
 
 def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
     """Extracts raw text content from uploaded PDF file bytes using pypdf."""
@@ -30,9 +36,8 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
         if full_text:
             return full_text
     except Exception as e:
-        logger.warning(f"pypdf extraction error, trying raw regex extraction: {e}")
+        logger.warning(f"pypdf extraction error, trying string decoding: {e}")
 
-    # Fallback to string extraction if binary stream contains clean strings
     try:
         decoded = pdf_bytes.decode('utf-8', errors='ignore')
         clean_text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]', ' ', decoded)
@@ -41,32 +46,212 @@ def extract_text_from_pdf_bytes(pdf_bytes: bytes) -> str:
         return ""
 
 
-def heuristic_scheme_parser(text: str) -> Dict[str, Any]:
+def heuristic_relevance_check(text: str, filename: str = "") -> Optional[str]:
     """
-    Robust rule-based parser that scans official text for government scheme norms,
-    currency caps, interest rates, margin money percentages, and target groups.
+    Fast pre-screening heuristic to catch obvious non-scheme uploads like presentations,
+    pitch decks, resumes, invoices, and student projects.
+    Returns rejection reason if rejected, or None if candidate for deep AI inspection.
     """
-    cleaned = text.strip()
-    
-    # 1. Scheme Name
-    name_match = re.search(r'(?:scheme|yojana|initiative|programme)[\s:\-]+([A-Za-z0-9\s\(\)\'\"]{5,60})', cleaned, re.IGNORECASE)
-    first_line = cleaned.split('\n')[0].strip() if cleaned else ""
-    scheme_name = ""
-    if name_match:
-        scheme_name = name_match.group(0).strip().title()
-    elif len(first_line) > 5 and len(first_line) < 80:
-        scheme_name = first_line
-    else:
-        scheme_name = "Government Concessional Credit Scheme"
+    lower_fn = (filename or "").lower()
+    lower_text = (text or "").lower()
 
-    # 2. Financials: Max Cost / Loan
-    cost_matches = re.findall(r'(?:rs\.?|inr|₹|amount|cost|ceiling|limit|upto|up to)\s*[:\-]?\s*([0-9,]+(?:\.[0-9]+)?)\s*(?:lakh|lac|crore|thousand)?', cleaned, re.IGNORECASE)
-    max_cost = 200000.0
-    for match in cost_matches:
-        val_str = match.replace(',', '').strip()
+    # 1. Filename cues
+    if any(ext in lower_fn for ext in [".pptx", ".ppt", ".key", "pitch", "deck", "slide", "resume", "cv", "invoice", "receipt", "assignment", "homework", "sih"]):
+        if not ("gazette of india" in lower_text or "ministry of" in lower_text or "notification no" in lower_text):
+            return f"The uploaded file ('{filename}') is identified as a presentation slide deck or non-scheme document, not an official Government Gazette or Policy Circular."
+
+    # 2. Text cues for slide decks / academic projects
+    presentation_cues = ["problem statement", "proposed solution", "team members", "hackathon", "slide 1", "slide 2", "architecture diagram", "future scope", "tech stack", "frontend:", "backend:"]
+    found_cues = [c for c in presentation_cues if c in lower_text]
+    if len(found_cues) >= 2:
+        return f"The document text contains presentation/hackathon indicators ({', '.join(found_cues)}). It does not contain an authentic Government Scheme Gazette or Policy Circular."
+
+    return None
+
+
+async def classify_and_parse_with_groq(text: str, filename: str = "") -> Dict[str, Any]:
+    """
+    Executes deep AI document classification and parameter extraction using Groq Cloud LPU.
+    Strictly verifies if the document is an official Government Gazette / Scheme Notification.
+    """
+    if not settings.GROQ_API_KEY:
+        raise RuntimeError("GROQ_API_KEY is not configured for document classification.")
+
+    prompt = f"""
+You are an expert Government of India Document Auditor and Gazette Classifier.
+Analyze the following text extracted from an uploaded file ('{filename}').
+
+TASK:
+1. CLASSIFY: Determine whether this document is an AUTHENTIC Government Scheme, Gazette Notification, or Policy Circular providing subsidized credit / enterprise loans / beneficiary welfare.
+2. REJECT: If this document is a presentation slide deck, hackathon project, resume, academic paper, invoice, code specification, or unrelated document, set "is_official_government_scheme": false and explain why.
+3. EXTRACT: If and ONLY IF it IS an authentic government scheme, extract its precise parameters. Do NOT invent numbers that are not in the text.
+
+Extracted Document Text:
+\"\"\"{text[:2800]}\"\"\"
+
+Respond STRICTLY in JSON with this exact structure:
+{{
+  "is_official_government_scheme": true/false,
+  "document_type": "official_government_gazette_circular" OR "presentation_slides" OR "academic_project" OR "unrelated_document",
+  "confidence_score": 0.95,
+  "rejection_reason": null OR "Clear explanation of why this document is rejected",
+  "scheme_name": "Official Scheme Name",
+  "scheme_name_hi": "हिंदी में योजना का नाम",
+  "ministry": "Official Ministry",
+  "agency": "Implementing Agency / SCA / DIC",
+  "category": "Business & Entrepreneurship" OR "Agriculture,Rural & Environment" OR "Women and Child" OR "Skills & Employment",
+  "min_cost": 20000.0,
+  "max_cost": 500000.0,
+  "margin_percent": 10.0,
+  "govt_loan_percent": 90.0,
+  "interest_rate": 5.5,
+  "interest_rebate_women": 1.0,
+  "repayment_years": 5,
+  "moratorium_months": 6,
+  "description": "2-3 sentence overview of the scheme from the text",
+  "description_hi": "योजना का संक्षिप्त विवरण",
+  "benefits": "Key financial subsidies and credit concessions",
+  "eligibility": "Target group and eligibility conditions",
+  "eligibility_hi": "पात्रता शर्तें",
+  "documents_required": "Required documents listed in circular",
+  "apply_url": "Official portal URL or https://jansamarth.in",
+  "official_source_url": "https://myscheme.gov.in"
+}}
+"""
+
+    payload = {
+        "model": settings.GROQ_MODEL or "qwen/qwen3.8-27b",
+        "messages": [
+            {
+                "role": "system", 
+                "content": "You are a strict Government Document Verifier. Never classify presentation slides, hackathon projects, resumes, or non-government texts as government schemes."
+            },
+            {"role": "user", "content": prompt}
+        ],
+        "response_format": {"type": "json_object"},
+        "temperature": 0.1
+    }
+
+    async with httpx.AsyncClient(timeout=12.0) as client:
+        res = await client.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {settings.GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json=payload
+        )
+        if res.status_code == 200:
+            content = res.json()["choices"][0]["message"]["content"]
+            parsed = json.loads(content)
+            return parsed
+        else:
+            logger.warning(f"Groq API error {res.status_code}: {res.text}")
+            raise RuntimeError(f"Groq API error {res.status_code}")
+
+
+async def parse_scheme_with_huggingface(text: str, filename: str = "") -> Dict[str, Any]:
+    """
+    Main orchestration entry point:
+    1. Pre-screens text for presentation / non-scheme cues.
+    2. Runs Groq LPU classifier & parameter extraction.
+    3. If rejected, raises DocumentRejectionError.
+    4. If authentic, validates and formats for database ingestion.
+    """
+    if not text or len(text.strip()) < 30:
+        raise DocumentRejectionError(
+            message="Provided document or circular text is too short to verify or extract scheme guidelines.",
+            document_type="empty_or_too_short",
+            rejection_reason="The uploaded file contains insufficient text for verification."
+        )
+
+    # 1. Pre-screening heuristic
+    pre_rejection = heuristic_relevance_check(text, filename)
+    if pre_rejection:
+        raise DocumentRejectionError(
+            message=pre_rejection,
+            document_type="presentation_or_pitch_deck",
+            rejection_reason=pre_rejection
+        )
+
+    # 2. Deep AI Classification via Groq LPU
+    if settings.GROQ_API_KEY:
         try:
-            val = float(val_str)
-            if val < 50: # likely in Lakhs
+            ai_result = await classify_and_parse_with_groq(text, filename)
+            
+            # Check if AI rejected the document
+            if not ai_result.get("is_official_government_scheme", False):
+                doc_type = ai_result.get("document_type", "non_scheme_document")
+                reason = ai_result.get("rejection_reason") or f"Document is classified as '{doc_type}' and does not contain official Government Scheme guidelines."
+                raise DocumentRejectionError(
+                    message=f"Document Rejected: {reason}",
+                    document_type=doc_type,
+                    rejection_reason=reason,
+                    confidence=float(ai_result.get("confidence_score", 0.95))
+                )
+
+            # Document is authentic government scheme!
+            scheme_name = ai_result.get("scheme_name", "").strip()
+            if not scheme_name or len(scheme_name) < 3 or "PPTX" in scheme_name.upper():
+                raise DocumentRejectionError(
+                    message="Document Rejected: No valid Government Scheme name could be identified.",
+                    document_type="invalid_scheme_name",
+                    rejection_reason="The document does not specify a valid government scheme or program."
+                )
+
+            margin = float(ai_result.get("margin_percent", 10.0))
+            return {
+                "scheme_name": scheme_name,
+                "scheme_name_hi": ai_result.get("scheme_name_hi") or f"{scheme_name} (शासकीय योजना)",
+                "agency": ai_result.get("agency") or "State Channelizing Agency (SCA) / Nodal DIC",
+                "ministry": ai_result.get("ministry") or "Ministry of Micro, Small and Medium Enterprises",
+                "department": "Department of Enterprise & Concessional Lending",
+                "state": "Central / All India",
+                "category": ai_result.get("category") or "Business & Entrepreneurship",
+                "min_cost": float(ai_result.get("min_cost", 20000.0)),
+                "max_cost": float(ai_result.get("max_cost", 500000.0)),
+                "margin_percent": margin,
+                "govt_loan_percent": float(ai_result.get("govt_loan_percent", max(50.0, 100.0 - margin))),
+                "interest_rate": float(ai_result.get("interest_rate", 5.5)),
+                "interest_rebate_women": float(ai_result.get("interest_rebate_women", 1.0)),
+                "repayment_years": int(ai_result.get("repayment_years", 5)),
+                "moratorium_months": int(ai_result.get("moratorium_months", 6)),
+                "description": ai_result.get("description") or text[:280],
+                "description_hi": ai_result.get("description_hi") or "शासकीय रियायती ऋण सहायता योजना।",
+                "benefits": ai_result.get("benefits") or "Concessional credit and interest subsidy assistance.",
+                "eligibility": ai_result.get("eligibility") or "Target beneficiaries adhering to official income and category guidelines.",
+                "eligibility_hi": ai_result.get("eligibility_hi") or "सक्षम सरकारी मापदंडों के अंतर्गत आने वाले पात्र उद्यमी।",
+                "documents_required": ai_result.get("documents_required") or "Aadhaar Card, Category Certificate, Project Proposal, Bank Passbook",
+                "apply_url": ai_result.get("apply_url") or "https://jansamarth.in",
+                "official_source_url": ai_result.get("official_source_url") or "https://myscheme.gov.in",
+                "source_pipeline": "Hugging Face / Groq LPU Government Gazette NLP Engine"
+            }
+        except DocumentRejectionError:
+            raise
+        except Exception as e:
+            logger.warning(f"AI classification error: {e}, running strict fallback validator...")
+
+    # 3. Strict Rule-Based Government Header Validation (Safety Fallback)
+    lower = text.lower()
+    gov_markers = ["government of india", "ministry of", "gazette of india", "policy circular", "scheme guidelines", "kvic", "sidbi", "nabard", "pmegp", "stand-up india", "mudra", "pm vishwakarma"]
+    matched_markers = [m for m in gov_markers if m in lower]
+    
+    if len(matched_markers) < 1:
+        raise DocumentRejectionError(
+            message=f"Document Verification Failed: The uploaded document does not contain official Government Gazette headers, Ministry circular notations, or statutory credit guidelines.",
+            document_type="unverified_non_government_document",
+            rejection_reason="No official Government of India ministry, gazette, or scheme indicators were detected in the text."
+        )
+
+    name_match = re.search(r'(?:scheme|yojana|initiative|programme)[\s:\-]+([A-Za-z0-9\s\(\)\'\"]{5,60})', text, re.IGNORECASE)
+    scheme_name = name_match.group(0).strip().title() if name_match else "Government Concessional Credit Scheme"
+
+    cost_matches = re.findall(r'(?:rs\.?|inr|₹|amount|cost|ceiling|limit|upto|up to)\s*[:\-]?\s*([0-9,]+(?:\.[0-9]+)?)\s*(?:lakh|lac|crore)?', text, re.IGNORECASE)
+    max_cost = 500000.0
+    for match in cost_matches:
+        try:
+            val = float(match.replace(',', '').strip())
+            if val < 50:
                 val = val * 100000
             if val >= 10000:
                 max_cost = val
@@ -74,113 +259,29 @@ def heuristic_scheme_parser(text: str) -> Dict[str, Any]:
         except Exception:
             continue
 
-    min_cost = max(5000.0, round(max_cost * 0.05, -2))
-
-    # 3. Margin Percent
-    margin_match = re.search(r'(?:margin|promoter(?:\'?s)?\s*share|beneficiary\s*contribution)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%', cleaned, re.IGNORECASE)
-    margin_percent = float(margin_match.group(1)) if margin_match else 10.0
-
-    # 4. Interest Rate
-    interest_match = re.search(r'(?:interest(?:\s*rate)?|roi|concession)\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%', cleaned, re.IGNORECASE)
-    interest_rate = float(interest_match.group(1)) if interest_match else 5.5
-
-    # 5. Women Rebate
-    women_match = re.search(r'women(?:\s*entrepreneurs?)?.*?([0-9]+(?:\.[0-9]+)?)\s*%\s*(?:rebate|concession|subsidy)', cleaned, re.IGNORECASE)
-    rebate = float(women_match.group(1)) if women_match else 1.0
-
-    # 6. Tenure / Repayment
-    tenure_match = re.search(r'(?:tenure|repayment|period)\s*[:\-]?\s*([0-9]+)\s*(?:years?|yrs?)', cleaned, re.IGNORECASE)
-    repayment_years = int(tenure_match.group(1)) if tenure_match else 5
-
-    # 7. Moratorium
-    mora_match = re.search(r'(?:moratorium|grace\s*period)\s*[:\-]?\s*([0-9]+)\s*(?:months?|mths?)', cleaned, re.IGNORECASE)
-    moratorium_months = int(mora_match.group(1)) if mora_match else 6
-
-    # 8. Category
-    cat_match = "Business & Entrepreneurship"
-    lower_text = cleaned.lower()
-    if "agri" in lower_text or "dairy" in lower_text or "farm" in lower_text or "poultry" in lower_text:
-        cat_match = "Agriculture,Rural & Environment"
-    elif "women" in lower_text or "mahila" in lower_text:
-        cat_match = "Women and Child"
-    elif "skill" in lower_text or "artisan" in lower_text or "weaver" in lower_text:
-        cat_match = "Skills & Employment"
-
-    # 9. Ministry
-    ministry = "Ministry of Social Justice and Empowerment"
-    if "msme" in lower_text:
-        ministry = "Ministry of Micro, Small and Medium Enterprises"
-    elif "agri" in lower_text:
-        ministry = "Ministry of Agriculture and Farmers Welfare"
-    elif "women" in lower_text:
-        ministry = "Ministry of Women and Child Development"
-
     return {
         "scheme_name": scheme_name,
         "scheme_name_hi": f"{scheme_name} (सरकारी योजना)",
         "agency": "State Channelizing Agency (SCA) / Nodal DIC",
-        "ministry": ministry,
+        "ministry": "Ministry of Micro, Small and Medium Enterprises",
         "department": "Department of Concessional Lending & Enterprise",
         "state": "Central / All India",
-        "category": cat_match,
-        "min_cost": float(min_cost),
+        "category": "Business & Entrepreneurship",
+        "min_cost": float(max(10000.0, round(max_cost * 0.05, -2))),
         "max_cost": float(max_cost),
-        "margin_percent": float(margin_percent),
-        "govt_loan_percent": float(max(50.0, 100.0 - margin_percent)),
-        "interest_rate": float(interest_rate),
-        "interest_rebate_women": float(rebate),
-        "repayment_years": int(repayment_years),
-        "moratorium_months": int(moratorium_months),
-        "description": cleaned[:280] if len(cleaned) > 40 else f"Government assistance and financial structuring scheme for rural and micro enterprise under {ministry}.",
-        "description_hi": f"{ministry} के अंतर्गत ग्रामीण व छोटे उद्यमियों हेतु रियायती ऋण सहायता योजना।",
-        "benefits": f"Up to {100.0 - margin_percent}% government loan assistance with low {interest_rate}% interest rate and {moratorium_months} months grace period.",
-        "eligibility": "Target beneficiaries with family income adhering to state/central government criteria.",
-        "eligibility_hi": "सक्षम सरकारी मापदंडों के अंतर्गत आने वाले पात्र ग्रामीण व लघु उद्यमी।",
-        "documents_required": "Aadhaar Card, Caste/Category Certificate, Income Certificate, Bank Account Passbook, Project Proposal",
+        "margin_percent": 10.0,
+        "govt_loan_percent": 90.0,
+        "interest_rate": 5.5,
+        "interest_rebate_women": 1.0,
+        "repayment_years": 5,
+        "moratorium_months": 6,
+        "description": text[:280],
+        "description_hi": "शासकीय रियायती ऋण सहायता योजना।",
+        "benefits": f"Up to 90% government loan assistance with low interest rate.",
+        "eligibility": "Target beneficiaries with family income adhering to government criteria.",
+        "eligibility_hi": "सक्षम सरकारी मापदंडों के अंतर्गत आने वाले पात्र उद्यमी।",
+        "documents_required": "Aadhaar Card, Category Certificate, Project Proposal, Bank Passbook",
         "apply_url": "https://jansamarth.in",
-        "official_source_url": "https://myscheme.gov.in"
+        "official_source_url": "https://myscheme.gov.in",
+        "source_pipeline": "Hugging Face Gazette NLP & Rule-Based Ingestion Pipeline"
     }
-
-
-async def parse_scheme_with_huggingface(text: str) -> Dict[str, Any]:
-    """
-    Orchestrates Hugging Face and intelligent AI document extraction.
-    Attempts Hugging Face Inference API / LLM structuring, with fallback
-    to reliable domain-tuned heuristic parser.
-    """
-    if not text or len(text.strip()) < 15:
-        raise ValueError("Provided circular text is too short to extract scheme guidelines.")
-
-    # 1. Attempt Hugging Face Inference API if HF token is provided
-    hf_token = getattr(settings, "HUGGINGFACE_API_KEY", "") or getattr(settings, "HF_TOKEN", "")
-    
-    if hf_token:
-        try:
-            prompt = (
-                f"Extract government scheme parameters from this circular text into strict JSON format with keys: "
-                f"scheme_name, ministry, category, min_cost, max_cost, margin_percent, interest_rate, "
-                f"repayment_years, moratorium_months, description, eligibility, documents_required.\n\n"
-                f"Circular Text:\n{text[:1800]}\n\nJSON:"
-            )
-            headers = {"Authorization": f"Bearer {hf_token}"}
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                res = await client.post(
-                    HF_INFERENCE_API_URL,
-                    headers=headers,
-                    json={"inputs": prompt, "parameters": {"max_new_tokens": 500, "return_full_text": False}}
-                )
-                if res.status_code == 200:
-                    generated = res.json()
-                    raw_out = generated[0]["generated_text"] if isinstance(generated, list) else str(generated)
-                    json_match = re.search(r'\{.*\}', raw_out, re.DOTALL)
-                    if json_match:
-                        parsed = json.loads(json_match.group(0))
-                        parsed["source_pipeline"] = "Hugging Face Mistral-7B Inference Engine"
-                        return parsed
-        except Exception as hf_err:
-            logger.info(f"Hugging Face API call fallback notice: {hf_err}")
-
-    # 2. High-precision rule-based parser
-    parsed_data = heuristic_scheme_parser(text)
-    parsed_data["source_pipeline"] = "Hugging Face Gazette NLP & Rule-Based Ingestion Pipeline"
-    return parsed_data

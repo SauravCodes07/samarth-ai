@@ -55,6 +55,7 @@ const AdminPage = () => {
   const [targetState, setTargetState] = useState('Central / All India');
   const [isIngesting, setIsIngesting] = useState(false);
   const [ingestResult, setIngestResult] = useState(null);
+  const [rejectionNotice, setRejectionNotice] = useState(null);
 
   // Queue state
   const [pendingList, setPendingList] = useState([]);
@@ -64,6 +65,28 @@ const AdminPage = () => {
 
   // Editing modal/inline
   const [editingScheme, setEditingScheme] = useState(null);
+
+  const loadSampleGazette = () => {
+    setIngestMode('text');
+    setCircularText(
+`GOVERNMENT OF INDIA
+MINISTRY OF MICRO, SMALL AND MEDIUM ENTERPRISES
+POLICY CIRCULAR / GAZETTE NOTIFICATION No. 12(4)/2024-Credit
+
+Sub: Guidelines for Prime Minister Employment Generation Programme (PMEGP) - Concessional Credit and Margin Money Subsidy
+
+1. Scheme Objective: Generate sustainable self-employment opportunities in rural and urban areas through setting up of new micro-enterprises.
+2. Maximum Project Cost: Manufacturing sector project limit is Rs. 50,00,000 (Fifty Lakhs). Service sector project limit is Rs. 20,00,000 (Twenty Lakhs).
+3. Beneficiary Margin Contribution: For General category, 10% of project cost. For Special categories (SC, ST, OBC, Women, Ex-servicemen, Differently-abled), beneficiary contribution is only 5% of project cost.
+4. Government Margin Money Subsidy: 25% in urban areas, 35% in rural areas for special category beneficiaries.
+5. Rate of Interest: Concessional interest rate between 5% to 7.5% per annum.
+6. Repayment Tenure: 3 to 7 years after initial moratorium of 6 months.
+7. Implementing Agencies: KVIC at national level, State KVIC Directorates, State Khadi and Village Industries Boards (KVIBs), District Industries Centres (DICs).`
+    );
+    setSourceUrl('https://msme.gov.in/pmegp');
+    setRejectionNotice(null);
+    setIngestResult(null);
+  };
 
   useEffect(() => {
     if (adminUser) {
@@ -125,6 +148,7 @@ const AdminPage = () => {
     e.preventDefault();
     setIsIngesting(true);
     setIngestResult(null);
+    setRejectionNotice(null);
     setActionNotice('');
 
     try {
@@ -145,13 +169,19 @@ const AdminPage = () => {
         res = await ingestCircularText(circularText, sourceUrl, targetState);
       }
 
-      if (res.success) {
+      if (res && res.success) {
         setIngestResult(res);
-        setActionNotice('Scheme successfully parsed by Hugging Face NLP and added to the Verification Queue!');
+        setRejectionNotice(null);
+        setActionNotice('Scheme successfully verified by AI NLP and added to the Verification Queue!');
         loadQueueData();
       }
     } catch (err) {
-      alert('Ingestion error: ' + (err.message || 'Check server connection.'));
+      const errMsg = err.message || 'Check server connection.';
+      setRejectionNotice({
+        filename: selectedFile?.name || (ingestMode === 'pdf' ? 'Uploaded PDF' : 'Pasted Circular Text'),
+        reason: errMsg
+      });
+      setIngestResult(null);
     } finally {
       setIsIngesting(false);
     }
@@ -508,6 +538,17 @@ const AdminPage = () => {
                 </div>
               </div>
 
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={loadSampleGazette}
+                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center space-x-1.5 cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Load Sample Official Gazette (PMEGP Guidelines)</span>
+                </button>
+              </div>
+
               <button
                 type="submit"
                 disabled={isIngesting}
@@ -516,7 +557,7 @@ const AdminPage = () => {
                 {isIngesting ? (
                   <>
                     <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Parsing Document with Hugging Face NLP Engine...</span>
+                    <span>Verifying Authenticity & Extracting Parameters...</span>
                   </>
                 ) : (
                   <>
@@ -528,14 +569,72 @@ const AdminPage = () => {
             </form>
           </div>
 
-          {/* Live Extraction Preview */}
+          {/* Live Extraction Preview / AI Rejection Quality Gate */}
           <div className="space-y-4">
             <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center space-x-2">
               <FileText className="w-4 h-4 text-blue-600" />
               <span>Extracted Schema Preview</span>
             </h3>
 
-            {ingestResult?.scheme ? (
+            {isIngesting ? (
+              <div className="bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-900/60 rounded-3xl p-8 text-center space-y-4 shadow-sm animate-pulse">
+                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/60 rounded-2xl flex items-center justify-center mx-auto text-blue-600">
+                  <RefreshCw className="w-6 h-6 animate-spin" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                    AI NLP Quality Gate Active
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                    Running multi-layer document classification to verify official government gazette authenticity and extract statutory loan guidelines...
+                  </p>
+                </div>
+              </div>
+            ) : rejectionNotice ? (
+              <div className="bg-rose-50 dark:bg-rose-950/40 border-2 border-rose-300 dark:border-rose-800 rounded-3xl p-6 shadow-sm space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="p-2.5 bg-rose-600 text-white rounded-2xl shrink-0">
+                    <AlertCircle className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 dark:text-rose-400 block">
+                      AI Quality Gate • Document Verification Rejected
+                    </span>
+                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                      Non-Government Document Detected
+                    </h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
+                      File / Input: <span className="font-mono font-bold text-rose-700 dark:text-rose-300">{rejectionNotice.filename}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900/60 rounded-2xl text-xs text-rose-900 dark:text-rose-200 leading-relaxed space-y-1.5">
+                  <div className="font-bold flex items-center space-x-1.5 text-rose-700 dark:text-rose-400">
+                    <span>Reason for Rejection:</span>
+                  </div>
+                  <p>{rejectionNotice.reason}</p>
+                </div>
+
+                <div className="bg-white/60 dark:bg-slate-900/60 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
+                  <p className="font-bold text-slate-700 dark:text-slate-300">
+                    Why did the AI reject this file?
+                  </p>
+                  <p>
+                    Samarth AI's NLP Verification Pipeline actively protects citizen advisory accuracy by screening out presentations, slide decks (.pptx), resumes, and student assignments. Only official Government Gazette Notifications, Ministry Circulars, and Concessional Credit Guidelines can be ingested into the live registry.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={loadSampleGazette}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center space-x-1.5"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Load Authentic Sample Gazette (PMEGP) to Test Ingestion</span>
+                </button>
+              </div>
+            ) : ingestResult?.scheme ? (
               <div className="bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800/80 rounded-3xl p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[11px] font-bold">
@@ -603,7 +702,7 @@ const AdminPage = () => {
               <div className="p-8 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl text-center space-y-2 bg-slate-50/50 dark:bg-slate-900/40">
                 <Clock className="w-8 h-8 text-slate-400 mx-auto" />
                 <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                  Ready to ingest. Upload a circular or paste text on the left to trigger the Hugging Face NLP pipeline.
+                  Ready to ingest. Upload an official Government Gazette PDF or paste policy circular text to trigger the AI verification pipeline.
                 </p>
               </div>
             )}
