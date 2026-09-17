@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured, getCurrentUser, signInWithEmail, signUpWithEmail, signOut, signInWithGoogle } from '../services/supabaseClient';
+import { apiRegisterUser, apiLoginUser } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -11,20 +12,17 @@ export const AuthProvider = ({ children }) => {
     let subscription = null;
     const initAuth = async () => {
       try {
-        if (isSupabaseConfigured && supabase) {
+        const localUser = localStorage.getItem('demo_user_auth');
+        if (localUser) {
+          setUser(JSON.parse(localUser));
+        } else if (isSupabaseConfigured && supabase) {
           const u = await getCurrentUser();
-          setUser(u);
+          if (u) setUser(u);
 
           const { data } = supabase.auth.onAuthStateChange((event, session) => {
             setUser(session?.user || null);
           });
           subscription = data?.subscription;
-        } else {
-          // Local demo session for hackathon demo fallback
-          const localUser = localStorage.getItem('demo_user_auth');
-          if (localUser) {
-            setUser(JSON.parse(localUser));
-          }
         }
       } catch (err) {
         console.warn('Auth init note:', err);
@@ -62,37 +60,90 @@ export const AuthProvider = ({ children }) => {
       return { data: { user: adminUser }, error: null };
     }
 
+    // 1. Authenticate against database via backend API
+    try {
+      const backendRes = await apiLoginUser(cleanEmail, cleanPass);
+      if (backendRes?.user) {
+        const u = backendRes.user;
+        localStorage.setItem('demo_user_auth', JSON.stringify(u));
+        setUser(u);
+        return { data: { user: u }, error: null };
+      }
+    } catch (err) {
+      if (err.response?.data?.detail) {
+        return { data: null, error: { message: err.response.data.detail } };
+      }
+    }
+
+    // 2. Check Supabase if configured
     if (isSupabaseConfigured && supabase) {
       const res = await signInWithEmail(email, password);
-      if (res.data?.user) setUser(res.data.user);
-      return res;
-    } else {
-      // Demo fallback
-      const demoUser = { email, id: 'demo-beneficiary-101', role: 'Beneficiary' };
-      localStorage.setItem('demo_user_auth', JSON.stringify(demoUser));
-      setUser(demoUser);
-      return { data: { user: demoUser }, error: null };
+      if (res.data?.user) {
+        setUser(res.data.user);
+        return res;
+      }
     }
+
+    // 3. Check local demo storage
+    const localUser = localStorage.getItem('demo_user_auth');
+    if (localUser) {
+      const parsed = JSON.parse(localUser);
+      if (parsed.email === cleanEmail) {
+        setUser(parsed);
+        return { data: { user: parsed }, error: null };
+      }
+    }
+
+    return { 
+      data: null, 
+      error: { message: "Invalid email or password. Please verify your credentials or click 'Sign Up' to create a new account." } 
+    };
   };
 
   const register = async (email, password, metadata = {}) => {
-    if (isSupabaseConfigured && supabase) {
-      const res = await signUpWithEmail(email, password, metadata);
-      if (res.data?.user) {
-        setUser(res.data.user);
+    const cleanEmail = (email || '').trim().toLowerCase();
+    
+    try {
+      // 1. Register in backend database
+      const backendRes = await apiRegisterUser({
+        email: cleanEmail,
+        password,
+        full_name: metadata.full_name || '',
+        phone: metadata.phone || '',
+        state: metadata.state || 'Maharashtra'
+      });
+
+      if (backendRes?.user) {
+        const u = backendRes.user;
+        localStorage.setItem('demo_user_auth', JSON.stringify(u));
+        setUser(u);
+
+        // Optional background attempt to sync with Supabase
+        if (isSupabaseConfigured && supabase) {
+          signUpWithEmail(cleanEmail, password, metadata).catch(() => {});
+        }
+
+        return { data: { user: u }, error: null };
       }
-      return res;
-    } else {
-      const demoUser = { 
-        email, 
-        id: 'beneficiary-' + Date.now(), 
-        role: 'Beneficiary',
-        user_metadata: metadata
-      };
-      localStorage.setItem('demo_user_auth', JSON.stringify(demoUser));
-      setUser(demoUser);
-      return { data: { user: demoUser }, error: null };
+    } catch (err) {
+      if (err.response?.data?.detail) {
+        return { data: null, error: { message: err.response.data.detail } };
+      }
     }
+
+    // Fallback if backend server is unreachable
+    const fallbackUser = { 
+      email: cleanEmail, 
+      id: 'beneficiary-' + Date.now(), 
+      role: 'Beneficiary',
+      full_name: metadata.full_name || cleanEmail.split('@')[0],
+      phone: metadata.phone || '',
+      state: metadata.state || 'Maharashtra',
+      user_metadata: metadata
+    };
+    localStorage.setItem('demo_user_auth', JSON.stringify(fallbackUser));
+    setUser(fallbackUser);
+    return { data: { user: fallbackUser }, error: null };
   };
 
   const loginWithGoogle = async () => {

@@ -762,5 +762,32 @@ export const deleteAdminScheme = async (schemeId) => {
   return { success: true };
 };
 
+/**
+ * Enterprise Database User Authentication & Password Recovery Services
+ */
+export const apiRegisterUser = async (payload) => {
+  const res = await api.post('/auth/register', payload);
+  return res.data;
+};
+
+export const apiLoginUser = async (email, password) => {
+  const res = await api.post('/auth/login', { email, password });
+  return res.data;
+};
+
+export const apiRequestResetOtp = async (email) => {
+  const res = await api.post('/auth/forgot-password/request-otp', { email });
+  return res.data;
+};
+
+export const apiVerifyAndResetPassword = async (email, otp_code, new_password) => {
+  const res = await api.post('/auth/forgot-password/verify-reset', {
+    email,
+    otp_code,
+    new_password
+  });
+  return res.data;
+};
+
 export default api;
 
