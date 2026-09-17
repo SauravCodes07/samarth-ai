@@ -197,10 +197,9 @@ def request_password_reset_otp(req: ForgotPasswordRequest, db: Session = Depends
 
     return {
         "status": "success",
-        "message": f"Verification OTP has been generated and dispatched for {clean_email}.",
+        "message": f"A secure 6-digit verification code has been dispatched to your registered contact.",
         "email": clean_email,
-        "phone_masked": f"+91 ***{user.phone[-4:]}" if user.phone and len(user.phone) >= 4 else "Registered Phone/Email",
-        "demo_otp": otp_code,  # Provided for seamless hackathon evaluator testing
+        "phone_masked": f"+91 ***{user.phone[-4:]}" if user.phone and len(user.phone) >= 4 else "Registered Contact",
         "expires_in_minutes": 10,
         "delivery_channel": dispatch_result.get("delivery_channel")
     }
@@ -210,6 +209,7 @@ def verify_and_reset_password(req: ResetPasswordRequest, db: Session = Depends(g
     """
     Step 2 of Password Reset:
     Validates the 6-digit OTP against database records and updates the user's password.
+    Strictly rejects any random, guessed, or mismatched OTP.
     """
     clean_email = req.email.strip().lower()
     clean_otp = req.otp_code.strip()
@@ -232,7 +232,7 @@ def verify_and_reset_password(req: ResetPasswordRequest, db: Session = Depends(g
     if not otp_record:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid OTP code. Please enter the correct 6-digit code received."
+            detail="Incorrect OTP code. Random or unverified codes are strictly rejected. Please enter the exact 6-digit code sent to your registered contact."
         )
 
     # Check expiration (ensure UTC aware)

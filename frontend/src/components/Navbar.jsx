@@ -555,10 +555,22 @@ const Navbar = () => {
 
       {/* Modern Authentication Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs p-4 animate-fadeIn">
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowAuthModal(false);
+              resetFormState();
+            }
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 dark:bg-black/75 backdrop-blur-xs p-4 animate-fadeIn"
+        >
           <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-md p-6 relative max-h-[92vh] overflow-y-auto transition-colors">
             <button
-              onClick={() => setShowAuthModal(false)}
+              type="button"
+              onClick={() => {
+                setShowAuthModal(false);
+                resetFormState();
+              }}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -596,27 +608,6 @@ const Navbar = () => {
               <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-700 dark:text-emerald-300 flex items-start space-x-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{authSuccessMessage}</span>
-              </div>
-            )}
-
-            {/* OTP Evaluation Helper Banner */}
-            {authMode === 'otp_reset' && otpInfo?.demo_otp && (
-              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 rounded-xl text-xs flex items-center justify-between gap-2">
-                <div className="flex flex-col">
-                  <span className="font-bold text-blue-900 dark:text-blue-200">
-                    Twilio Gateway OTP: <span className="font-mono text-sm tracking-wider text-blue-700 dark:text-blue-300">{otpInfo.demo_otp}</span>
-                  </span>
-                  <span className="text-[10px] text-blue-600 dark:text-blue-400">
-                    {otpInfo.delivery_channel === 'twilio_sms' ? 'Dispatched via Twilio SMS' : 'Generated via Security Gateway'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setOtpCode(otpInfo.demo_otp)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer shrink-0"
-                >
-                  Auto-Fill
-                </button>
               </div>
             )}
 
