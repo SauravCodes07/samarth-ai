@@ -47,6 +47,13 @@ const Home = () => {
   const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
+  // When user is already authenticated, take them directly to the main schemes directory / dashboard
+  useEffect(() => {
+    if (user) {
+      navigate('/schemes', { replace: true });
+    }
+  }, [user, navigate]);
+
   const handleFeatureAccess = (path = '/advisory') => {
     if (!user) {
       openAuthModal('login');

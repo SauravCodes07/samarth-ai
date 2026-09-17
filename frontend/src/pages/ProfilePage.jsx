@@ -24,7 +24,8 @@ import {
   FileCheck,
   Building,
   Activity,
-  Radio
+  Radio,
+  Lock
 } from 'lucide-react';
 
 const ProfilePage = () => {
