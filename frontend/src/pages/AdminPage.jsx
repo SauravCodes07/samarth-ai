@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, 
   UploadCloud, 
@@ -19,7 +20,8 @@ import {
   Building2,
   Percent,
   IndianRupee,
-  RefreshCw
+  RefreshCw,
+  User
 } from 'lucide-react';
 import { 
   adminLogin, 
@@ -33,6 +35,7 @@ import {
 } from '../services/api';
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   // Auth state
   const [adminUser, setAdminUser] = useState(() => {
     const saved = localStorage.getItem('samarth_admin_user');
@@ -105,11 +108,11 @@ const AdminPage = () => {
   };
 
   const handleQuickDemoLogin = async () => {
-    setEmail('admin@samarth.gov.in');
+    setEmail('ghansushayal@gmail.com');
     setPassword('Samarth@2026');
     setLoginLoading(true);
     try {
-      const res = await adminLogin('admin@samarth.gov.in', 'Samarth@2026');
+      const res = await adminLogin('ghansushayal@gmail.com', 'Samarth@2026');
       if (res.admin) {
         setAdminUser(res.admin);
       }
@@ -213,7 +216,7 @@ const AdminPage = () => {
               <input
                 type="email"
                 required
-                placeholder="admin@samarth.gov.in"
+                placeholder="ghansushayal@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3.5 py-2.5 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
@@ -249,8 +252,8 @@ const AdminPage = () => {
               onClick={handleQuickDemoLogin}
               className="w-full py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center space-x-1.5"
             >
-              <Lock className="w-3.5 h-3.5 text-blue-600" />
-              <span>1-Click Evaluator Login (Demo Nodal Officer)</span>
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>1-Click Evaluator Nodal Officer Login</span>
             </button>
           </div>
 
@@ -279,6 +282,15 @@ const AdminPage = () => {
         </div>
 
         <div className="flex items-center space-x-3">
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            className="px-3.5 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer text-white shadow-xs"
+            title="Open Admin Profile & Settings"
+          >
+            <User className="w-3.5 h-3.5" />
+            <span>My Profile</span>
+          </button>
           <button
             onClick={loadQueueData}
             className="px-3.5 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer"

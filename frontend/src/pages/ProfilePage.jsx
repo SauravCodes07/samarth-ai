@@ -29,10 +29,35 @@ import {
 
 const ProfilePage = () => {
   const { lang } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUserProfile, changeUserPassword } = useAuth();
   const navigate = useNavigate();
   const [inquiries, setInquiries] = useState([]);
   const [loadingInquiries, setLoadingInquiries] = useState(true);
+
+  // Profile Form state
+  const [editFullName, setEditFullName] = useState(user?.user_metadata?.full_name || user?.full_name || '');
+  const [editPhone, setEditPhone] = useState(user?.user_metadata?.phone || user?.phone || '');
+  const [editState, setEditState] = useState(user?.user_metadata?.state || user?.state || 'Central / All India');
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [profileNotice, setProfileNotice] = useState({ type: '', text: '' });
+
+  // Password Form state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordNotice, setPasswordNotice] = useState({ type: '', text: '' });
+
+  // Settings Tab: 'profile' | 'password'
+  const [settingsTab, setSettingsTab] = useState('profile');
+
+  useEffect(() => {
+    if (user) {
+      setEditFullName(user.user_metadata?.full_name || user.full_name || '');
+      setEditPhone(user.user_metadata?.phone || user.phone || '');
+      setEditState(user.user_metadata?.state || user.state || 'Central / All India');
+    }
+  }, [user]);
 
   useEffect(() => {
     let unsubscribe = () => {};
@@ -46,7 +71,6 @@ const ProfilePage = () => {
 
     loadInquiries();
 
-    // Listen to real-time additions across all mobile and web devices
     unsubscribe = subscribeToInquiries((payload) => {
       if (payload.eventType === 'INSERT' && payload.new) {
         setInquiries(prev => [payload.new, ...prev.slice(0, 5)]);
@@ -71,7 +95,7 @@ const ProfilePage = () => {
               ? 'आपले प्रोफाइल आणि सरकारी योजनांची पात्रता पाहण्यासाठी खात्यात प्रवेश करा.' 
               : lang === 'hi' 
               ? 'अपना प्रोफाइल और सरकारी योजनाओं की पात्रता देखने के लिए खाते में प्रवेश करें।' 
-              : 'Sign in to access your beneficiary profile, saved schemes, and credit entitlements.'}
+              : 'Sign in to access your profile, saved schemes, and administrative settings.'}
           </p>
           <button
             onClick={() => navigate('/')}
@@ -84,9 +108,72 @@ const ProfilePage = () => {
     );
   }
 
-  const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Beneficiary';
-  const initial = displayName[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U';
+  const isAdmin = localStorage.getItem('samarth_admin_user') || user?.role === 'Admin' || user?.email === 'ghansushayal@gmail.com';
+  const displayName = user.user_metadata?.full_name || user.full_name || (isAdmin ? 'Chief Nodal Officer & Administrator' : user.email?.split('@')[0]);
+  const initial = displayName[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'A';
   const username = displayName;
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setProfileNotice({ type: '', text: '' });
+    setIsUpdatingProfile(true);
+
+    try {
+      await updateUserProfile({
+        full_name: editFullName.trim(),
+        phone: editPhone.trim(),
+        state: editState.trim()
+      });
+      setProfileNotice({
+        type: 'success',
+        text: lang === 'mr' ? 'प्रोफाइल माहिती यशस्वीरीत्या अद्ययावत केली.' : lang === 'hi' ? 'प्रोफाइल विवरण सफलतापूर्वक अपडेट किया गया।' : 'Profile details updated successfully.'
+      });
+    } catch (err) {
+      setProfileNotice({
+        type: 'error',
+        text: err.message || 'Failed to update profile.'
+      });
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPasswordNotice({ type: '', text: '' });
+
+    if (!currentPassword.trim()) {
+      setPasswordNotice({ type: 'error', text: 'Please enter your current password.' });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordNotice({ type: 'error', text: 'New password must be at least 6 characters.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordNotice({ type: 'error', text: 'New passwords do not match. Please verify.' });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      await changeUserPassword(currentPassword, newPassword);
+      setPasswordNotice({
+        type: 'success',
+        text: lang === 'mr' ? 'पासवर्ड यशस्वीरीत्या बदलला आहे.' : lang === 'hi' ? 'पासवर्ड सफलतापूर्वक बदल दिया गया है।' : 'Password updated successfully!'
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setPasswordNotice({
+        type: 'error',
+        text: err.response?.data?.detail || err.message || 'Incorrect current password or update failed.'
+      });
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#090D16] py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
@@ -94,11 +181,11 @@ const ProfilePage = () => {
         
         {/* Profile Header Card */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl overflow-hidden card-glow-interactive relative transition-colors">
-          <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 text-white p-6 sm:p-8 relative overflow-hidden border-b border-white/10">
+          <div className={`text-white p-6 sm:p-8 relative overflow-hidden border-b border-white/10 ${isAdmin ? 'bg-gradient-to-r from-[#0B3D91] via-[#1E3A8A] to-[#0F172A]' : 'bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950'}`}>
             <BackgroundBeams />
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
               <div className="flex items-center space-x-4 sm:space-x-6">
-                <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-white dark:bg-slate-800 text-blue-900 dark:text-blue-300 flex items-center justify-center text-3xl font-black shadow-xl border-2 border-amber-300 dark:border-amber-400">
+                <div className={`w-18 h-18 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center text-3xl font-black shadow-xl border-2 ${isAdmin ? 'bg-amber-400 text-slate-950 border-white' : 'bg-white dark:bg-slate-800 text-blue-900 dark:text-blue-300 border-amber-300 dark:border-amber-400'}`}>
                   {initial}
                 </div>
                 <div>
@@ -111,65 +198,269 @@ const ProfilePage = () => {
                     <span>{user.email}</span>
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2.5">
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-radar"></span>
-                      <CheckCircle2 className="w-3 h-3" />
-                      {lang === 'mr' ? 'सत्यापित अर्जदार (MoSJE)' : lang === 'hi' ? 'सत्यापित लाभार्थी (MoSJE)' : 'Verified Beneficiary'}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
-                      <Landmark className="w-3 h-3" />
-                      {lang === 'mr' ? 'ग्रामीण MSME श्रेणी' : lang === 'hi' ? 'ग्रामीण MSME श्रेणी' : 'Rural MSME Category'}
-                    </span>
+                    {isAdmin ? (
+                      <>
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span>Chief Nodal Officer & Administrator</span>
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/30">
+                          <Landmark className="w-3 h-3" />
+                          <span>MoSJE / SCA Ingestion Authority</span>
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-radar"></span>
+                          <CheckCircle2 className="w-3 h-3" />
+                          {lang === 'mr' ? 'सत्यापित अर्जदार (MoSJE)' : lang === 'hi' ? 'सत्यापित लाभार्थी (MoSJE)' : 'Verified Beneficiary'}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                          <Landmark className="w-3 h-3" />
+                          {lang === 'mr' ? 'ग्रामीण MSME श्रेणी' : lang === 'hi' ? 'ग्रामीण MSME श्रेणी' : 'Rural MSME Category'}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  logout();
-                  navigate('/');
-                }}
-                className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>{lang === 'mr' ? 'लॉगआउट करा' : lang === 'hi' ? 'लॉगआउट करें' : 'Sign Out'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Entitlements Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-slate-800 bg-slate-50/70 dark:bg-slate-900/60 p-4 sm:p-5 transition-colors">
-            <div className="py-2 sm:py-0 sm:px-4">
-              <span className="text-[11px] uppercase font-bold text-slate-400 dark:text-slate-400 block tracking-wider">
-                {lang === 'mr' ? 'किमान स्वतःचे भांडवल' : lang === 'hi' ? 'न्यूनतम मार्जिन पूंजी' : 'Minimum Margin Share'}
-              </span>
-              <div className="flex items-baseline space-x-1.5 mt-0.5">
-                <span className="text-xl font-black text-blue-700 dark:text-blue-400">10%</span>
-                <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">({lang === 'mr' ? '९०% सरकारी कर्ज' : lang === 'hi' ? '90% सरकारी लोन' : '90% Govt Loan'})</span>
-              </div>
-            </div>
-
-            <div className="py-2 sm:py-0 sm:px-4">
-              <span className="text-[11px] uppercase font-bold text-slate-400 dark:text-slate-400 block tracking-wider">
-                {lang === 'mr' ? 'हप्ता सवलत (मोरेटोरियम)' : lang === 'hi' ? 'मोरेटोरियम अवधि' : 'Moratorium Holiday'}
-              </span>
-              <div className="flex items-baseline space-x-1.5 mt-0.5">
-                <span className="text-xl font-black text-amber-600 dark:text-amber-400">6 – 12</span>
-                <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">{lang === 'mr' ? 'महिने' : lang === 'hi' ? 'माह' : 'Months'}</span>
-              </div>
-            </div>
-
-            <div className="py-2 sm:py-0 sm:px-4">
-              <span className="text-[11px] uppercase font-bold text-slate-400 dark:text-slate-400 block tracking-wider">
-                {lang === 'mr' ? 'सवलतीचा व्याजदर' : lang === 'hi' ? 'रियायती ब्याज दर' : 'Concessional Interest'}
-              </span>
-              <div className="flex items-baseline space-x-1.5 mt-0.5">
-                <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">4% – 8%</span>
-                <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">{lang === 'mr' ? 'वार्षिक' : lang === 'hi' ? 'वार्षिक' : 'p.a.'}</span>
+              <div className="flex items-center space-x-2">
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/admin')}
+                    className="inline-flex items-center space-x-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold px-3.5 py-2.5 rounded-xl transition-all shadow-md cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                    <span>Scheme Ingestion Portal</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    navigate('/');
+                  }}
+                  className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/20 transition-all cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{lang === 'mr' ? 'लॉगआउट करा' : lang === 'hi' ? 'लॉगआउट करें' : 'Sign Out'}</span>
+                </button>
               </div>
             </div>
           </div>
+
+          {/* Interactive Profile & Security Tab Switcher */}
+          <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 px-6 pt-3 flex space-x-6">
+            <button
+              type="button"
+              onClick={() => setSettingsTab('profile')}
+              className={`pb-3 text-xs font-extrabold flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+                settingsTab === 'profile'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <User className="w-4 h-4" />
+              <span>{lang === 'mr' ? 'वैयक्तिक माहिती बदला' : lang === 'hi' ? 'प्रोफाइल विवरण बदलें' : 'Edit Profile Information'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSettingsTab('password')}
+              className={`pb-3 text-xs font-extrabold flex items-center space-x-2 border-b-2 transition-all cursor-pointer ${
+                settingsTab === 'password'
+                  ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <Lock className="w-4 h-4" />
+              <span>{lang === 'mr' ? 'पासवर्ड बदला' : lang === 'hi' ? 'पासवर्ड बदलें' : 'Change Password'}</span>
+            </button>
+          </div>
+
+          {/* Tab 1: Edit Profile Information Form */}
+          {settingsTab === 'profile' && (
+            <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 transition-colors">
+              <form onSubmit={handleProfileUpdate} className="max-w-2xl space-y-4">
+                {profileNotice.text && (
+                  <div className={`p-3 rounded-xl text-xs flex items-center space-x-2 ${profileNotice.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border border-emerald-200' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 border border-rose-200'}`}>
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{profileNotice.text}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {lang === 'mr' ? 'पूर्ण नाव' : lang === 'hi' ? 'पूरा नाम' : 'Full Name'}
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editFullName}
+                      onChange={(e) => setEditFullName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                      placeholder="Enter full name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {lang === 'mr' ? 'मोबाईल नंबर' : lang === 'hi' ? 'मोबाइल नंबर' : 'Phone Number'}
+                    </label>
+                    <input
+                      type="tel"
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
+                      className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                      placeholder="10-digit mobile number"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {lang === 'mr' ? 'राज्य / अधिकार क्षेत्र' : lang === 'hi' ? 'राज्य / अधिकार क्षेत्र' : 'State / Jurisdiction'}
+                    </label>
+                    <input
+                      type="text"
+                      value={editState}
+                      onChange={(e) => setEditState(e.target.value)}
+                      className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                      placeholder="State of operation"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      {lang === 'mr' ? 'ईमेल पत्ता (बदलता येत नाही)' : lang === 'hi' ? 'ईमेल पता (अपरिवर्तनीय)' : 'Email Address (Registered)'}
+                    </label>
+                    <input
+                      type="email"
+                      disabled
+                      value={user.email}
+                      className="w-full px-3.5 py-2.5 text-sm bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl text-slate-500 dark:text-slate-400 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isUpdatingProfile}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-70"
+                  >
+                    {isUpdatingProfile ? 'Saving Changes...' : (lang === 'mr' ? 'बदल जतन करा' : lang === 'hi' ? 'बदलाव सुरक्षित करें' : 'Save Profile Changes')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Tab 2: Change Password Form */}
+          {settingsTab === 'password' && (
+            <div className="p-6 sm:p-8 bg-white dark:bg-slate-900 transition-colors">
+              <form onSubmit={handlePasswordChange} className="max-w-md space-y-4">
+                {passwordNotice.text && (
+                  <div className={`p-3 rounded-xl text-xs flex items-center space-x-2 ${passwordNotice.type === 'success' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border border-emerald-200' : 'bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 border border-rose-200'}`}>
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{passwordNotice.text}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {lang === 'mr' ? 'सध्याचा पासवर्ड' : lang === 'hi' ? 'वर्तमान पासवर्ड' : 'Current Password'}
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    placeholder="Enter existing password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {lang === 'mr' ? 'नवीन पासवर्ड (किमान ६ अक्षरे)' : lang === 'hi' ? 'नया पासवर्ड (कम से कम 6 अक्षर)' : 'New Password (min 6 characters)'}
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    placeholder="Enter new strong password"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {lang === 'mr' ? 'नवीन पासवर्डची पुष्टी करा' : lang === 'hi' ? 'नए पासवर्ड की पुष्टि करें' : 'Confirm New Password'}
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-slate-900 dark:text-white"
+                    placeholder="Re-enter new password"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isUpdatingPassword}
+                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-70"
+                  >
+                    {isUpdatingPassword ? 'Updating Password...' : (lang === 'mr' ? 'पासवर्ड अद्ययावत करा' : lang === 'hi' ? 'पासवर्ड अपडेट करें' : 'Update Password')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Quick Entitlements Bar (For Beneficiaries) */}
+          {!isAdmin && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-slate-800 bg-slate-50/70 dark:bg-slate-900/60 p-4 sm:p-5 transition-colors">
+              <div className="py-2 sm:py-0 sm:px-4">
+                <span className="text-[11px] uppercase font-bold text-slate-400 dark:text-slate-400 block tracking-wider">
+                  {lang === 'mr' ? 'किमान स्वतःचे भांडवल' : lang === 'hi' ? 'न्यूनतम मार्जिन पूंजी' : 'Minimum Margin Share'}
+                </span>
+                <div className="flex items-baseline space-x-1.5 mt-0.5">
+                  <span className="text-xl font-black text-blue-700 dark:text-blue-400">10%</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">({lang === 'mr' ? '९०% सरकारी कर्ज' : lang === 'hi' ? '90% सरकारी लोन' : '90% Govt Loan'})</span>
+                </div>
+              </div>
+
+              <div className="py-2 sm:py-0 sm:px-4">
+                <span className="text-[11px] uppercase font-bold text-slate-400 dark:text-slate-400 block tracking-wider">
+                  {lang === 'mr' ? 'हप्ता सवलत (मोरेटोरियम)' : lang === 'hi' ? 'मोरेटोरियम अवधि' : 'Moratorium Holiday'}
+                </span>
+                <div className="flex items-baseline space-x-1.5 mt-0.5">
+                  <span className="text-xl font-black text-amber-600 dark:text-amber-400">6 – 12</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">{lang === 'mr' ? 'महिने' : lang === 'hi' ? 'माह' : 'Months'}</span>
+                </div>
+              </div>
+
+              <div className="py-2 sm:py-0 sm:px-4">
+                <span className="text-[11px] uppercase font-bold text-slate-400 dark:text-slate-400 block tracking-wider">
+                  {lang === 'mr' ? 'सवलतीचा व्याजदर' : lang === 'hi' ? 'रियायती ब्याज दर' : 'Concessional Interest'}
+                </span>
+                <div className="flex items-baseline space-x-1.5 mt-0.5">
+                  <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">4% – 8%</span>
+                  <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">{lang === 'mr' ? 'वार्षिक' : lang === 'hi' ? 'वार्षिक' : 'p.a.'}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Detailed Sections */}

@@ -116,26 +116,21 @@ const Navbar = () => {
         const cleanPass = (password || '').trim();
 
         // 1. Nodal Officer / Admin Login Detection & Direct Routing
-        const isAdminAttempt = (
-          cleanEmail === 'admin@samarth.gov.in' ||
-          cleanEmail === 'officer@mosje.gov.in' ||
-          cleanEmail === 'nodal@nsfdc.nic.in' ||
-          cleanPass === 'Samarth@2026'
-        );
+        const isAdminAttempt = (cleanEmail === 'ghansushayal@gmail.com');
 
         if (isAdminAttempt) {
           try {
-            const adminRes = await adminLogin(cleanEmail || 'admin@samarth.gov.in', cleanPass);
+            const adminRes = await adminLogin('ghansushayal@gmail.com', cleanPass);
             if (adminRes && adminRes.status === 'success') {
               localStorage.setItem('samarth_admin_user', JSON.stringify(adminRes.admin));
-              await login(cleanEmail || 'admin@samarth.gov.in', cleanPass);
+              await login('ghansushayal@gmail.com', cleanPass);
               setShowAuthModal(false);
               resetFormState();
               navigate('/admin');
               return;
             }
           } catch (adminErr) {
-            if (cleanEmail === 'admin@samarth.gov.in' || cleanPass === 'Samarth@2026') {
+            if (cleanEmail === 'ghansushayal@gmail.com') {
               throw new Error(adminErr.response?.data?.detail || 'Invalid administrative credentials. Use master password Samarth@2026.');
             }
           }
@@ -396,32 +391,34 @@ const Navbar = () => {
 
               {/* Authentication Button & Profile Trigger */}
               {user ? (
-                <div className="flex items-center space-x-1.5">
+                <div className="flex items-center space-x-2">
+                  {(localStorage.getItem('samarth_admin_user') || user?.role === 'Admin' || user?.email === 'ghansushayal@gmail.com') && (
+                    <button
+                      type="button"
+                      onClick={() => navigate('/admin')}
+                      className="flex items-center space-x-1.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 py-1.5 px-2.5 rounded-xl text-xs font-bold text-indigo-900 dark:text-indigo-200 transition-all cursor-pointer shadow-2xs whitespace-nowrap"
+                      title="Nodal Administration Portal (Hugging Face Ingestion & Verification)"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                      <span>{lang === 'mr' ? 'प्रशासक पोर्टल' : lang === 'hi' ? 'एडमिन पोर्टल' : 'Admin Portal'}</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
-                    onClick={() => {
-                      const isNodalAdmin = localStorage.getItem('samarth_admin_user') || user?.role === 'Admin' || user?.email === 'admin@samarth.gov.in';
-                      if (isNodalAdmin) {
-                        navigate('/admin');
-                      } else {
-                        navigate('/profile');
-                      }
-                    }}
+                    onClick={() => navigate('/profile')}
                     className="shine-button flex items-center space-x-1.5 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800/80 py-1.5 px-2.5 rounded-xl text-xs font-bold text-blue-900 dark:text-blue-200 transition-all cursor-pointer shadow-2xs group whitespace-nowrap"
-                    title={
-                      localStorage.getItem('samarth_admin_user') || user?.email === 'admin@samarth.gov.in'
-                        ? 'Nodal Officer Administration Gateway'
-                        : (lang === 'mr' ? 'माझे प्रोफाइल पहा' : lang === 'hi' ? 'मेरा प्रोफाइल देखें' : 'View Beneficiary Profile')
-                    }
+                    title={lang === 'mr' ? 'माझे प्रोफाइल पहा व बदला' : lang === 'hi' ? 'मेरा प्रोफाइल देखें व बदलें' : 'View & Edit Profile'}
                   >
                     <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black group-hover:scale-105 transition-transform shrink-0">
                       {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
                     </div>
                     <span className="max-w-[120px] truncate">{user.user_metadata?.full_name || user.email?.split('@')[0]}</span>
                     <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded-full font-bold">
-                      {localStorage.getItem('samarth_admin_user') || user?.email === 'admin@samarth.gov.in' ? 'Admin' : (lang === 'mr' ? 'प्रोफाइल' : lang === 'hi' ? 'प्रोफाइल' : 'Profile')}
+                      {localStorage.getItem('samarth_admin_user') || user?.email === 'ghansushayal@gmail.com' ? 'Admin' : (lang === 'mr' ? 'प्रोफाइल' : lang === 'hi' ? 'प्रोफाइल' : 'Profile')}
                     </span>
                   </button>
+
                   <button
                     onClick={() => {
                       logout();
@@ -509,29 +506,39 @@ const Navbar = () => {
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
               {user ? (
                 <div className="flex items-center justify-between w-full">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      const isNodalAdmin = localStorage.getItem('samarth_admin_user') || user?.role === 'Admin' || user?.email === 'admin@samarth.gov.in';
-                      if (isNodalAdmin) {
-                        navigate('/admin');
-                      } else {
+                  <div className="flex items-center space-x-2">
+                    {(localStorage.getItem('samarth_admin_user') || user?.role === 'Admin' || user?.email === 'ghansushayal@gmail.com') && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          navigate('/admin');
+                        }}
+                        className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <ShieldCheck className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                        <span>Admin</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
                         navigate('/profile');
-                      }
-                    }}
-                    className="flex items-center space-x-2 text-left cursor-pointer"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
-                      {user.email?.[0]?.toUpperCase() || 'U'}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">{user.user_metadata?.full_name || user.email?.split('@')[0]}</span>
-                      <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
-                        {localStorage.getItem('samarth_admin_user') || user?.email === 'admin@samarth.gov.in' ? 'Nodal Admin Gateway' : (lang === 'mr' ? 'प्रोफाइल उघडा' : lang === 'hi' ? 'प्रोफाइल खोलें' : 'Open Profile')}
-                      </span>
-                    </div>
-                  </button>
+                      }}
+                      className="flex items-center space-x-2 text-left cursor-pointer"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                        {user.email?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[130px]">{user.user_metadata?.full_name || user.email?.split('@')[0]}</span>
+                        <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
+                          {localStorage.getItem('samarth_admin_user') || user?.email === 'ghansushayal@gmail.com' ? 'Admin Profile' : (lang === 'mr' ? 'प्रोफाइल उघडा' : lang === 'hi' ? 'प्रोफाइल खोलें' : 'Open Profile')}
+                        </span>
+                      </div>
+                    </button>
+                  </div>
                   <button onClick={() => { logout(); navigate('/'); }} className="text-xs text-rose-600 dark:text-rose-400 font-medium px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer">
                     {lang === 'mr' ? 'लॉगआउट' : lang === 'hi' ? 'लॉगआउट' : 'Log out'}
                   </button>

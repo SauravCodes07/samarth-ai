@@ -43,37 +43,56 @@ class SchemeUpdateRequest(BaseModel):
     is_active: Optional[bool] = None
 
 
+from app.models.user_model import User
+from app.routes.auth_routes import verify_password
+
 @router.post("/login")
-def admin_login(creds: AdminLoginRequest):
+def admin_login(creds: AdminLoginRequest, db: Session = Depends(get_db)):
     """
     Nodal Officer Authentication Gateway.
     Verifies admin credentials for access to scheme governance.
+    Strictly recognizes ghansushayal@gmail.com as the primary administrator.
     """
     clean_email = creds.email.strip().lower()
     clean_pass = creds.password.strip()
 
-    # Pre-authorized Nodal Officer credentials (government domain or master password)
-    is_authorized = (
-        (clean_email in ["admin@samarth.gov.in", "officer@mosje.gov.in", "nodal@nsfdc.nic.in"] and clean_pass in ["Samarth@2026", "Admin@123", "SIH2026"])
-        or (clean_pass == "Samarth@2026")
-    )
+    # The sole designated administrator email
+    SOLE_ADMIN_EMAIL = "ghansushayal@gmail.com"
+
+    if clean_email != SOLE_ADMIN_EMAIL:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized administrative email. Only the designated Chief Nodal Administrator can access this gateway."
+        )
+
+    # Check database or master credentials
+    admin_user = db.query(User).filter(func.lower(User.email) == clean_email).first()
+    is_authorized = False
+
+    if admin_user and verify_password(clean_pass, admin_user.hashed_password):
+        is_authorized = True
+    elif clean_pass == "Samarth@2026":
+        is_authorized = True
 
     if not is_authorized:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid Nodal Officer credentials. Please use registered administrative credentials."
+            detail="Invalid administrative credentials. Please verify your password."
         )
+
+    admin_name = admin_user.full_name if (admin_user and admin_user.full_name) else "Chief Nodal Officer & Administrator"
 
     return {
         "success": True,
         "token": "samarth-admin-auth-token-sih-2026",
         "admin": {
             "email": clean_email,
-            "name": "Nodal Officer (MoSJE / SCA)",
+            "name": admin_name,
             "role": "Chief Scheme Ingestion & Verification Officer",
             "department": "Department of Social Justice and Concessional Lending"
         }
     }
+
 
 
 @router.post("/schemes/ingest-text")

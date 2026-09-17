@@ -789,5 +789,16 @@ export const apiVerifyAndResetPassword = async (email, otp_code, new_password) =
   return res.data;
 };
 
+export const apiUpdateProfile = async (payload) => {
+  const res = await api.put('/auth/profile', payload);
+  return res.data;
+};
+
+export const apiChangePassword = async (payload) => {
+  const res = await api.post('/auth/change-password', payload);
+  return res.data;
+};
+
 export default api;
+
 

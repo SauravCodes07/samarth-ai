@@ -156,12 +156,13 @@ def seed_database():
             print(f"Database already contains {count} schemes. Skipping scheme seed.")
 
         # 2. Seed pre-configured Nodal Admin account into users table
-        admin_user = db.query(User).filter_by(email="admin@samarth.gov.in").first()
+        admin_email = "ghansushayal@gmail.com"
+        admin_user = db.query(User).filter_by(email=admin_email).first()
         if not admin_user:
             admin_user = User(
-                email="admin@samarth.gov.in",
+                email=admin_email,
                 hashed_password=get_admin_password_hash("Samarth@2026"),
-                full_name="Chief Nodal Officer (MoSJE / SCA)",
+                full_name="Chief Nodal Officer & Administrator",
                 phone="9876543210",
                 state="Central / All India",
                 role="Admin",
@@ -169,9 +170,12 @@ def seed_database():
             )
             db.add(admin_user)
             db.commit()
-            print("Successfully seeded Chief Nodal Officer (admin@samarth.gov.in) in database.")
+            print(f"Successfully seeded Chief Nodal Officer ({admin_email}) in database.")
         else:
-            print("Nodal Admin account already exists in database.")
+            admin_user.role = "Admin"
+            admin_user.hashed_password = get_admin_password_hash("Samarth@2026")
+            db.commit()
+            print(f"Nodal Admin account ({admin_email}) refreshed in database.")
     finally:
         db.close()
 

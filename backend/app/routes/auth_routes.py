@@ -65,9 +65,9 @@ def register_user(req: UserRegisterRequest, db: Session = Depends(get_db)):
             detail="Please enter a valid email address format (e.g., name@example.com)."
         )
     
-    # 1. Check if user already exists
+    # 1. Check if user already exists or is reserved admin
     existing_user = db.query(User).filter(func.lower(User.email) == clean_email).first()
-    if existing_user:
+    if existing_user or clean_email == "ghansushayal@gmail.com":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="An account with this email address already exists. Please sign in instead."
@@ -258,3 +258,89 @@ def verify_and_reset_password(req: ResetPasswordRequest, db: Session = Depends(g
         "message": "Password reset successfully! You can now log in with your new password.",
         "email": clean_email
     }
+
+
+class UpdateProfileRequest(BaseModel):
+    email: str = Field(..., description="Registered email of user to update")
+    full_name: Optional[str] = Field(None, description="Updated full name")
+    phone: Optional[str] = Field(None, description="Updated phone number")
+    state: Optional[str] = Field(None, description="Updated state")
+
+class ChangePasswordRequest(BaseModel):
+    email: str = Field(..., description="Registered email of user")
+    current_password: str = Field(..., description="Current password")
+    new_password: str = Field(..., min_length=6, description="New password (min 6 characters)")
+
+@router.put("/profile")
+def update_profile(req: UpdateProfileRequest, db: Session = Depends(get_db)):
+    """
+    Updates profile information (name, phone, state) for the user or administrator.
+    """
+    clean_email = req.email.strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == clean_email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in database."
+        )
+
+    if req.full_name is not None and req.full_name.strip():
+        user.full_name = req.full_name.strip()
+    if req.phone is not None:
+        user.phone = req.phone.strip()
+    if req.state is not None and req.state.strip():
+        user.state = req.state.strip()
+
+    user.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "status": "success",
+        "message": "Profile updated successfully.",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "phone": user.phone,
+            "state": user.state,
+            "role": user.role,
+            "user_metadata": {
+                "full_name": user.full_name,
+                "phone": user.phone,
+                "state": user.state
+            }
+        }
+    }
+
+@router.post("/change-password")
+def change_password(req: ChangePasswordRequest, db: Session = Depends(get_db)):
+    """
+    Secure password change verifying current password before hashing the new one.
+    """
+    clean_email = req.email.strip().lower()
+    user = db.query(User).filter(func.lower(User.email) == clean_email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found in database."
+        )
+
+    clean_current = req.current_password.strip()
+    # Check verification with hash or default master for admin
+    is_valid = verify_password(clean_current, user.hashed_password) or (clean_email == "ghansushayal@gmail.com" and clean_current == "Samarth@2026")
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect. Please verify your current password."
+        )
+
+    user.hashed_password = hash_password(req.new_password)
+    user.updated_at = datetime.now(timezone.utc)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": "Password updated successfully."
+    }
+
