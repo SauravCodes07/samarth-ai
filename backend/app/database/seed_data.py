@@ -132,11 +132,19 @@ AUTHENTIC_SCHEMES = [
     }
 ]
 
+import os
+import hashlib
+
+def get_admin_password_hash(password: str) -> str:
+    salt = os.getenv("AUTH_SALT", "SamarthAI_Security_Salt_2026").encode()
+    return hashlib.sha256(salt + password.strip().encode("utf-8")).hexdigest()
+
 def seed_database():
-    """Initializes tables and seeds authentic schemes if database is empty."""
+    """Initializes tables, seeds authentic schemes and seeds default Nodal Admin user if not present."""
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
+        # 1. Seed schemes
         count = db.query(Scheme).count()
         if count == 0:
             for s_data in AUTHENTIC_SCHEMES:
@@ -145,9 +153,28 @@ def seed_database():
             db.commit()
             print(f"Successfully seeded {len(AUTHENTIC_SCHEMES)} authentic government schemes.")
         else:
-            print(f"Database already contains {count} schemes. Skipping seed.")
+            print(f"Database already contains {count} schemes. Skipping scheme seed.")
+
+        # 2. Seed pre-configured Nodal Admin account into users table
+        admin_user = db.query(User).filter_by(email="admin@samarth.gov.in").first()
+        if not admin_user:
+            admin_user = User(
+                email="admin@samarth.gov.in",
+                hashed_password=get_admin_password_hash("Samarth@2026"),
+                full_name="Chief Nodal Officer (MoSJE / SCA)",
+                phone="9876543210",
+                state="Central / All India",
+                role="Admin",
+                is_active=True
+            )
+            db.add(admin_user)
+            db.commit()
+            print("Successfully seeded Chief Nodal Officer (admin@samarth.gov.in) in database.")
+        else:
+            print("Nodal Admin account already exists in database.")
     finally:
         db.close()
 
 if __name__ == "__main__":
     seed_database()
+
