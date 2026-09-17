@@ -260,7 +260,7 @@ const SchemeDetailModal = ({ scheme, lang, onClose, onSelectForLoan }) => {
 // Compact Scheme Card Component with Enhanced Visual Hierarchy
 const SchemeCard = ({ s, lang, onOpenModal, onSelectForLoan }) => {
   return (
-    <SpotlightCard className="bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 flex flex-col justify-between group space-y-3.5 card-glow-interactive animate-fade-in-up">
+    <SpotlightCard className="bg-white dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-2xs hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 flex flex-col justify-between group space-y-3.5 card-glow-interactive standup-card-hover animate-fade-in-up">
       
       {/* Header Row */}
       <div className="space-y-2">

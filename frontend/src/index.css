@@ -413,3 +413,57 @@ html.dark body {
 .dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.35);
 }
+
+/* Stand-Up India Micro-Animations & Floating Transitions */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.45);
+  }
+}
+
+.pulse-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+/* Stand-Up India Wave Curve Dividers */
+.standup-wave-container {
+  position: relative;
+  background: linear-gradient(180deg, #0B2545 0%, #081B33 100%);
+  color: white;
+}
+
+.standup-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.standup-card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 35px -10px rgba(11, 61, 145, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .standup-card-hover:hover {
+  box-shadow: 0 20px 35px -10px rgba(37, 99, 235, 0.25), 0 10px 15px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Rupee Mosaic Gradient Mask */
+.rupee-symbol-mask {
+  background: linear-gradient(135deg, #0B3D91 0%, #2563EB 50%, #D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
