@@ -20,6 +20,12 @@ import { Navigate } from 'react-router-dom';
 
 const HomeRoute = () => {
   const { user, loading } = useAuth();
+  const hasAuth = !!user || !!localStorage.getItem('demo_user_auth');
+
+  if (hasAuth) {
+    return <Navigate to="/schemes" replace />;
+  }
+
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
@@ -27,9 +33,7 @@ const HomeRoute = () => {
       </div>
     );
   }
-  if (user) {
-    return <Navigate to="/schemes" replace />;
-  }
+
   return <Home />;
 };
 
@@ -50,6 +54,7 @@ function App() {
                     <Route path="/calculator" element={<ProtectedRoute><CalculatorPage /></ProtectedRoute>} />
                     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </ErrorBoundary>
               </main>

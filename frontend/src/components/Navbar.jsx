@@ -142,9 +142,7 @@ const Navbar = () => {
 
         setShowAuthModal(false);
         resetFormState();
-        if (location.pathname === '/') {
-          navigate('/schemes');
-        }
+        navigate('/schemes', { replace: true });
       } else if (authMode === 'register') {
         if (!fullName.trim()) {
           throw new Error(lang === 'mr' ? 'कृपया आपले पूर्ण नाव प्रविष्ट करा.' : lang === 'hi' ? 'कृपया अपना पूरा नाम दर्ज करें।' : 'Please enter your full name.');
@@ -168,9 +166,7 @@ const Navbar = () => {
 
         setShowAuthModal(false);
         resetFormState();
-        if (location.pathname === '/') {
-          navigate('/schemes');
-        }
+        navigate('/schemes', { replace: true });
       } else if (authMode === 'forgot') {
         // Step 1: Query database to check if user already exists, then send OTP via Twilio
         if (!email.trim()) {
@@ -229,9 +225,7 @@ const Navbar = () => {
         throw res.error;
       }
       setShowAuthModal(false);
-      if (location.pathname === '/') {
-        navigate('/schemes');
-      }
+      navigate('/schemes', { replace: true });
     } catch (err) {
       setAuthError(err.message || 'Google sign-in failed');
     } finally {
@@ -278,7 +272,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-16 gap-3">
             
             {/* Brand Logo */}
-            <Link to={user ? "/schemes" : "/"} className="flex items-center space-x-2.5 shrink-0 group">
+            <Link to={(user || localStorage.getItem('demo_user_auth')) ? "/schemes" : "/"} className="flex items-center space-x-2.5 shrink-0 group">
               <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-center group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden relative shrink-0">
                 <img 
                   src="/logo.png" 

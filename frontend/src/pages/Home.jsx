@@ -48,7 +48,8 @@ const Home = () => {
   const navigate = useNavigate();
 
   // If user is logged in, immediately redirect to schemes directory without ever rendering landing page
-  if (user) {
+  const hasAuth = !!user || !!localStorage.getItem('demo_user_auth');
+  if (hasAuth) {
     return <Navigate to="/schemes" replace />;
   }
 

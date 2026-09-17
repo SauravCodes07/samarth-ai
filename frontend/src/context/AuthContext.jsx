@@ -5,8 +5,21 @@ import { apiRegisterUser, apiLoginUser, apiUpdateProfile, apiChangePassword } fr
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      const localUser = localStorage.getItem('demo_user_auth');
+      return localUser ? JSON.parse(localUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !localStorage.getItem('demo_user_auth') && isSupabaseConfigured;
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     let subscription = null;
@@ -14,13 +27,17 @@ export const AuthProvider = ({ children }) => {
       try {
         const localUser = localStorage.getItem('demo_user_auth');
         if (localUser) {
-          setUser(JSON.parse(localUser));
-        } else if (isSupabaseConfigured && supabase) {
+          const parsed = JSON.parse(localUser);
+          setUser(parsed);
+        }
+        if (isSupabaseConfigured && supabase) {
           const u = await getCurrentUser();
           if (u) setUser(u);
 
           const { data } = supabase.auth.onAuthStateChange((event, session) => {
-            setUser(session?.user || null);
+            if (session?.user) {
+              setUser(session.user);
+            }
           });
           subscription = data?.subscription;
         }
