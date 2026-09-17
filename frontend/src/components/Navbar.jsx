@@ -278,7 +278,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-16 gap-3">
             
             {/* Brand Logo */}
-            <Link to="/" className="flex items-center space-x-2.5 shrink-0 group">
+            <Link to={user ? "/schemes" : "/"} className="flex items-center space-x-2.5 shrink-0 group">
               <div className="w-10 h-10 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-center group-hover:shadow-md group-hover:scale-105 transition-all overflow-hidden relative shrink-0">
                 <img 
                   src="/logo.png" 

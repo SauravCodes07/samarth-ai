@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import SpotlightCard from '../components/ui/SpotlightCard';
@@ -47,12 +47,10 @@ const Home = () => {
   const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
-  // When user is already authenticated, take them directly to the main schemes directory / dashboard
-  useEffect(() => {
-    if (user) {
-      navigate('/schemes', { replace: true });
-    }
-  }, [user, navigate]);
+  // If user is logged in, immediately redirect to schemes directory without ever rendering landing page
+  if (user) {
+    return <Navigate to="/schemes" replace />;
+  }
 
   const handleFeatureAccess = (path = '/advisory') => {
     if (!user) {

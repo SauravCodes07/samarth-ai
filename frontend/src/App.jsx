@@ -15,6 +15,23 @@ import AdminPage from './pages/AdminPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AIChatbot from './components/AIChatbot';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useAuth } from './context/AuthContext';
+import { Navigate } from 'react-router-dom';
+
+const HomeRoute = () => {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  if (user) {
+    return <Navigate to="/schemes" replace />;
+  }
+  return <Home />;
+};
 
 function App() {
   return (
@@ -27,7 +44,7 @@ function App() {
               <main className="flex-grow">
                 <ErrorBoundary>
                   <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<HomeRoute />} />
                     <Route path="/advisory" element={<ProtectedRoute><FormPage /></ProtectedRoute>} />
                     <Route path="/schemes" element={<ProtectedRoute><SchemesPage /></ProtectedRoute>} />
                     <Route path="/calculator" element={<ProtectedRoute><CalculatorPage /></ProtectedRoute>} />
