@@ -26,6 +26,7 @@ import {
   MapPin
 } from 'lucide-react';
 import UserProfileModal from './UserProfileModal';
+import { adminLogin } from '../services/api';
 
 const Navbar = () => {
   const { lang, setLang } = useLanguage();
@@ -63,6 +64,37 @@ const Navbar = () => {
 
     try {
       if (authMode === 'login') {
+        const cleanEmail = (email || '').trim().toLowerCase();
+        const cleanPass = (password || '').trim();
+
+        // 1. Nodal Officer / Admin Login Detection & Direct Routing
+        const isAdminAttempt = (
+          cleanEmail === 'admin@samarth.gov.in' ||
+          cleanEmail === 'officer@mosje.gov.in' ||
+          cleanEmail === 'nodal@nsfdc.nic.in' ||
+          cleanPass === 'Samarth@2026'
+        );
+
+        if (isAdminAttempt) {
+          try {
+            const adminRes = await adminLogin(cleanEmail || 'admin@samarth.gov.in', cleanPass);
+            if (adminRes && adminRes.status === 'success') {
+              localStorage.setItem('samarth_admin_user', JSON.stringify(adminRes.admin));
+              await login(cleanEmail || 'admin@samarth.gov.in', cleanPass);
+              setShowAuthModal(false);
+              setEmail('');
+              setPassword('');
+              navigate('/admin');
+              return;
+            }
+          } catch (adminErr) {
+            if (cleanEmail === 'admin@samarth.gov.in' || cleanPass === 'Samarth@2026') {
+              throw new Error(adminErr.response?.data?.detail || 'Invalid administrative credentials. Use master password Samarth@2026.');
+            }
+          }
+        }
+
+        // 2. Standard Beneficiary Citizen Login
         const res = await login(email, password);
         if (res.error) throw res.error;
       } else {
@@ -143,14 +175,7 @@ const Navbar = () => {
       labelMr: 'एआय व्यवसाय अहवाल',
       icon: Sparkles,
       highlight: true
-    },
-    { 
-      path: '/admin', 
-      labelEn: 'Nodal Admin', 
-      labelHi: 'नोडल अधिकारी', 
-      labelMr: 'नोडल अधिकारी',
-      icon: ShieldCheck 
-    },
+    }
   ];
 
   const getNavLabel = (link) => {
@@ -283,20 +308,34 @@ const Navbar = () => {
                 <div className="flex items-center space-x-1.5">
                   <button
                     type="button"
-                    onClick={() => navigate('/profile')}
+                    onClick={() => {
+                      const isNodalAdmin = localStorage.getItem('samarth_admin_user') || user?.role === 'Admin' || user?.email === 'admin@samarth.gov.in';
+                      if (isNodalAdmin) {
+                        navigate('/admin');
+                      } else {
+                        navigate('/profile');
+                      }
+                    }}
                     className="shine-button flex items-center space-x-1.5 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800/80 py-1.5 px-2.5 rounded-xl text-xs font-bold text-blue-900 dark:text-blue-200 transition-all cursor-pointer shadow-2xs group whitespace-nowrap"
-                    title={lang === 'mr' ? 'माझे प्रोफाइल पहा' : lang === 'hi' ? 'मेरा प्रोफाइल देखें' : 'View Beneficiary Profile'}
+                    title={
+                      localStorage.getItem('samarth_admin_user') || user?.email === 'admin@samarth.gov.in'
+                        ? 'Nodal Officer Administration Gateway'
+                        : (lang === 'mr' ? 'माझे प्रोफाइल पहा' : lang === 'hi' ? 'मेरा प्रोफाइल देखें' : 'View Beneficiary Profile')
+                    }
                   >
                     <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-black group-hover:scale-105 transition-transform shrink-0">
                       {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
                     </div>
                     <span className="max-w-[120px] truncate">{user.user_metadata?.full_name || user.email?.split('@')[0]}</span>
                     <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.2 rounded-full font-bold">
-                      {lang === 'mr' ? 'प्रोफाइल' : lang === 'hi' ? 'प्रोफाइल' : 'Profile'}
+                      {localStorage.getItem('samarth_admin_user') || user?.email === 'admin@samarth.gov.in' ? 'Admin' : (lang === 'mr' ? 'प्रोफाइल' : lang === 'hi' ? 'प्रोफाइल' : 'Profile')}
                     </span>
                   </button>
                   <button
-                    onClick={logout}
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                    }}
                     className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer shrink-0"
                     title="Sign Out"
                   >
@@ -328,12 +367,13 @@ const Navbar = () => {
               </button>
               <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-bold">
                 <button onClick={() => setLang('en')} className={`px-1.5 py-0.5 rounded ${lang === 'en' ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>EN</button>
-                <button onClick={() => setLang('hi')} className={`px-1.5 py-0.5 rounded ${lang === 'hi' ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>हि</button>
-                <button onClick={() => setLang('mr')} className={`px-1.5 py-0.5 rounded ${lang === 'mr' ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>म</button>
+                <button onClick={() => setLang('hi')} className={`px-1.5 py-0.5 rounded ${lang === 'hi' ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>HI</button>
+                <button onClick={() => setLang('mr')} className={`px-1.5 py-0.5 rounded ${lang === 'mr' ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400' : 'text-slate-600 dark:text-slate-400'}`}>MR</button>
               </div>
               <button
+                type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -342,9 +382,9 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B0F19] px-4 py-3 space-y-2 shadow-lg">
+          <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-3 pb-4 space-y-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive = location.pathname === link.path;
@@ -354,9 +394,7 @@ const Navbar = () => {
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    if (link.path === '/admin') {
-                      navigate('/admin');
-                    } else if (!user) {
+                    if (!user) {
                       setAuthMode('login');
                       setShowAuthModal(true);
                     } else {
@@ -371,7 +409,7 @@ const Navbar = () => {
                     <Icon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                     <span>{getNavLabel(link)}</span>
                   </div>
-                  {link.path !== '/admin' && !user && (
+                  {!user && (
                     <Lock className="w-3.5 h-3.5 text-amber-500" />
                   )}
                 </button>
@@ -384,7 +422,12 @@ const Navbar = () => {
                     type="button"
                     onClick={() => {
                       setMobileMenuOpen(false);
-                      navigate('/profile');
+                      const isNodalAdmin = localStorage.getItem('samarth_admin_user') || user?.role === 'Admin' || user?.email === 'admin@samarth.gov.in';
+                      if (isNodalAdmin) {
+                        navigate('/admin');
+                      } else {
+                        navigate('/profile');
+                      }
                     }}
                     className="flex items-center space-x-2 text-left cursor-pointer"
                   >
@@ -393,10 +436,12 @@ const Navbar = () => {
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[140px]">{user.user_metadata?.full_name || user.email?.split('@')[0]}</span>
-                      <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">{lang === 'mr' ? 'प्रोफाइल उघडा' : lang === 'hi' ? 'प्रोफाइल खोलें' : 'Open Profile'}</span>
+                      <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">
+                        {localStorage.getItem('samarth_admin_user') || user?.email === 'admin@samarth.gov.in' ? 'Nodal Admin Gateway' : (lang === 'mr' ? 'प्रोफाइल उघडा' : lang === 'hi' ? 'प्रोफाइल खोलें' : 'Open Profile')}
+                      </span>
                     </div>
                   </button>
-                  <button onClick={logout} className="text-xs text-rose-600 dark:text-rose-400 font-medium px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer">
+                  <button onClick={() => { logout(); navigate('/'); }} className="text-xs text-rose-600 dark:text-rose-400 font-medium px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer">
                     {lang === 'mr' ? 'लॉगआउट' : lang === 'hi' ? 'लॉगआउट' : 'Log out'}
                   </button>
                 </div>
