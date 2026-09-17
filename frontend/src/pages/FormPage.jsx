@@ -69,15 +69,15 @@ const FormPage = () => {
   });
 
   // Dynamic State-to-District Cascade Resolution
-  const currentStateObj = stateDistrictsData.find(
-    s => s.state.toLowerCase() === (formData.state || '').toLowerCase()
-  ) || stateDistrictsData.find(s => s.state === 'Maharashtra') || stateDistrictsData[0];
+  const currentStateObj = (Array.isArray(stateDistrictsData) ? stateDistrictsData : []).find(
+    s => s?.state && s.state.toLowerCase() === String(formData?.state || '').toLowerCase()
+  ) || stateDistrictsData?.find(s => s?.state === 'Maharashtra') || stateDistrictsData?.[0] || { state: 'Maharashtra', districts: [{ name: 'Pune' }] };
 
-  const currentDistricts = currentStateObj ? currentStateObj.districts : [];
+  const currentDistricts = currentStateObj?.districts || [];
 
   const handleStateChange = (selectedState) => {
-    const targetState = stateDistrictsData.find(s => s.state === selectedState) || stateDistrictsData[0];
-    const firstDistrict = targetState?.districts[0]?.name || '';
+    const targetState = (Array.isArray(stateDistrictsData) ? stateDistrictsData : []).find(s => s?.state === selectedState) || stateDistrictsData?.[0];
+    const firstDistrict = targetState?.districts?.[0]?.name || '';
     setFormData(prev => ({
       ...prev,
       state: selectedState,
@@ -87,16 +87,21 @@ const FormPage = () => {
 
   useEffect(() => {
     if (prefilled) {
-      const maxC = prefilled.max_cost || 1000000;
-      const targetStateName = prefilled.state && prefilled.state !== 'Central / All India' ? prefilled.state : formData.state;
-      const targetStateObj = stateDistrictsData.find(s => s.state.toLowerCase() === targetStateName.toLowerCase()) || stateDistrictsData[0];
+      const maxC = Number(prefilled.max_cost) || 1000000;
+      const rawState = (prefilled.state && prefilled.state !== 'Central / All India') 
+        ? String(prefilled.state) 
+        : String(formData?.state || 'Maharashtra');
+      const targetStateObj = (Array.isArray(stateDistrictsData) ? stateDistrictsData : []).find(
+        s => s?.state && s.state.toLowerCase() === rawState.toLowerCase()
+      ) || stateDistrictsData?.[0];
+
       setFormData(prev => ({
         ...prev,
-        business_title: prefilled.scheme_name,
+        business_title: prefilled.scheme_name || prev.business_title || '',
         investment_amount: maxC,
         margin_capital: Math.round(maxC * 0.10),
-        state: targetStateObj.state,
-        district: targetStateObj.districts[0]?.name || prev.district
+        state: targetStateObj?.state || prev.state || 'Maharashtra',
+        district: targetStateObj?.districts?.[0]?.name || prev.district || 'Pune'
       }));
     }
   }, [prefilled]);

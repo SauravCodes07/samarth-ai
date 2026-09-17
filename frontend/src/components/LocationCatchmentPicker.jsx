@@ -174,42 +174,46 @@ const LocationCatchmentPicker = ({
   // Load districts when State changes
   useEffect(() => {
     const loadDistricts = async () => {
-      const stateObj = stateDistrictsData.find(
-        s => s.state.toLowerCase() === (formData.state || '').toLowerCase()
+      const stateObj = (Array.isArray(stateDistrictsData) ? stateDistrictsData : []).find(
+        s => s?.state && s.state.toLowerCase() === String(formData?.state || '').toLowerCase()
       );
-      if (stateObj && stateObj.districts?.length > 0) {
+      if (stateObj && Array.isArray(stateObj.districts) && stateObj.districts.length > 0) {
         setDistrictsList(stateObj.districts);
       } else {
-        const fetched = await fetchGeoDistricts(formData.state);
-        setDistrictsList(fetched.map(d => (typeof d === 'string' ? { name: d, nameHi: d } : d)));
+        const fetched = await fetchGeoDistricts(formData?.state);
+        if (Array.isArray(fetched)) {
+          setDistrictsList(fetched.map(d => (typeof d === 'string' ? { name: d, nameHi: d } : d)));
+        }
       }
     };
-    if (formData.state) {
+    if (formData?.state) {
       loadDistricts();
     }
-  }, [formData.state]);
+  }, [formData?.state]);
 
   // Load subdistricts when District changes
   useEffect(() => {
     const loadSubdistricts = async () => {
-      const stateObj = stateDistrictsData.find(
-        s => s.state.toLowerCase() === (formData.state || '').toLowerCase()
+      const stateObj = (Array.isArray(stateDistrictsData) ? stateDistrictsData : []).find(
+        s => s?.state && s.state.toLowerCase() === String(formData?.state || '').toLowerCase()
       );
       const distObj = stateObj?.districts?.find(
-        d => d.name.toLowerCase() === (formData.district || '').toLowerCase()
+        d => (d?.name || '').toLowerCase() === String(formData?.district || '').toLowerCase()
       );
       
-      if (distObj?.subdistricts?.length > 0) {
+      if (distObj && Array.isArray(distObj.subdistricts) && distObj.subdistricts.length > 0) {
         setSubdistrictsList(distObj.subdistricts);
       } else {
-        const fetched = await fetchGeoSubdistricts(formData.state, formData.district);
-        setSubdistrictsList(fetched);
+        const fetched = await fetchGeoSubdistricts(formData?.state, formData?.district);
+        if (Array.isArray(fetched)) {
+          setSubdistrictsList(fetched);
+        }
       }
     };
-    if (formData.state && formData.district) {
+    if (formData?.state && formData?.district) {
       loadSubdistricts();
     }
-  }, [formData.state, formData.district]);
+  }, [formData?.state, formData?.district]);
 
   // Resolve geocoded address when pin changes
   const handleCoordinatesResolved = async (lat, lon) => {
@@ -505,12 +509,12 @@ const LocationCatchmentPicker = ({
               onChange={(e) => handleDistrictSelect(e.target.value)}
               className="w-full px-3.5 py-2.5 text-xs font-medium bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none pr-8 text-slate-800 dark:text-slate-100"
             >
-              {formData.district && !districtsList.some(d => d.name.toLowerCase() === formData.district.toLowerCase()) && (
+              {formData.district && !districtsList.some(d => (d?.name || '').toLowerCase() === String(formData.district || '').toLowerCase()) && (
                 <option value={formData.district}>{formData.district}</option>
               )}
-              {districtsList.map((d) => (
-                <option key={d.name} value={d.name}>
-                  {lang === 'hi' && d.nameHi ? `${d.nameHi} (${d.name})` : d.name}
+              {districtsList.map((d, i) => (
+                <option key={d?.name || i} value={d?.name || ''}>
+                  {lang === 'hi' && d?.nameHi ? `${d.nameHi} (${d?.name || ''})` : (d?.name || '')}
                 </option>
               ))}
             </select>
